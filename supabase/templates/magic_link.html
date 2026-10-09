@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <body
+    style="
+      margin: 0;
+      padding: 24px;
+      background: #fff4e2;
+      font-family: Manrope, Arial, sans-serif;
+      color: #111018;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 16px"
+    >
+      <tr>
+        <td style="padding: 32px">
+          <p style="margin: 0 0 8px; font-size: 20px; font-weight: 800">Your Modulr sign-in code</p>
+          <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6">
+            Enter this code on the sign-in screen. It expires in 10 minutes.
+          </p>
+          <p
+            style="
+              margin: 0 0 24px;
+              font-family: &quot;JetBrains Mono&quot;, monospace;
+              font-size: 32px;
+              font-weight: 700;
+              letter-spacing: 8px;
+              color: #2343ff;
+            "
+          >
+            {{ .Token }}
+          </p>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4a4858">
+            If you didn't try to sign in, you can ignore this email. Never share this code with
+            anyone.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

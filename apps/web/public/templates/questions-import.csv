@@ -1,0 +1,4 @@
+kind,module,question,answer,marks,sessions,frequency
+pyq,1,"Explain the term with an example. (sample row, replace it)","Write the full answer here. Markdown and $maths$ work.",5,May 2024; Dec 2023,
+important,2,"Another sample question","Sample answer",10,,very_frequent
+viva,,"A short viva question that spans modules","A short answer",,,

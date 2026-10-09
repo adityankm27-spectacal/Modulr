@@ -1,0 +1,21 @@
+node_modules
+.next
+out
+dist
+.turbo
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+*.log
+
+# env
+.env
+.env.*
+!.env.example
+
+# supabase local state
+supabase/.temp
+supabase/.branches
+
+# Dev video provider uploads (local only)
+apps/web/.dev-videos

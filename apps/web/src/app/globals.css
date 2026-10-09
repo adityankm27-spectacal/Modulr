@@ -1,0 +1,341 @@
+@import "tailwindcss";
+
+/*
+ * Brand tokens (spec §3), mirrored from packages/shared/src/brand.ts, and the
+ * semantic tokens shadcn/ui components use. Components use semantic tokens
+ * (bg-background, text-muted-foreground, bg-primary, ...), never raw hex.
+ * Contrast notes: sunflower, mint and orange are fills only, never text on white.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --color-cobalt: #2343ff;
+  --color-periwinkle: #5c73ff;
+  --color-sunflower: #ffc629;
+  --color-ink: #111018;
+  --color-cream: #fff4e2;
+  --color-orange: #ff5b1f;
+  --color-mint: #1fd49e;
+  --color-pink: #ff5fa2;
+  --color-red: #ff2e4d;
+
+  --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-danger-text: var(--danger-text);
+  --color-success: var(--success);
+  --color-link: var(--link);
+  --color-band: var(--band);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+:root {
+  --radius: 0.875rem;
+  --background: #ffffff;
+  --foreground: #111018;
+  --card: #ffffff;
+  --card-foreground: #111018;
+  --primary: #2343ff;
+  --primary-foreground: #ffffff;
+  --secondary: #fff4e2;
+  --secondary-foreground: #111018;
+  --muted: #f4f3f8;
+  --muted-foreground: #4a4858;
+  --accent: #eef0ff;
+  --accent-foreground: #111018;
+  --destructive: #ff2e4d;
+  --destructive-foreground: #111018;
+  --danger-text: #c4122f;
+  --success: #1fd49e;
+  --link: #2343ff;
+  --band: #111018;
+  --border: #e4e2ec;
+  --input: #cfcbdc;
+  --ring: #2343ff;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #111018;
+    --foreground: #f6f5fa;
+    --card: #1c1a26;
+    --card-foreground: #f6f5fa;
+    --secondary: #2a2536;
+    --secondary-foreground: #f6f5fa;
+    --muted: #24212f;
+    --muted-foreground: #b4b2c2;
+    --accent: #232a52;
+    --accent-foreground: #f6f5fa;
+    --danger-text: #ff8597;
+    --link: #8c9bff;
+    --band: #1c1a26;
+    --border: #2e2b3b;
+    --input: #44405a;
+    --ring: #8c9bff;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #111018;
+  --foreground: #f6f5fa;
+  --card: #1c1a26;
+  --card-foreground: #f6f5fa;
+  --secondary: #2a2536;
+  --secondary-foreground: #f6f5fa;
+  --muted: #24212f;
+  --muted-foreground: #b4b2c2;
+  --accent: #232a52;
+  --accent-foreground: #f6f5fa;
+  --danger-text: #ff8597;
+  --link: #8c9bff;
+  --band: #1c1a26;
+  --border: #2e2b3b;
+  --input: #44405a;
+  --ring: #8c9bff;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-weight: 800;
+    text-wrap: balance;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  a,
+  button,
+  summary,
+  label[for],
+  select {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Markdown content (components/markdown). Readable at 360 px: 16px+ body,
+ * generous line height, wide blocks scroll inside themselves.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .md {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+  .md > * + *,
+  .md-callout > * + * {
+    margin-top: 1rem;
+  }
+  .md :where(p, ul, ol, blockquote, pre, .md-scroll, .katex-display) + :where(*) {
+    margin-top: 1rem;
+  }
+  .md :where(h2, h3, h4, h5) {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .md :where(h2, h3, h4, h5):first-child {
+    margin-top: 0;
+  }
+  .md h2 {
+    font-size: 1.5rem;
+  }
+  .md h3 {
+    font-size: 1.25rem;
+  }
+  .md :where(h4, h5) {
+    font-size: 1.0625rem;
+  }
+  .md :where(ul, ol) {
+    padding-left: 1.5rem;
+  }
+  .md ul {
+    list-style: disc;
+  }
+  .md ol {
+    list-style: decimal;
+  }
+  .md li + li,
+  .md li > :where(ul, ol) {
+    margin-top: 0.375rem;
+  }
+  .md li::marker {
+    color: var(--muted-foreground);
+  }
+  .md strong {
+    font-weight: 800;
+  }
+  .md a {
+    color: var(--link);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .md blockquote {
+    border-left: 4px solid var(--border);
+    padding-left: 1rem;
+    color: var(--muted-foreground);
+  }
+  .md hr {
+    border-top: 1px solid var(--border);
+    margin-block: 2rem;
+  }
+  .md img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+  }
+  .md :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--muted);
+    border-radius: 0.375rem;
+    padding: 0.1em 0.35em;
+  }
+  .md pre {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    background: var(--color-ink);
+    color: #f6f5fa;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  .md-scroll,
+  .md .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .md .katex-display {
+    margin-block: 1rem;
+    padding-block: 0.25rem;
+  }
+  .md .katex {
+    font-size: 1.1em;
+  }
+  .md table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .md :where(th, td) {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md th {
+    background: var(--muted);
+    font-weight: 800;
+  }
+  .md td code,
+  .md table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Callouts: tinted surface + brand-colour edge; text stays foreground for contrast. */
+  .md-callout {
+    --callout: var(--color-cobalt);
+    border-left: 6px solid var(--callout);
+    background: color-mix(in oklab, var(--callout) 12%, var(--background));
+    border-radius: var(--radius-md);
+    padding: 1rem 1rem 1rem 1.125rem;
+  }
+  .md-callout-trick {
+    --callout: var(--color-sunflower);
+    background: color-mix(in oklab, var(--callout) 22%, var(--background));
+  }
+  .md-callout-tip {
+    --callout: var(--color-cobalt);
+  }
+  .md-callout-mistake {
+    --callout: var(--color-red);
+  }
+  .md-callout-definition {
+    --callout: var(--color-periwinkle);
+  }
+  .md-callout-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .md-callout-label svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  .md-formula .katex-display {
+    margin: 0;
+  }
+}

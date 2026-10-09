@@ -1,0 +1,9 @@
+node_modules
+.next
+dist
+.turbo
+pnpm-lock.yaml
+.claude
+supabase/.temp
+supabase/.branches
+MODULR_SPEC.md
