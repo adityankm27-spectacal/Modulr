@@ -355,6 +355,22 @@ export function VideoPlayer({
 
         {playback ? <Watermark name={watermark.name} email={watermark.email} /> : null}
 
+        {/*
+          Fullscreen for the whole player (video + watermark). The provider's own fullscreen
+          button inside the iframe can't work: fullscreening the iframe alone would drop the
+          watermark, so the iframe isn't allowed to. This one sits where people look for it.
+        */}
+        {canFullscreen && playback ? (
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            aria-label={fullscreen ? "Exit full screen" : "Full screen"}
+            className="absolute top-3 right-3 z-20 inline-flex size-11 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur transition-colors hover:bg-black/75 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none [&_svg]:size-5"
+          >
+            {fullscreen ? <Minimize aria-hidden="true" /> : <Maximize aria-hidden="true" />}
+          </button>
+        ) : null}
+
         {ended && next && countdown !== null ? (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-ink/90 p-6 text-center text-white">
             <p className="text-sm font-bold tracking-wide text-white/70 uppercase">

@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, Loader2, PlayCircle, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FormulaCard } from "@/components/content/formula-card";
+import { ContentGuard } from "@/components/content/content-guard";
 import { PdfViewer } from "@/components/content/pdf-viewer";
 import { QuestionCard } from "@/components/content/question-card";
 import { Markdown } from "@/components/markdown/markdown";
@@ -53,7 +54,18 @@ interface Props {
 }
 
 /** Content of one module tab for a viewer who has access (RLS has already filtered rows). */
-export async function ModuleContent({
+export async function ModuleContent(props: Props) {
+  // The video tab is excluded: focus moves into the player's iframe when it is clicked.
+  // Admin previews are excluded too, so drafts can still be screenshotted while editing.
+  if (props.tab === "videos") return <TabContent {...props} />;
+  return (
+    <ContentGuard enabled={!props.drafts}>
+      <TabContent {...props} />
+    </ContentGuard>
+  );
+}
+
+async function TabContent({
   moduleId,
   subjectId,
   tab,
