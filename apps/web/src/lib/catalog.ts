@@ -1,6 +1,7 @@
 import "server-only";
 import { resolveSettings, type AppSettings } from "@modulr/shared";
 import { cache } from "react";
+import type { PdfDocumentKind } from "@/lib/pdf-documents";
 import { createClient } from "@/lib/supabase/server";
 
 interface QueryResult {
@@ -170,7 +171,7 @@ export async function getVideos(moduleId: string, { drafts = false }: ContentOpt
 
 export async function getDocument(
   moduleId: string,
-  kind: "short_notes" | "formula_sheet",
+  kind: PdfDocumentKind,
   { drafts = false }: ContentOptions = {},
 ) {
   const supabase = await createClient();

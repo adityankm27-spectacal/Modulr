@@ -1,4 +1,5 @@
 import "server-only";
+import { PDF_DOCUMENT_KINDS } from "@/lib/pdf-documents";
 import { createClient } from "@/lib/supabase/server";
 
 /** Admin reads go through the admin's own session; RLS (admin_all) returns drafts too. */
@@ -129,7 +130,7 @@ export async function getModuleContentAdmin(moduleId: string) {
       .from("documents")
       .select("id, kind, title, content_md, pdf_path, version, is_published, updated_at")
       .eq("module_id", moduleId)
-      .in("kind", ["short_notes", "formula_sheet"]),
+      .in("kind", PDF_DOCUMENT_KINDS),
     supabase
       .from("formula_cards")
       .select("id, title, formula_latex, symbols, when_to_use, is_published")

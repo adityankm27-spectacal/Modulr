@@ -25,6 +25,7 @@ import {
   sortByFrequency,
   type QuestionFilters,
 } from "@/lib/questions";
+import { QUESTION_SHEET_KIND } from "@/lib/pdf-documents";
 import { cn } from "@/lib/utils";
 import { resumePosition } from "@/lib/video/watch";
 import { VideoPlayer } from "@/components/video/video-player";
@@ -78,7 +79,7 @@ export async function ModuleContent({
     case "notes":
       return <NotesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "formulas":
-      return <FormulasTab moduleId={moduleId} drafts={drafts} />;
+      return <FormulasTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "pyqs":
       return (
         <QuestionsTab
@@ -88,11 +89,20 @@ export async function ModuleContent({
           drafts={drafts}
           filters={filters}
           basePath={basePath}
+          viewer={viewer}
         />
       );
     case "important":
     case "viva":
-      return <QuestionsTab moduleId={moduleId} subjectId={subjectId} kind={tab} drafts={drafts} />;
+      return (
+        <QuestionsTab
+          moduleId={moduleId}
+          subjectId={subjectId}
+          kind={tab}
+          drafts={drafts}
+          viewer={viewer}
+        />
+      );
   }
 }
 
@@ -238,6 +248,25 @@ async function VideosTab({
   );
 }
 
+/** A document's uploaded PDF in the view-only viewer, or null if it has none (or no access). */
+async function DocumentPdf({
+  doc,
+  viewer,
+}: {
+  doc: { title: string; pdf_path: string | null } | null;
+  viewer: Props["viewer"];
+}) {
+  const url = doc?.pdf_path ? await getNotesPdfUrl(doc.pdf_path) : null;
+  if (!doc || !url) return null;
+  return (
+    <PdfViewer
+      url={url}
+      title={doc.title}
+      watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
+    />
+  );
+}
+
 async function NotesTab({
   moduleId,
   drafts,
@@ -249,8 +278,7 @@ async function NotesTab({
 }) {
   const doc = await getDocument(moduleId, "short_notes", { drafts });
   // An uploaded PDF replaces the Markdown notes; the Markdown stays saved but hidden.
-  const pdfUrl = doc?.pdf_path ? await getNotesPdfUrl(doc.pdf_path) : null;
-  if (!doc || (!pdfUrl && !doc.content_md.trim())) {
+  if (!doc || (!doc.pdf_path && !doc.content_md.trim())) {
     return <Empty>Notes for this module are being written.</Empty>;
   }
   return (
@@ -259,12 +287,8 @@ async function NotesTab({
         Updated {dateFormat.format(new Date(doc.updated_at))}
         {drafts && !doc.is_published ? <Badge variant="highlight">Draft</Badge> : null}
       </p>
-      {pdfUrl ? (
-        <PdfViewer
-          url={pdfUrl}
-          title={doc.title}
-          watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
-        />
+      {doc.pdf_path ? (
+        <DocumentPdf doc={doc} viewer={viewer} />
       ) : (
         <Markdown>{doc.content_md}</Markdown>
       )}
@@ -272,17 +296,28 @@ async function NotesTab({
   );
 }
 
-async function FormulasTab({ moduleId, drafts }: { moduleId: string; drafts: boolean }) {
+async function FormulasTab({
+  moduleId,
+  drafts,
+  viewer,
+}: {
+  moduleId: string;
+  drafts: boolean;
+  viewer: Props["viewer"];
+}) {
   const [cards, sheet] = await Promise.all([
     getFormulaCards(moduleId, { drafts }),
     getDocument(moduleId, "formula_sheet", { drafts }),
   ]);
-  const hasSheet = Boolean(sheet?.content_md.trim());
-  if (cards.length === 0 && !hasSheet)
+  // A formula-sheet PDF replaces the sheet's Markdown (kept but hidden), above the cards.
+  const hasPdf = Boolean(sheet?.pdf_path);
+  const hasSheet = !hasPdf && Boolean(sheet?.content_md.trim());
+  if (cards.length === 0 && !hasSheet && !hasPdf)
     return <Empty>Formulas for this module are being written.</Empty>;
 
   return (
     <div className="space-y-8">
+      {hasPdf ? <DocumentPdf doc={sheet} viewer={viewer} /> : null}
       {cards.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {cards.map((card) => (
@@ -311,6 +346,7 @@ async function QuestionsTab({
   drafts,
   filters,
   basePath,
+  viewer,
 }: {
   moduleId: string;
   subjectId: string;
@@ -318,13 +354,21 @@ async function QuestionsTab({
   drafts: boolean;
   filters?: QuestionFilters;
   basePath?: string;
+  viewer: Props["viewer"];
 }) {
-  const [own, shared] = await Promise.all([
+  const [own, shared, sheet] = await Promise.all([
     getQuestions(moduleId, kind, { drafts }),
     getCrossModuleQuestions(subjectId, kind, { drafts }),
+    getDocument(moduleId, QUESTION_SHEET_KIND[kind], { drafts }),
   ]);
-  if (own.length === 0 && shared.length === 0)
-    return <Empty>No questions for this module yet.</Empty>;
+  const hasPdf = Boolean(sheet?.pdf_path);
+  if (own.length === 0 && shared.length === 0) {
+    return hasPdf ? (
+      <DocumentPdf doc={sheet} viewer={viewer} />
+    ) : (
+      <Empty>No questions for this module yet.</Empty>
+    );
+  }
 
   const order = (list: QuestionRow[]) => (kind === "important" ? sortByFrequency(list) : list);
   const active = filters ?? { marks: null, session: null };
@@ -339,6 +383,7 @@ async function QuestionsTab({
 
   return (
     <div className="space-y-5">
+      {hasPdf ? <DocumentPdf doc={sheet} viewer={viewer} /> : null}
       {kind === "pyq" && basePath && (options.marks.length > 1 || options.sessions.length > 1) ? (
         <QuestionFilterBar basePath={basePath} options={options} active={active} />
       ) : null}

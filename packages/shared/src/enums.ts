@@ -5,7 +5,14 @@
 export const USER_ROLES = ["student", "contributor", "admin"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
-export const DOCUMENT_KINDS = ["short_notes", "formula_sheet", "practical"] as const;
+export const DOCUMENT_KINDS = [
+  "short_notes",
+  "formula_sheet",
+  "practical",
+  "pyq_sheet",
+  "important_sheet",
+  "viva_sheet",
+] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
 export const QUESTION_KINDS = ["pyq", "important", "viva"] as const;

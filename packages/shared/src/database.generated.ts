@@ -1221,7 +1221,10 @@ export type Database = {
         Returns: {
           formula_cards: number;
           has_formula_sheet: boolean;
+          has_important_sheet: boolean;
+          has_pyq_sheet: boolean;
           has_short_notes: boolean;
+          has_viva_sheet: boolean;
           important_questions: number;
           module_id: string;
           pyqs: number;
@@ -1238,7 +1241,13 @@ export type Database = {
       content_item_type:
         "module" | "video" | "document" | "formula_card" | "question" | "experiment";
       device_platform: "web" | "android" | "ios";
-      document_kind: "short_notes" | "formula_sheet" | "practical";
+      document_kind:
+        | "short_notes"
+        | "formula_sheet"
+        | "practical"
+        | "pyq_sheet"
+        | "important_sheet"
+        | "viva_sheet";
       payment_status: "created" | "authorized" | "captured" | "failed" | "refunded";
       plan_interval: "month" | "one_time";
       plan_scope: "all" | "subject" | "semester";
@@ -1365,7 +1374,14 @@ export const Constants = {
     Enums: {
       content_item_type: ["module", "video", "document", "formula_card", "question", "experiment"],
       device_platform: ["web", "android", "ios"],
-      document_kind: ["short_notes", "formula_sheet", "practical"],
+      document_kind: [
+        "short_notes",
+        "formula_sheet",
+        "practical",
+        "pyq_sheet",
+        "important_sheet",
+        "viva_sheet",
+      ],
       payment_status: ["created", "authorized", "captured", "failed", "refunded"],
       plan_interval: ["month", "one_time"],
       plan_scope: ["all", "subject", "semester"],

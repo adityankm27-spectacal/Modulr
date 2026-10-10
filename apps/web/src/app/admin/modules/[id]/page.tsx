@@ -8,7 +8,7 @@ import { DeleteButton } from "@/components/admin/delete-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
 import { FormulaCardFields } from "@/components/admin/formula-card-fields";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
-import { NotesPdfUpload } from "@/components/admin/notes-pdf-upload";
+import { PdfSlot } from "@/components/admin/pdf-slot";
 import { SortableList } from "@/components/admin/sortable-list";
 import { VideoFields } from "@/components/admin/video-fields";
 import { VideoUpload } from "@/components/admin/video-upload";
@@ -17,7 +17,6 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   deleteContent,
   deleteModule,
-  removeNotesPdf,
   saveDocument,
   saveFormulaCard,
   saveModule,
@@ -26,6 +25,7 @@ import {
 } from "@/lib/admin/actions";
 import { getModuleAdmin, getModuleContentAdmin } from "@/lib/admin/queries";
 import { formatDuration, plainPreview, pluralize } from "@/lib/format";
+import { QUESTION_SHEET_KIND } from "@/lib/pdf-documents";
 import { cn } from "@/lib/utils";
 import { configuredProviderName } from "@/lib/video";
 import { isUuid } from "@/lib/validation";
@@ -147,21 +147,13 @@ export default async function ModuleEditorPage({
           title="Short notes"
           description="One page per module. Use callouts generously: memory tricks are a core feature."
         >
-          <NotesPdfUpload
+          <PdfSlot
             moduleId={mod.id}
-            title={notes?.title ?? `Short notes: ${mod.title}`}
-            hasPdf={Boolean(notes?.pdf_path)}
+            moduleTitle={mod.title}
+            kind="short_notes"
+            doc={notes}
+            hint="Upload a PDF to show your designed notes exactly as they are. It replaces the text notes below while attached."
           />
-          {notes?.pdf_path ? (
-            <ActionForm
-              action={removeNotesPdf}
-              submitLabel="Remove PDF"
-              submitVariant="outline"
-              confirm="Remove the PDF? Students will see the text notes instead."
-            >
-              <input type="hidden" name="id" value={notes.id} />
-            </ActionForm>
-          ) : null}
           <ActionForm action={saveDocument} submitLabel="Save notes">
             {notes ? <input type="hidden" name="id" value={notes.id} /> : null}
             {notes ? <input type="hidden" name="version" value={notes.version} /> : null}
@@ -258,9 +250,16 @@ export default async function ModuleEditorPage({
           </AdminSection>
 
           <AdminSection
-            title="Formula sheet notes"
-            description="Optional free-form notes shown under the cards."
+            title="Formula sheet"
+            description="Upload a formula-sheet PDF (shown above the cards), or write free-form notes shown under the cards."
           >
+            <PdfSlot
+              moduleId={mod.id}
+              moduleTitle={mod.title}
+              kind="formula_sheet"
+              doc={sheet}
+              hint="Upload your formula sheet as a PDF. It replaces the text formula sheet below while attached."
+            />
             <ActionForm action={saveDocument} submitLabel="Save formula sheet">
               {sheet ? <input type="hidden" name="id" value={sheet.id} /> : null}
               {sheet ? <input type="hidden" name="version" value={sheet.version} /> : null}
@@ -305,6 +304,14 @@ export default async function ModuleEditorPage({
                   </Link>
                 }
               >
+                <PdfSlot
+                  moduleId={mod.id}
+                  moduleTitle={mod.title}
+                  kind={QUESTION_SHEET_KIND[kind]}
+                  doc={content.documents.find((d) => d.kind === QUESTION_SHEET_KIND[kind])}
+                  hint={`Upload a ${label} PDF, e.g. a solved paper or question bank. Students see it above the questions below.`}
+                  showPublish
+                />
                 {list.length === 0 ? (
                   <EmptyState>None yet. Add one, or import a CSV from the subject page.</EmptyState>
                 ) : (

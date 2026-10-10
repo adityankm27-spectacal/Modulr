@@ -5,6 +5,7 @@ import { getViewer, isAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { validateQuestionImport, type ImportValidation } from "@/lib/question-import";
 import { configuredProviderName, getVideoProvider } from "@/lib/video";
+import { PDF_DOCUMENT_KINDS } from "@/lib/pdf-documents";
 import { providerChaptersUpdate } from "@/lib/video/chapters";
 import type { UploadTarget } from "@/lib/video/types";
 import { AdminError, check, runAdminAction } from "./action";
@@ -487,47 +488,49 @@ export async function refreshVideoStatus(_: ActionState, form: FormData) {
   });
 }
 
-const notesPdfAttach = z.object({
+const pdfAttach = z.object({
   moduleId: z.uuid(),
+  kind: z.enum(PDF_DOCUMENT_KINDS),
   // Uploaded by the admin's browser to notes/<module id>/<random uuid>.pdf.
   path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/, "Invalid file path."),
   title: z.string().trim().min(1).max(200),
 });
 
-/** Best effort: a leftover file is harmless (unreachable once no notes row points at it). */
-async function removeNotesFile(supabase: Supabase, path: string | null | undefined) {
+/** Best effort: a leftover file is harmless (unreachable once no document points at it). */
+async function removePdfFile(supabase: Supabase, path: string | null | undefined) {
   if (path) await supabase.storage.from("notes").remove([path]);
 }
 
 /**
- * Called after the browser uploaded a PDF to storage: makes it the module's short notes.
- * The Markdown notes are kept but hidden while a PDF is attached.
+ * Called after the browser uploaded a PDF to storage: attaches it to the module's
+ * document of that kind (short notes, formula sheet or a question sheet), creating
+ * it as a draft if needed. Any Markdown on the document is kept but hidden.
  */
-export async function attachNotesPdf(input: z.infer<typeof notesPdfAttach>): Promise<ActionState> {
-  return runAdminAction(input, notesPdfAttach, async ({ moduleId, path, title }, supabase) => {
+export async function attachPdf(input: z.infer<typeof pdfAttach>): Promise<ActionState> {
+  return runAdminAction(input, pdfAttach, async ({ moduleId, kind, path, title }, supabase) => {
     if (!path.startsWith(`${moduleId}/`))
       throw new AdminError("That file belongs to another module.");
     const { data: existing, error } = await supabase
       .from("documents")
       .select("id, pdf_path, is_published")
       .eq("module_id", moduleId)
-      .eq("kind", "short_notes")
+      .eq("kind", kind)
       .maybeSingle();
     check(error);
     if (existing) {
       check(
         (await supabase.from("documents").update({ pdf_path: path }).eq("id", existing.id)).error,
       );
-      if (existing.pdf_path !== path) await removeNotesFile(supabase, existing.pdf_path);
+      if (existing.pdf_path !== path) await removePdfFile(supabase, existing.pdf_path);
       return existing.is_published
-        ? "PDF attached. Students now see it in Short notes."
-        : "PDF attached. Publish the notes to show it to students.";
+        ? "PDF attached. Students can see it now."
+        : "PDF attached as a draft. Publish it to show it to students.";
     }
     check(
       (
         await supabase.from("documents").insert({
           module_id: moduleId,
-          kind: "short_notes",
+          kind,
           title,
           content_md: "",
           pdf_path: path,
@@ -535,12 +538,12 @@ export async function attachNotesPdf(input: z.infer<typeof notesPdfAttach>): Pro
         })
       ).error,
     );
-    return "PDF attached. Publish the notes to show it to students.";
+    return "PDF attached as a draft. Publish it to show it to students.";
   });
 }
 
-/** Detaches the PDF so the Markdown notes show again, and deletes the file. */
-export async function removeNotesPdf(_: ActionState, form: FormData) {
+/** Detaches a document's PDF (any Markdown shows again) and deletes the file. */
+export async function removePdf(_: ActionState, form: FormData) {
   return runAdminAction(form, idSchema, async ({ id }, supabase) => {
     const { data: doc, error } = await supabase
       .from("documents")
@@ -548,10 +551,10 @@ export async function removeNotesPdf(_: ActionState, form: FormData) {
       .eq("id", id)
       .maybeSingle();
     check(error);
-    if (!doc) throw new AdminError("Notes not found. Reload the page.");
+    if (!doc) throw new AdminError("Document not found. Reload the page.");
     check((await supabase.from("documents").update({ pdf_path: null }).eq("id", id)).error);
-    await removeNotesFile(supabase, doc.pdf_path);
-    return "PDF removed. The text notes show again.";
+    await removePdfFile(supabase, doc.pdf_path);
+    return "PDF removed.";
   });
 }
 

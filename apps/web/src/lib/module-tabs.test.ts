@@ -9,6 +9,22 @@ const counts: ModuleCounts = {
   pyqs: 3,
   important_questions: 3,
   viva_questions: 1,
+  has_pyq_sheet: false,
+  has_important_sheet: false,
+  has_viva_sheet: false,
+};
+
+const empty: ModuleCounts = {
+  videos: 0,
+  has_short_notes: false,
+  has_formula_sheet: false,
+  formula_cards: 0,
+  pyqs: 0,
+  important_questions: 0,
+  viva_questions: 0,
+  has_pyq_sheet: false,
+  has_important_sheet: false,
+  has_viva_sheet: false,
 };
 
 describe("parseModuleTab", () => {
@@ -29,6 +45,13 @@ describe("tabCount", () => {
     expect(tabCount("viva", counts)).toBe(1);
     expect(tabCount("pyqs", undefined)).toBe(0);
   });
+
+  it("counts a PDF question sheet as content on its tab", () => {
+    expect(tabCount("pyqs", { ...empty, has_pyq_sheet: true })).toBe(1);
+    expect(tabCount("pyqs", { ...counts, has_pyq_sheet: true })).toBe(4);
+    expect(tabCount("important", { ...empty, has_important_sheet: true })).toBe(1);
+    expect(tabCount("viva", { ...empty, has_viva_sheet: true })).toBe(1);
+  });
 });
 
 describe("countsSummary", () => {
@@ -38,16 +61,12 @@ describe("countsSummary", () => {
 
   it("says coming soon for empty modules", () => {
     expect(countsSummary(undefined)).toBe("Coming soon");
-    expect(
-      countsSummary({
-        videos: 0,
-        has_short_notes: false,
-        has_formula_sheet: false,
-        formula_cards: 0,
-        pyqs: 0,
-        important_questions: 0,
-        viva_questions: 0,
-      }),
-    ).toBe("Coming soon");
+    expect(countsSummary(empty)).toBe("Coming soon");
+  });
+
+  it("mentions question PDFs when there are no question rows", () => {
+    expect(countsSummary({ ...empty, has_pyq_sheet: true, has_viva_sheet: true })).toBe(
+      "PYQs · More Qs",
+    );
   });
 });

@@ -4,7 +4,8 @@ import { CheckCircle2, FileText, Loader2, TriangleAlert, Upload } from "lucide-r
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { attachNotesPdf } from "@/lib/admin/actions";
+import { attachPdf } from "@/lib/admin/actions";
+import type { PdfDocumentKind } from "@/lib/pdf-documents";
 import { createClient } from "@/lib/supabase/client";
 
 /** Matches the `notes` bucket's file_size_limit. */
@@ -18,16 +19,21 @@ type Phase =
 
 /**
  * Uploads a PDF straight from the admin's browser to the private `notes` bucket
- * (storage policy: admins only), then attaches it to the module's short notes.
+ * (storage policy: admins only), then attaches it to the module's document of `kind`.
  */
-export function NotesPdfUpload({
+export function PdfUpload({
   moduleId,
+  kind,
   title,
   hasPdf,
+  hint,
 }: {
   moduleId: string;
+  kind: PdfDocumentKind;
   title: string;
   hasPdf: boolean;
+  /** What students see, shown while no PDF is attached. */
+  hint: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +57,7 @@ export function NotesPdfUpload({
       setPhase({ kind: "error", message: `Upload failed: ${error.message}` });
       return;
     }
-    const result = await attachNotesPdf({ moduleId, path, title });
+    const result = await attachPdf({ moduleId, kind, path, title });
     if (result.status === "error") {
       setPhase({ kind: "error", message: result.message ?? "Couldn't attach the PDF." });
       return;
@@ -65,9 +71,7 @@ export function NotesPdfUpload({
       <div className="flex flex-wrap items-center gap-3">
         <FileText className="size-5 text-muted-foreground" aria-hidden="true" />
         <p className="flex-1 text-sm">
-          {hasPdf
-            ? "A PDF is attached. Students see it instead of the text notes below."
-            : "Upload a PDF to show your designed notes exactly as they are (view only, no download)."}
+          {hasPdf ? "A PDF is attached. Students see it (view only, no download)." : hint}
         </p>
         <input
           ref={inputRef}
