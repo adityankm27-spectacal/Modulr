@@ -2,6 +2,7 @@ import { CircleUserRound } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
+import { SessionWatch } from "@/components/session-watch";
 import { getViewer, isAdmin } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ export async function SiteHeader() {
         <nav aria-label="Main" className="flex items-center gap-1">
           {viewer ? (
             <>
+              <SessionWatch />
               {isAdmin(viewer) ? (
                 <Link href="/admin" className={navLink}>
                   Admin

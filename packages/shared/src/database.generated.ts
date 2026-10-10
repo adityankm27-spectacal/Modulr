@@ -661,6 +661,7 @@ export type Database = {
       };
       profiles: {
         Row: {
+          active_session_id: string | null;
           age_confirmed_at: string | null;
           branch_id: string | null;
           college_id: string | null;
@@ -677,6 +678,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          active_session_id?: string | null;
           age_confirmed_at?: string | null;
           branch_id?: string | null;
           college_id?: string | null;
@@ -692,6 +694,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          active_session_id?: string | null;
           age_confirmed_at?: string | null;
           branch_id?: string | null;
           college_id?: string | null;

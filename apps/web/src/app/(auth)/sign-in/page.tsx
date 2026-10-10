@@ -14,6 +14,9 @@ const CALLBACK_ERROR = "We couldn't finish signing you in. Please try again.";
 const ERRORS: Record<string, string> = {
   callback: CALLBACK_ERROR,
   oauth: "Google sign-in was cancelled or failed. Please try again.",
+  // Value of SESSION_REPLACED (lib/session.ts).
+  "other-device":
+    "You were signed out because your account was signed in on another device. Modulr accounts work on one device at a time.",
 };
 
 export default async function SignInPage({
