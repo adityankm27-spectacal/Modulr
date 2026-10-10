@@ -18,7 +18,7 @@ export function Watermark({ name, email }: { name: string; email: string }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute z-10 max-w-[70%] select-none rounded-md px-2 py-1 font-mono text-[11px] leading-tight font-semibold text-white/55 transition-[top,left] duration-1000 ease-in-out [text-shadow:0_1px_2px_rgb(0_0_0/0.6)] motion-reduce:transition-none sm:text-xs"
+      className="pointer-events-none absolute z-10 max-w-[70%] select-none rounded-md px-2 py-1 font-mono text-[11px] leading-tight font-semibold text-white/25 transition-[top,left] duration-1000 ease-in-out [text-shadow:0_1px_2px_rgb(0_0_0/0.25)] motion-reduce:transition-none sm:text-xs"
       style={{ top: `${position.top}%`, left: `${position.left}%` }}
     >
       <span className="block truncate">{name}</span>
