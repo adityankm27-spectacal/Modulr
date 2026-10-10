@@ -18,15 +18,18 @@ export type Playback =
   | { kind: "iframe"; src: string; expiresAt: string }
   | { kind: "file"; src: string; expiresAt: string };
 
+// A type alias (not an interface) so it is assignable to the jsonb `chapters` column.
+export type VideoChapterInput = {
+  title: string;
+  start_sec: number;
+};
+
 export interface ProviderVideoStatus {
   status: ProcessingStatus;
   durationSec: number | null;
   thumbnailUrl: string | null;
-}
-
-export interface VideoChapterInput {
-  title: string;
-  start_sec: number;
+  /** Chapters the provider generated itself (e.g. Bunny Smart Chapters); empty if none. */
+  chapters: VideoChapterInput[];
 }
 
 /**

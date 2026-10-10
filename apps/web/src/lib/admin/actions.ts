@@ -5,6 +5,7 @@ import { getViewer, isAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { validateQuestionImport, type ImportValidation } from "@/lib/question-import";
 import { configuredProviderName, getVideoProvider } from "@/lib/video";
+import { providerChaptersUpdate } from "@/lib/video/chapters";
 import type { UploadTarget } from "@/lib/video/types";
 import { AdminError, check, runAdminAction } from "./action";
 import type { ActionState } from "./state";
@@ -428,7 +429,7 @@ export async function finishVideoUpload(input: z.infer<typeof uploadDone>): Prom
   return runAdminAction(input, uploadDone, async ({ videoId, durationSec }, supabase) => {
     const { data: video, error } = await supabase
       .from("videos")
-      .select("provider, provider_video_id, duration_sec")
+      .select("provider, provider_video_id, duration_sec, chapters")
       .eq("id", videoId)
       .maybeSingle();
     check(error);
@@ -443,6 +444,7 @@ export async function finishVideoUpload(input: z.infer<typeof uploadDone>): Prom
             processing_status: processing,
             duration_sec: status.durationSec ?? durationSec ?? video.duration_sec,
             ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
+            ...providerChaptersUpdate(video.chapters, status),
           })
           .eq("id", videoId)
       ).error,
@@ -458,13 +460,14 @@ export async function refreshVideoStatus(_: ActionState, form: FormData) {
   return runAdminAction(form, idSchema, async ({ id }, supabase) => {
     const { data: video, error } = await supabase
       .from("videos")
-      .select("provider, provider_video_id, duration_sec")
+      .select("provider, provider_video_id, duration_sec, chapters")
       .eq("id", id)
       .maybeSingle();
     check(error);
     if (!video?.provider_video_id)
       throw new AdminError("No file has been uploaded for this video yet.");
     const status = await getVideoProvider(video.provider).getStatus(video.provider_video_id);
+    const chapterUpdate = providerChaptersUpdate(video.chapters, status);
     check(
       (
         await supabase
@@ -473,11 +476,82 @@ export async function refreshVideoStatus(_: ActionState, form: FormData) {
             processing_status: status.status,
             duration_sec: status.durationSec ?? video.duration_sec,
             ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
+            ...chapterUpdate,
           })
           .eq("id", id)
       ).error,
     );
-    return `Status: ${status.status}`;
+    return chapterUpdate.chapters
+      ? `Status: ${status.status} · ${chapterUpdate.chapters.length} chapters added`
+      : `Status: ${status.status}`;
+  });
+}
+
+const notesPdfAttach = z.object({
+  moduleId: z.uuid(),
+  // Uploaded by the admin's browser to notes/<module id>/<random uuid>.pdf.
+  path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/, "Invalid file path."),
+  title: z.string().trim().min(1).max(200),
+});
+
+/** Best effort: a leftover file is harmless (unreachable once no notes row points at it). */
+async function removeNotesFile(supabase: Supabase, path: string | null | undefined) {
+  if (path) await supabase.storage.from("notes").remove([path]);
+}
+
+/**
+ * Called after the browser uploaded a PDF to storage: makes it the module's short notes.
+ * The Markdown notes are kept but hidden while a PDF is attached.
+ */
+export async function attachNotesPdf(input: z.infer<typeof notesPdfAttach>): Promise<ActionState> {
+  return runAdminAction(input, notesPdfAttach, async ({ moduleId, path, title }, supabase) => {
+    if (!path.startsWith(`${moduleId}/`))
+      throw new AdminError("That file belongs to another module.");
+    const { data: existing, error } = await supabase
+      .from("documents")
+      .select("id, pdf_path, is_published")
+      .eq("module_id", moduleId)
+      .eq("kind", "short_notes")
+      .maybeSingle();
+    check(error);
+    if (existing) {
+      check(
+        (await supabase.from("documents").update({ pdf_path: path }).eq("id", existing.id)).error,
+      );
+      if (existing.pdf_path !== path) await removeNotesFile(supabase, existing.pdf_path);
+      return existing.is_published
+        ? "PDF attached. Students now see it in Short notes."
+        : "PDF attached. Publish the notes to show it to students.";
+    }
+    check(
+      (
+        await supabase.from("documents").insert({
+          module_id: moduleId,
+          kind: "short_notes",
+          title,
+          content_md: "",
+          pdf_path: path,
+          is_published: false,
+        })
+      ).error,
+    );
+    return "PDF attached. Publish the notes to show it to students.";
+  });
+}
+
+/** Detaches the PDF so the Markdown notes show again, and deletes the file. */
+export async function removeNotesPdf(_: ActionState, form: FormData) {
+  return runAdminAction(form, idSchema, async ({ id }, supabase) => {
+    const { data: doc, error } = await supabase
+      .from("documents")
+      .select("pdf_path")
+      .eq("id", id)
+      .maybeSingle();
+    check(error);
+    if (!doc) throw new AdminError("Notes not found. Reload the page.");
+    check((await supabase.from("documents").update({ pdf_path: null }).eq("id", id)).error);
+    await removeNotesFile(supabase, doc.pdf_path);
+    return "PDF removed. The text notes show again.";
   });
 }
 

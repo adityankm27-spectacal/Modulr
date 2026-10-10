@@ -2,6 +2,7 @@ import { z } from "zod";
 import { apiError, json, readJson } from "@/lib/api";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getVideoProvider } from "@/lib/video";
+import { providerChaptersUpdate } from "@/lib/video/chapters";
 import { safeEqual } from "@/lib/video/signing";
 
 const payload = z.object({ VideoGuid: z.string().min(1).max(100) });
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   const supabase = createServiceClient();
   const { data: video } = await supabase
     .from("videos")
-    .select("id, duration_sec")
+    .select("id, duration_sec, chapters")
     .eq("provider", "bunny")
     .eq("provider_video_id", parsed.data.VideoGuid)
     .maybeSingle();
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
       processing_status: status.status,
       duration_sec: status.durationSec ?? video.duration_sec,
       ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
+      ...providerChaptersUpdate(video.chapters, status),
     })
     .eq("id", video.id);
   if (error) return apiError(500, "Update failed");

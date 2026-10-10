@@ -8,6 +8,7 @@ import { DeleteButton } from "@/components/admin/delete-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
 import { FormulaCardFields } from "@/components/admin/formula-card-fields";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
+import { NotesPdfUpload } from "@/components/admin/notes-pdf-upload";
 import { SortableList } from "@/components/admin/sortable-list";
 import { VideoFields } from "@/components/admin/video-fields";
 import { VideoUpload } from "@/components/admin/video-upload";
@@ -16,6 +17,7 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   deleteContent,
   deleteModule,
+  removeNotesPdf,
   saveDocument,
   saveFormulaCard,
   saveModule,
@@ -145,6 +147,21 @@ export default async function ModuleEditorPage({
           title="Short notes"
           description="One page per module. Use callouts generously: memory tricks are a core feature."
         >
+          <NotesPdfUpload
+            moduleId={mod.id}
+            title={notes?.title ?? `Short notes: ${mod.title}`}
+            hasPdf={Boolean(notes?.pdf_path)}
+          />
+          {notes?.pdf_path ? (
+            <ActionForm
+              action={removeNotesPdf}
+              submitLabel="Remove PDF"
+              submitVariant="outline"
+              confirm="Remove the PDF? Students will see the text notes instead."
+            >
+              <input type="hidden" name="id" value={notes.id} />
+            </ActionForm>
+          ) : null}
           <ActionForm action={saveDocument} submitLabel="Save notes">
             {notes ? <input type="hidden" name="id" value={notes.id} /> : null}
             {notes ? <input type="hidden" name="version" value={notes.version} /> : null}

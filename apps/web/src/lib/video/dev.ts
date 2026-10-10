@@ -48,9 +48,9 @@ export class DevProvider implements VideoProvider {
   async getStatus(providerVideoId: string): Promise<ProviderVideoStatus> {
     try {
       await stat(devVideoPath(providerVideoId));
-      return { status: "ready", durationSec: null, thumbnailUrl: null };
+      return { status: "ready", durationSec: null, thumbnailUrl: null, chapters: [] };
     } catch {
-      return { status: "pending", durationSec: null, thumbnailUrl: null };
+      return { status: "pending", durationSec: null, thumbnailUrl: null, chapters: [] };
     }
   }
 

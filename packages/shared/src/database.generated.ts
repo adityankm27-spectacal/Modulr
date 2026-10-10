@@ -320,6 +320,7 @@ export type Database = {
           is_published: boolean;
           kind: Database["public"]["Enums"]["document_kind"];
           module_id: string;
+          pdf_path: string | null;
           title: string;
           updated_at: string;
           version: number;
@@ -332,6 +333,7 @@ export type Database = {
           is_published?: boolean;
           kind: Database["public"]["Enums"]["document_kind"];
           module_id: string;
+          pdf_path?: string | null;
           title: string;
           updated_at?: string;
           version?: number;
@@ -343,6 +345,7 @@ export type Database = {
           is_published?: boolean;
           kind?: Database["public"]["Enums"]["document_kind"];
           module_id?: string;
+          pdf_path?: string | null;
           title?: string;
           updated_at?: string;
           version?: number;

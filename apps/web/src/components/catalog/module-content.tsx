@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, Loader2, PlayCircle, X } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FormulaCard } from "@/components/content/formula-card";
+import { PdfViewer } from "@/components/content/pdf-viewer";
 import { QuestionCard } from "@/components/content/question-card";
 import { Markdown } from "@/components/markdown/markdown";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import {
   getCrossModuleQuestions,
   getDocument,
   getFormulaCards,
+  getNotesPdfUrl,
   getQuestions,
   getVideos,
   getWatchProgress,
@@ -74,7 +76,7 @@ export async function ModuleContent({
         />
       );
     case "notes":
-      return <NotesTab moduleId={moduleId} drafts={drafts} />;
+      return <NotesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "formulas":
       return <FormulasTab moduleId={moduleId} drafts={drafts} />;
     case "pyqs":
@@ -236,9 +238,19 @@ async function VideosTab({
   );
 }
 
-async function NotesTab({ moduleId, drafts }: { moduleId: string; drafts: boolean }) {
+async function NotesTab({
+  moduleId,
+  drafts,
+  viewer,
+}: {
+  moduleId: string;
+  drafts: boolean;
+  viewer: Props["viewer"];
+}) {
   const doc = await getDocument(moduleId, "short_notes", { drafts });
-  if (!doc || !doc.content_md.trim()) {
+  // An uploaded PDF replaces the Markdown notes; the Markdown stays saved but hidden.
+  const pdfUrl = doc?.pdf_path ? await getNotesPdfUrl(doc.pdf_path) : null;
+  if (!doc || (!pdfUrl && !doc.content_md.trim())) {
     return <Empty>Notes for this module are being written.</Empty>;
   }
   return (
@@ -247,7 +259,15 @@ async function NotesTab({ moduleId, drafts }: { moduleId: string; drafts: boolea
         Updated {dateFormat.format(new Date(doc.updated_at))}
         {drafts && !doc.is_published ? <Badge variant="highlight">Draft</Badge> : null}
       </p>
-      <Markdown>{doc.content_md}</Markdown>
+      {pdfUrl ? (
+        <PdfViewer
+          url={pdfUrl}
+          title={doc.title}
+          watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
+        />
+      ) : (
+        <Markdown>{doc.content_md}</Markdown>
+      )}
     </article>
   );
 }

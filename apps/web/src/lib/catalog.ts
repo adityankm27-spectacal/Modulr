@@ -176,11 +176,26 @@ export async function getDocument(
   const supabase = await createClient();
   let query = supabase
     .from("documents")
-    .select("id, title, content_md, updated_at, is_published")
+    .select("id, title, content_md, pdf_path, updated_at, is_published")
     .eq("module_id", moduleId)
     .eq("kind", kind);
   if (!drafts) query = query.eq("is_published", true);
   return maybe(await query.maybeSingle(), "document");
+}
+
+/** Seconds a notes-PDF link stays valid: long enough to load, useless if shared later. */
+const NOTES_PDF_TTL_SECONDS = 5 * 60;
+
+/**
+ * Short-lived signed URL for a notes PDF, signed with the viewer's own session so the
+ * storage policy (same access rule as the notes row) decides. Null if not allowed.
+ */
+export async function getNotesPdfUrl(pdfPath: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.storage
+    .from("notes")
+    .createSignedUrl(pdfPath, NOTES_PDF_TTL_SECONDS);
+  return data?.signedUrl ?? null;
 }
 
 export async function getFormulaCards(moduleId: string, { drafts = false }: ContentOptions = {}) {

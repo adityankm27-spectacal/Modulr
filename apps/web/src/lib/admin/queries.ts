@@ -127,7 +127,7 @@ export async function getModuleContentAdmin(moduleId: string) {
       .order("sort_order"),
     supabase
       .from("documents")
-      .select("id, kind, title, content_md, version, is_published, updated_at")
+      .select("id, kind, title, content_md, pdf_path, version, is_published, updated_at")
       .eq("module_id", moduleId)
       .in("kind", ["short_notes", "formula_sheet"]),
     supabase

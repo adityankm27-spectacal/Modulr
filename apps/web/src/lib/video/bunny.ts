@@ -53,6 +53,23 @@ export function toBunnyChapters(chapters: VideoChapterInput[], durationSec: numb
   }));
 }
 
+/**
+ * Bunny's chapters (Smart Chapters or set in its dashboard), as Modulr chapters:
+ * malformed entries dropped, starts rounded to whole seconds, sorted by start.
+ */
+export function fromBunnyChapters(value: unknown): VideoChapterInput[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item: unknown) => {
+      if (typeof item !== "object" || item === null) return [];
+      const { title, start } = item as { title?: unknown; start?: unknown };
+      if (typeof title !== "string" || !title.trim()) return [];
+      if (typeof start !== "number" || !Number.isFinite(start) || start < 0) return [];
+      return [{ title: title.trim(), start_sec: Math.round(start) }];
+    })
+    .sort((a, b) => a.start_sec - b.start_sec);
+}
+
 export class BunnyProvider implements VideoProvider {
   readonly name = "bunny" as const;
 
@@ -112,6 +129,7 @@ export class BunnyProvider implements VideoProvider {
       status: number;
       length?: number;
       thumbnailFileName?: string;
+      chapters?: unknown;
     }>(`/videos/${providerVideoId}`);
     const status = mapBunnyStatus(video.status);
     return {
@@ -121,6 +139,7 @@ export class BunnyProvider implements VideoProvider {
         status === "ready" && this.config.cdnHostname && video.thumbnailFileName
           ? `https://${this.config.cdnHostname}/${providerVideoId}/${video.thumbnailFileName}`
           : null,
+      chapters: fromBunnyChapters(video.chapters),
     };
   }
 
