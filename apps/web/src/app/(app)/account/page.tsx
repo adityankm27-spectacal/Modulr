@@ -1,5 +1,6 @@
 import { LogOut, MonitorSmartphone } from "lucide-react";
 import type { Metadata } from "next";
+import { BackButton } from "@/components/back-button";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "@/lib/actions/profile";
@@ -15,7 +16,8 @@ export default async function AccountPage() {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 space-y-10 px-4 py-10">
       <div>
-        <h1 className="text-3xl sm:text-4xl">Account</h1>
+        <BackButton fallbackHref="/home" />
+        <h1 className="mt-4 text-3xl sm:text-4xl">Account</h1>
         <p className="mt-2 break-all text-muted-foreground">Signed in as {email}</p>
       </div>
 
