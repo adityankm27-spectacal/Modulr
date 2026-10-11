@@ -188,3 +188,14 @@ export type PublishableTable = (typeof PUBLISHABLE)[number];
 
 export const REORDERABLE = ["subjects", "modules", "videos", "formula_cards", "questions"] as const;
 export type ReorderableTable = (typeof REORDERABLE)[number];
+
+// Monthly plans only for now: one-time exam packs need a Razorpay Orders flow (spec §16 Q2).
+export const planSchema = z.object({
+  id: optionalId,
+  name: text("Name", 60),
+  description: optionalText(200),
+  price_rupees: intInRange("Price", 1, 100_000),
+  sort_order: intInRange("Order", 0, 1000),
+  is_active: checkbox,
+  new_provider_plan: checkbox,
+});

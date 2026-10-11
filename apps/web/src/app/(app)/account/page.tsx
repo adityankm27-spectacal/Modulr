@@ -1,6 +1,7 @@
 import { LogOut, MonitorSmartphone } from "lucide-react";
 import type { Metadata } from "next";
 import { BackButton } from "@/components/back-button";
+import { BillingSection } from "@/components/billing/billing-section";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "@/lib/actions/profile";
@@ -9,9 +10,13 @@ import { getCollegesWithBranches } from "@/lib/catalog";
 
 export const metadata: Metadata = { title: "Account", robots: { index: false } };
 
-export default async function AccountPage() {
-  const { profile, email } = await requireOnboardedViewer("/account");
-  const colleges = await getCollegesWithBranches();
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ subscribed?: string }>;
+}) {
+  const { profile, email, userId } = await requireOnboardedViewer("/account");
+  const [colleges, { subscribed }] = await Promise.all([getCollegesWithBranches(), searchParams]);
 
   return (
     <main className="mx-auto w-full max-w-xl flex-1 space-y-10 px-4 py-10">
@@ -37,6 +42,12 @@ export default async function AccountPage() {
           }}
         />
       </section>
+
+      <BillingSection
+        userId={userId}
+        compAccessUntil={profile.comp_access_until}
+        justSubscribed={subscribed === "1"}
+      />
 
       <section aria-labelledby="sessions-heading" className="space-y-4 border-t pt-8">
         <h2 id="sessions-heading" className="text-xl">

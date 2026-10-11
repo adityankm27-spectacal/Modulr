@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatInterval, formatPrice } from "@/lib/format";
@@ -35,7 +36,7 @@ export function PlanCard({
 }: {
   plan: PlanCardPlan;
   featured?: boolean;
-  cta: { href: string; label: string } | { disabledLabel: string };
+  cta: { href: string; label: string } | { disabledLabel: string } | { node: ReactNode };
 }) {
   return (
     <article
@@ -65,7 +66,9 @@ export function PlanCard({
         ))}
       </ul>
       <div className="mt-8">
-        {"href" in cta ? (
+        {"node" in cta ? (
+          cta.node
+        ) : "href" in cta ? (
           <Link href={cta.href} className={buttonVariants({ size: "lg", block: true })}>
             {cta.label}
           </Link>

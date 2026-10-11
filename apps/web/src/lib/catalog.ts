@@ -32,7 +32,9 @@ export const getActivePlans = cache(async () => {
   return rows(
     await supabase
       .from("plans")
-      .select("id, name, description, price_paise, interval, scope, validity_days")
+      .select(
+        "id, name, description, price_paise, interval, scope, validity_days, razorpay_plan_id",
+      )
       .eq("is_active", true)
       .order("sort_order")
       .order("price_paise"),

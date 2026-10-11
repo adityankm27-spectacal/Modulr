@@ -17,6 +17,18 @@ export function formatPrice(paise: number): string {
   return (paise % 100 === 0 ? wholeRupees : rupeesAndPaise).format(paise / 100);
 }
 
+const indianDate = new Intl.DateTimeFormat("en-IN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Kolkata",
+});
+
+/** "2026-11-12T…" → "12 Nov 2026" (India time). */
+export function formatDate(value: string | Date): string {
+  return indianDate.format(typeof value === "string" ? new Date(value) : value);
+}
+
 export function formatInterval(
   interval: Enums<"plan_interval">,
   validityDays: number | null,

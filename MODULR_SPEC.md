@@ -148,7 +148,7 @@ These were shown in the promo video as "coming soon". Design the schema and navi
 | Feature | P |
 |---|---|
 | Plans stored in the database (price, interval, provider plan id, active flag); **never hard-code prices** | M |
-| Launch plan: **₹49 / month** (see §16, Q2 for exam-pack pricing) | M |
+| Launch plan: **₹100 / month** (see §16, Q2 for exam-pack pricing) | M |
 | Free preview: Module 1 of every subject (configurable per module) | M |
 | Razorpay Subscriptions (UPI Autopay + cards) on the **website** | M |
 | Webhooks: verify signature, store event ids, process idempotently | M |
@@ -325,7 +325,7 @@ Do this alongside M0–M1, not after:
 
 Each milestone ends with working code, migrations applied, updated seed data, and a "How to test" note.
 
-**M0 — Foundation:** monorepo, TypeScript strict, lint/format, Supabase config, full schema (§8) + RLS, `.env.example`. Seed: 1 college, IT branch, 1 syllabus version, 1 semester, 2 subjects × 3 modules, dummy videos, notes with LaTeX and every callout type, 10 questions of each kind, 1 plan at ₹49/month. Mark all seed content **DUMMY**.
+**M0 — Foundation:** monorepo, TypeScript strict, lint/format, Supabase config, full schema (§8) + RLS, `.env.example`. Seed: 1 college, IT branch, 1 syllabus version, 1 semester, 2 subjects × 3 modules, dummy videos, notes with LaTeX and every callout type, 10 questions of each kind, 1 plan at ₹100/month. Mark all seed content **DUMMY**.
 
 **M1 — Auth, onboarding, catalog (web):** sign-in, onboarding, home, subject and module pages with tabs (locked except free preview), landing, pricing, legal placeholders.
 
@@ -355,7 +355,7 @@ iOS app · offline video downloads · forums/comments · live classes · college
 ## 16. Open decisions (ask the owner; build as configurable)
 
 1. **Syllabus scope:** does the college follow the common University of Mumbai syllabus, or its own autonomous syllabus? This decides how content is shared across colleges. The schema already supports both via `syllabus_versions`.
-2. **Pricing model:** launch with **₹49/month**, or per-subject/per-semester **exam packs** (e.g. ₹99–149 one-time) to match how students study around exams? Support both via `plans.interval` + `purchases`.
+2. **Pricing model:** *(decided: ₹100/month subscription at launch)* launch with **₹100/month**, or per-subject/per-semester **exam packs** (e.g. ₹99–149 one-time) to match how students study around exams? Support both via `plans.interval` + `purchases`.
 3. **Android payments:** keep purchases on the website only (default, avoids Google Play billing), or add Play Billing?
 4. **Free preview rule:** Module 1 of every subject (default) and/or a time-limited trial?
 5. **Devices per account:** 2 (default) or 1?

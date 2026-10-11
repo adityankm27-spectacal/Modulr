@@ -244,9 +244,10 @@ cross join (values ('pyq'::public.question_kind, 'PYQ'),
 cross join generate_series(1, 10) q;
 
 -- ---------------------------------------------------------------------------
--- Plans: launch plan ₹49/month (spec §5.4). razorpay_plan_id is set in M4.
+-- Plans: launch plan ₹100/month (spec §5.4). razorpay_plan_id is set by saving
+-- the plan in /admin/plans once the Razorpay keys are configured.
 -- ---------------------------------------------------------------------------
 insert into public.plans (id, name, description, price_paise, interval, scope, sort_order)
 values
   ('60000000-0000-4000-8000-000000000001', 'Monthly',
-   'All modules, all subjects. Cancel anytime.', 4900, 'month', 'all', 1);
+   'All modules, all subjects. Cancel anytime.', 10000, 'month', 'all', 1);

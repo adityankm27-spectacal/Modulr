@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Faq } from "@/components/marketing/faq";
-import { PlanCard } from "@/components/marketing/plan-card";
+import { PlanCard, type PlanCardPlan } from "@/components/marketing/plan-card";
+import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { getViewer } from "@/lib/auth";
+import { paymentsConfigured } from "@/lib/billing";
+import { getBilling } from "@/lib/billing/queries";
 import { getActivePlans, getSettings } from "@/lib/catalog";
 import { faqItems } from "@/lib/marketing";
 
@@ -17,6 +20,17 @@ export default async function PricingPage() {
     getSettings(),
   ]);
   const monthly = plans.find((p) => p.interval === "month" && p.scope === "all") ?? null;
+  const billing = viewer ? await getBilling(viewer.userId) : null;
+  const canPay = paymentsConfigured();
+
+  function cta(plan: PlanCardPlan & { razorpay_plan_id: string | null }) {
+    if (!viewer) return { href: "/sign-in?next=%2Fpricing", label: "Start free" };
+    if (billing?.hasSubscriptionAccess) return { href: "/account", label: "Manage your plan" };
+    if (canPay && plan.interval === "month" && plan.razorpay_plan_id) {
+      return { node: <SubscribeButton planId={plan.id} /> };
+    }
+    return { disabledLabel: "Payments open soon" };
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:py-20">
@@ -36,11 +50,7 @@ export default async function PricingPage() {
               key={plan.id}
               plan={plan}
               featured={plan.id === monthly?.id}
-              cta={
-                viewer
-                  ? { disabledLabel: "Payments open soon" }
-                  : { href: "/sign-in?next=%2Fpricing", label: "Start free" }
-              }
+              cta={cta(plan)}
             />
           ))}
         </div>
