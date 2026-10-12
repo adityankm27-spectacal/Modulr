@@ -127,11 +127,11 @@ export default async function PlansPage() {
         </ul>
       </AdminSection>
 
-      <AdminSection title="Add a plan">
+      <Disclosure summary="+ Add a plan">
         <ActionForm action={savePlan} submitLabel="Create plan" resetOnSuccess>
           <PlanFields />
         </ActionForm>
-      </AdminSection>
+      </Disclosure>
     </>
   );
 }
