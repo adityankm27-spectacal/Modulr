@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   BookOpenCheck,
   FileText,
   History,
@@ -56,6 +57,36 @@ const INSIDE = [
   },
 ];
 
+const HERO_BARS = [
+  {
+    icon: PlayCircle,
+    label: "Animated videos",
+    bar: "bg-sunflower text-ink",
+    chip: "bg-ink text-sunflower",
+    offset: "",
+    delay: "300ms",
+    sway: "0s",
+  },
+  {
+    icon: FileText,
+    label: "One-page notes",
+    bar: "bg-periwinkle text-white",
+    chip: "bg-white text-cobalt",
+    offset: "translate-x-8",
+    delay: "450ms",
+    sway: "-2s",
+  },
+  {
+    icon: History,
+    label: "Solved PYQs",
+    bar: "bg-white text-ink",
+    chip: "bg-cobalt text-white",
+    offset: "",
+    delay: "600ms",
+    sway: "-4s",
+  },
+];
+
 const STEPS = [
   { title: "Pick your semester", body: "Your subjects appear first, organised module by module." },
   {
@@ -80,43 +111,90 @@ export default async function LandingPage() {
   return (
     <main>
       {/* Hero */}
-      <section className="bg-cobalt text-white">
+      <section className="relative isolate overflow-hidden bg-cobalt text-white">
+        {/* Slow-drifting colour washes behind everything. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-24 -left-24 size-96 rounded-full bg-periwinkle/50 blur-3xl motion-safe:animate-drift" />
+          <div className="absolute -right-32 -bottom-40 size-[28rem] rounded-full bg-sunflower/20 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
+        </div>
+
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:py-24 lg:grid-cols-[1.3fr_1fr] lg:items-center">
           <div>
-            <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm font-bold">
+            <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm font-bold motion-safe:animate-rise">
               For engineering students
             </p>
             <h1 className="mt-5 text-5xl font-black sm:text-7xl">
-              Every module.
-              <br />
-              <span className="text-sunflower">Inside out.</span>
+              <span className="block motion-safe:animate-rise motion-safe:[animation-delay:100ms]">
+                Every module.
+              </span>
+              <span className="relative inline-block text-sunflower motion-safe:animate-rise motion-safe:[animation-delay:220ms]">
+                Inside out.
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 -bottom-1 h-2 origin-left rounded-full bg-sunflower motion-safe:animate-draw motion-safe:[animation-delay:750ms]"
+                />
+              </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/90">
+            <p className="mt-6 max-w-xl text-lg text-white/90 motion-safe:animate-rise motion-safe:[animation-delay:340ms]">
               Animated explainers, one-page notes, formula sheets and solved PYQs for every module
               of your syllabus. Everything you need for exams, in one place.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 motion-safe:animate-rise motion-safe:[animation-delay:460ms] sm:flex-row">
               <Link
                 href={startHref}
-                className={buttonVariants({ variant: "sunflower", size: "lg" })}
+                className={cn(
+                  buttonVariants({ variant: "sunflower", size: "lg" }),
+                  "group hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--color-ink)]",
+                )}
               >
                 {viewer ? "Go to my subjects" : "Start free"}
+                <ArrowRight
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </Link>
               <Link
                 href="/subjects"
                 className={cn(
                   buttonVariants({ size: "lg", variant: "outline" }),
-                  "border-white/60 text-white hover:bg-white/10",
+                  "border-white/60 text-white hover:-translate-y-0.5 hover:bg-white/10",
                 )}
               >
                 Browse subjects
               </Link>
             </div>
           </div>
-          <div aria-hidden="true" className="hidden flex-col gap-4 lg:flex">
-            <div className="h-24 rounded-full bg-sunflower" />
-            <div className="h-24 translate-x-8 rounded-full bg-periwinkle" />
-            <div className="h-24 rounded-full bg-white" />
+
+          {/* The logo's stacked bars, as the three things every module has. */}
+          <div aria-hidden="true" className="relative hidden flex-col gap-4 lg:flex">
+            {HERO_BARS.map(({ icon: Icon, label, bar, chip, offset, delay, sway }) => (
+              <div
+                key={label}
+                className={cn("motion-safe:animate-slide-in", offset)}
+                style={{ animationDelay: delay }}
+              >
+                <div
+                  className={cn(
+                    "flex h-24 items-center gap-4 rounded-full px-4 motion-safe:animate-sway",
+                    bar,
+                  )}
+                  style={{ animationDelay: sway }}
+                >
+                  <span
+                    className={cn("flex size-16 items-center justify-center rounded-full", chip)}
+                  >
+                    <Icon className="size-7" />
+                  </span>
+                  <span className="font-display text-xl font-black">{label}</span>
+                </div>
+              </div>
+            ))}
+            <span className="absolute -top-6 right-6 rounded-full bg-mint px-4 py-2 text-sm font-extrabold text-ink shadow-lg motion-safe:animate-bob">
+              Formula sheets
+            </span>
+            <span className="absolute -bottom-6 left-10 rounded-full bg-pink px-4 py-2 text-sm font-extrabold text-ink shadow-lg motion-safe:animate-bob motion-safe:[animation-delay:-2s]">
+              Viva prep
+            </span>
           </div>
         </div>
       </section>
