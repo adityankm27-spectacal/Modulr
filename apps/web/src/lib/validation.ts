@@ -2,6 +2,9 @@ import { z } from "zod";
 
 const uuid = z.uuid({ error: "Choose an option." });
 
+/** Semesters students can currently pick. Widen this list as more content is published. */
+export const AVAILABLE_SEMESTERS: readonly number[] = [3];
+
 export const profileSchema = z.object({
   fullName: z
     .string()
@@ -14,7 +17,8 @@ export const profileSchema = z.object({
     .number({ error: "Choose your semester." })
     .int()
     .min(1, "Choose your semester.")
-    .max(8, "Choose your semester."),
+    .max(8, "Choose your semester.")
+    .refine((n) => AVAILABLE_SEMESTERS.includes(n), "Only Semester 3 is open right now."),
 });
 
 export const onboardingSchema = profileSchema.extend({

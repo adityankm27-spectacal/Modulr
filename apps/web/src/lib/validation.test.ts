@@ -11,6 +11,7 @@ const valid = {
 describe("profileSchema", () => {
   it("parses and normalises form input", () => {
     expect(profileSchema.parse(valid)).toEqual({ ...valid, fullName: "Asha Rao", semester: 3 });
+    expect(profileSchema.safeParse({ ...valid, semester: "2" }).success).toBe(false);
   });
 
   it("reports one message per field", () => {

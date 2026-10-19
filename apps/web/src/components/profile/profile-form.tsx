@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { FieldError, Label } from "@/components/ui/label";
 import type { ProfileFormState, ProfileFormValues } from "@/lib/actions/profile";
+import { AVAILABLE_SEMESTERS } from "@/lib/validation";
 
 export interface CollegeOption {
   id: string;
@@ -15,8 +16,6 @@ export interface CollegeOption {
 }
 
 type Action = (state: ProfileFormState, formData: FormData) => Promise<ProfileFormState>;
-
-const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export function ProfileForm({
   action,
@@ -153,7 +152,7 @@ export function ProfileForm({
             <option value="" disabled>
               Choose semester
             </option>
-            {SEMESTERS.map((n) => (
+            {AVAILABLE_SEMESTERS.map((n) => (
               <option key={n} value={n}>
                 Semester {n}
               </option>
