@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldErrors, isUuid, onboardingSchema, parseSemester, profileSchema } from "./validation";
+import { fieldErrors, isUuid, onboardingSchema, profileSchema } from "./validation";
 
 const valid = {
   fullName: "  Asha Rao ",
@@ -40,17 +40,6 @@ describe("onboardingSchema", () => {
     expect(
       onboardingSchema.safeParse({ ...valid, ageConfirmed: "on", consent: "on" }).success,
     ).toBe(true);
-  });
-});
-
-describe("parseSemester", () => {
-  it("accepts 1 to 8 only", () => {
-    expect(parseSemester("4")).toBe(4);
-    expect(parseSemester(["2"])).toBe(2);
-    expect(parseSemester("0")).toBeNull();
-    expect(parseSemester("9")).toBeNull();
-    expect(parseSemester("2.5")).toBeNull();
-    expect(parseSemester(undefined)).toBeNull();
   });
 });
 

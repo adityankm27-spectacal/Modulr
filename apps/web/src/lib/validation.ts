@@ -39,11 +39,6 @@ export function fieldErrors(error: z.ZodError): FieldErrors {
   return errors;
 }
 
-export function parseSemester(value: string | string[] | undefined): number | null {
-  const n = Number(Array.isArray(value) ? value[0] : value);
-  return Number.isInteger(n) && n >= 1 && n <= 8 ? n : null;
-}
-
 export function isUuid(value: string): boolean {
   return uuid.safeParse(value).success;
 }
