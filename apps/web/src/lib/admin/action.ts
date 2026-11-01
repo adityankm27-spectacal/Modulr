@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { getViewer, isAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { VideoProviderError } from "@/lib/video/types";
 import { fieldErrors, type FieldErrors } from "@/lib/validation";
 
 import type { ActionState } from "./state";
@@ -83,6 +84,10 @@ export async function runAdminAction<S extends z.ZodType>(
       };
     }
     console.error(error);
+    // Provider messages name a status code or a missing setting, never a key, so admins can act on them.
+    if (error instanceof VideoProviderError) {
+      return { status: "error", message: error.message, at: Date.now() };
+    }
     return { status: "error", message: "Something went wrong. Please try again.", at: Date.now() };
   }
 }
