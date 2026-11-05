@@ -6,9 +6,16 @@ import { siteUrl } from "@/lib/env";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const pages = ["", "/subjects", "/pricing", "/terms", "/privacy", "/refunds", "/contact"].map(
-    (path) => ({ url: `${siteUrl}${path}` }),
-  );
+  const pages = [
+    "",
+    "/subjects",
+    "/pricing",
+    "/terms",
+    "/privacy",
+    "/refunds",
+    "/delivery",
+    "/contact",
+  ].map((path) => ({ url: `${siteUrl}${path}` }));
   const subjects = await getPublishedSubjects();
   return [
     ...pages,

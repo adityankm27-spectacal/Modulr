@@ -7,6 +7,7 @@ const links = [
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
   { href: "/refunds", label: "Refunds" },
+  { href: "/delivery", label: "Delivery" },
   { href: "/contact", label: "Contact" },
 ];
 
