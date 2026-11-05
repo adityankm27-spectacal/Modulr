@@ -1,5 +1,6 @@
 import type { Enums } from "@modulr/shared";
 import { parseCsv, CsvError } from "@/lib/csv";
+import { hasImageAlts, IMAGE_ALT_MESSAGE } from "@/lib/markdown-images";
 
 /**
  * Validates a CSV of questions for one subject before anything is saved (spec §5.6).
@@ -152,6 +153,7 @@ export function validateQuestionImport(
     else if (question.length > 5000) errors.push("question is longer than 5,000 characters.");
     if (!answer) errors.push("answer is empty.");
     else if (answer.length > 20000) errors.push("answer is longer than 20,000 characters.");
+    if (!hasImageAlts(question) || !hasImageAlts(answer)) errors.push(IMAGE_ALT_MESSAGE);
 
     const moduleRaw = get("module").replace(/^module\s*/i, "");
     let moduleId: string | null = null;

@@ -86,7 +86,8 @@ export function ContentGuard({
         >
           <p className="flex max-w-sm items-center gap-2 rounded-2xl border-2 bg-card px-4 py-3 font-semibold shadow-lg">
             <EyeOff className="size-5 shrink-0" aria-hidden="true" />
-            Content is hidden while this window isn&apos;t in focus. Click here to continue.
+            Content is hidden while this window isn&apos;t in focus. Come back to this window to
+            continue.
           </p>
         </div>
       ) : null}

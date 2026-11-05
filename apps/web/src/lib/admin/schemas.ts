@@ -1,5 +1,6 @@
 import { parseChapters, parseSymbols, parseTimestamp } from "@modulr/shared";
 import { z } from "zod";
+import { hasImageAlts, IMAGE_ALT_MESSAGE } from "@/lib/markdown-images";
 
 /** HTML checkboxes submit "on" when ticked and nothing when not. */
 // Note: Zod 4 treats a key as required unless it is `.optional()`, even when the
@@ -125,7 +126,10 @@ export const documentSchema = z.object({
   module_id: id,
   kind: z.enum(["short_notes", "formula_sheet"]),
   title: text("Title", 200),
-  content_md: z.string().max(200_000, "The document is too long (200,000 characters max)."),
+  content_md: z
+    .string()
+    .max(200_000, "The document is too long (200,000 characters max).")
+    .refine(hasImageAlts, IMAGE_ALT_MESSAGE),
   // Optimistic concurrency: the version the editor started from.
   version: optionalInt("Version", 1, 1_000_000),
   is_published: checkbox,
@@ -138,7 +142,7 @@ export const formulaCardSchema = z
     title: text("Title", 200),
     formula_latex: text("Formula", 2000),
     symbols: z.string().max(10000).optional(),
-    when_to_use: z.string().trim().max(5000).optional(),
+    when_to_use: z.string().trim().max(5000).refine(hasImageAlts, IMAGE_ALT_MESSAGE).optional(),
     is_published: checkbox,
   })
   .transform((v, ctx) => {
@@ -154,8 +158,13 @@ export const questionSchema = z.object({
   subject_id: id,
   module_id: optionalId,
   kind: z.enum(["pyq", "important", "viva"], { error: "Choose a type." }),
-  question_md: text("Question", 5000),
-  answer_md: z.string().trim().max(20000, "The answer is too long.").default(""),
+  question_md: text("Question", 5000).refine(hasImageAlts, IMAGE_ALT_MESSAGE),
+  answer_md: z
+    .string()
+    .trim()
+    .max(20000, "The answer is too long.")
+    .refine(hasImageAlts, IMAGE_ALT_MESSAGE)
+    .default(""),
   marks: optionalInt("Marks", 1, 100),
   sessions: z
     .string()

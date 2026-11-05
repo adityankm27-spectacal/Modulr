@@ -100,6 +100,30 @@ function PdfPage({
   // A4 portrait until the real size is known, so the page list doesn't jump around.
   const [aspect, setAspect] = useState(1 / Math.SQRT2);
   const [rendered, setRendered] = useState(false);
+  // Screen readers can't read a canvas, so each page's text is also kept off-screen.
+  // The PDF is already in the browser to be drawn, so this doesn't make copying easier.
+  const [text, setText] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void pdf
+      .getPage(pageNumber)
+      .then((page) => page.getTextContent())
+      .then((content) => {
+        if (cancelled) return;
+        const pageText = content.items
+          .map((item) => ("str" in item ? item.str + (item.hasEOL ? "\n" : " ") : ""))
+          .join("")
+          .trim();
+        setText(pageText);
+      })
+      .catch(() => {
+        if (!cancelled) setText("");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pdf, pageNumber]);
 
   useEffect(() => {
     const box = boxRef.current;
@@ -149,12 +173,7 @@ function PdfPage({
         className="relative overflow-hidden rounded-xl border-2 bg-white shadow-sm"
         style={{ aspectRatio: aspect }}
       >
-        <canvas
-          ref={canvasRef}
-          className="block h-full w-full"
-          aria-label={`Page ${pageNumber} of ${total}`}
-          role="img"
-        />
+        <canvas ref={canvasRef} className="block h-full w-full" aria-hidden="true" />
         {!rendered ? (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
             <Loader2 className="size-5 animate-spin" aria-hidden="true" />
@@ -174,6 +193,11 @@ function PdfPage({
       <figcaption className="text-center text-xs text-muted-foreground">
         Page {pageNumber} of {total}
       </figcaption>
+      <div className="sr-only whitespace-pre-line">
+        {text === null
+          ? "Loading this page's text."
+          : text || "This page has no readable text; it may be a scanned image."}
+      </div>
     </figure>
   );
 }
