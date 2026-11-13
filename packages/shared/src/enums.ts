@@ -89,3 +89,11 @@ export type ContentItemType = (typeof CONTENT_ITEM_TYPES)[number];
 
 export const CALLOUT_KINDS = ["trick", "tip", "mistake", "definition"] as const;
 export type CalloutKind = (typeof CALLOUT_KINDS)[number];
+
+/** Mirrors the calendar_event_kind enum in supabase/migrations/20261116000100_planner.sql. */
+export const CALENDAR_EVENT_KINDS = ["exam", "holiday", "deadline", "event", "reminder"] as const;
+export type CalendarEventKind = (typeof CALENDAR_EVENT_KINDS)[number];
+
+/** The checklist every module has in the planner (module_steps.step). */
+export const MODULE_STEPS = ["video", "notes", "formulas", "questions"] as const;
+export type ModuleStep = (typeof MODULE_STEPS)[number];

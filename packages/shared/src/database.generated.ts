@@ -207,6 +207,67 @@ export type Database = {
           },
         ];
       };
+      calendar_events: {
+        Row: {
+          branch_id: string | null;
+          college_id: string | null;
+          created_at: string;
+          ends_on: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["calendar_event_kind"];
+          notes: string | null;
+          semester: number | null;
+          starts_on: string;
+          title: string;
+          updated_at: string;
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id?: string | null;
+          college_id?: string | null;
+          created_at?: string;
+          ends_on?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["calendar_event_kind"];
+          notes?: string | null;
+          semester?: number | null;
+          starts_on: string;
+          title: string;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          branch_id?: string | null;
+          college_id?: string | null;
+          created_at?: string;
+          ends_on?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["calendar_event_kind"];
+          notes?: string | null;
+          semester?: number | null;
+          starts_on?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "calendar_events_college_id_fkey";
+            columns: ["college_id"];
+            isOneToOne: false;
+            referencedRelation: "colleges";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       colleges: {
         Row: {
           created_at: string;
@@ -494,6 +555,36 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "module_completion_module_id_fkey";
+            columns: ["module_id"];
+            isOneToOne: false;
+            referencedRelation: "modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      module_steps: {
+        Row: {
+          done_at: string;
+          module_id: string;
+          step: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          done_at?: string;
+          module_id: string;
+          step: string;
+          user_id: string;
+        };
+        Update: {
+          done_at?: string;
+          module_id?: string;
+          step?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "module_steps_module_id_fkey";
             columns: ["module_id"];
             isOneToOne: false;
             referencedRelation: "modules";
@@ -996,6 +1087,48 @@ export type Database = {
           },
         ];
       };
+      todos: {
+        Row: {
+          created_at: string;
+          done_at: string | null;
+          due_on: string | null;
+          id: string;
+          module_id: string | null;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          done_at?: string | null;
+          due_on?: string | null;
+          id?: string;
+          module_id?: string | null;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          done_at?: string | null;
+          due_on?: string | null;
+          id?: string;
+          module_id?: string | null;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "todos_module_id_fkey";
+            columns: ["module_id"];
+            isOneToOne: false;
+            referencedRelation: "modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       topic_progress: {
         Row: {
           created_at: string;
@@ -1238,6 +1371,7 @@ export type Database = {
       subject_visible: { Args: { p_subject: string }; Returns: boolean };
     };
     Enums: {
+      calendar_event_kind: "exam" | "holiday" | "deadline" | "event" | "reminder";
       content_item_type:
         "module" | "video" | "document" | "formula_card" | "question" | "experiment";
       device_platform: "web" | "android" | "ios";
@@ -1372,6 +1506,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      calendar_event_kind: ["exam", "holiday", "deadline", "event", "reminder"],
       content_item_type: ["module", "video", "document", "formula_card", "question", "experiment"],
       device_platform: ["web", "android", "ios"],
       document_kind: [

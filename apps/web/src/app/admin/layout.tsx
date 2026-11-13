@@ -38,6 +38,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           >
             Plans
           </Link>
+          <Link
+            href="/admin/calendar"
+            className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold hover:bg-muted"
+          >
+            Calendar
+          </Link>
         </nav>
       </div>
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-4 py-8">{children}</main>
