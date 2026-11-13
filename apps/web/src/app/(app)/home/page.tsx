@@ -55,10 +55,10 @@ export default async function HomePage() {
   const moduleTotal = subjects.reduce((sum, s) => sum + (s.modules[0]?.count ?? 0), 0);
 
   return (
-    <main className="flex flex-1 flex-col lg:flex-row lg:items-start">
+    <main className="flex flex-1 flex-col lg:h-[calc(100vh-5rem)] lg:min-h-0 lg:flex-none lg:flex-row lg:items-stretch">
       <aside
         aria-label="Dashboard"
-        className="order-2 px-4 pb-8 lg:sticky lg:top-4 lg:order-1 lg:mt-12 lg:max-h-[calc(100vh-2rem)] lg:w-[372px] lg:shrink-0 lg:overflow-y-auto lg:pb-2"
+        className="order-2 px-4 pb-8 lg:order-1 lg:w-[372px] lg:shrink-0 lg:overflow-y-auto lg:pt-8 lg:pb-4"
       >
         {plannerData ? (
           <Planner data={plannerData} />
@@ -69,7 +69,7 @@ export default async function HomePage() {
         )}
       </aside>
 
-      <div className="order-1 mx-auto w-full max-w-5xl min-w-0 flex-1 space-y-10 px-4 py-8 sm:py-12 lg:order-2">
+      <div className="order-1 mx-auto w-full max-w-5xl min-w-0 flex-1 space-y-10 px-4 py-8 sm:py-12 lg:order-2 lg:overflow-y-auto">
         <header className="relative isolate overflow-hidden rounded-[1.75rem] border-[3px] border-line bg-cobalt p-6 text-white shadow-[0_8px_0_0_var(--line)] sm:p-10">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute -top-20 -right-16 size-72 rounded-full bg-periwinkle/60 blur-3xl motion-safe:animate-drift" />
