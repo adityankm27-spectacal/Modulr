@@ -14,16 +14,15 @@ const links = [
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t-[3px] border-line bg-card">
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-[1fr_auto] sm:items-start">
-        <div className="space-y-3">
+      <div className="mx-auto flex max-w-6xl flex-col gap-x-6 gap-y-1 px-4 py-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Logo />
-          <p className="max-w-md text-sm text-muted-foreground">
-            Modulr is an independent learning platform. It is not affiliated with, or endorsed by,
-            any college or university.
+          <p className="text-xs text-muted-foreground">
+            Independent learning platform, not affiliated with any college or university.
           </p>
         </div>
         <nav aria-label="Footer">
-          <ul className="grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-3">
+          <ul className="flex flex-wrap gap-x-4">
             {links.map((link) => (
               <li key={link.href}>
                 <Link
