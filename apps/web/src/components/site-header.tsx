@@ -7,14 +7,14 @@ import { getViewer, isAdmin } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const navLink =
-  "inline-flex min-h-11 items-center rounded-full px-3 text-sm font-extrabold text-foreground transition-colors hover:bg-muted";
+  "inline-flex min-h-11 items-center rounded-full px-2 text-sm font-extrabold whitespace-nowrap text-foreground transition-colors hover:bg-muted sm:px-3";
 
 export async function SiteHeader() {
   const viewer = await getViewer();
 
   return (
     <header className="sticky top-0 z-40 px-4 pt-4">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 rounded-full border-[3px] border-line bg-card py-1 pr-2 pl-5 shadow-[0_5px_0_0_var(--line)]">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 rounded-full border-[3px] border-line bg-card py-1 pr-2 pl-4 sm:pl-5 shadow-[0_5px_0_0_var(--line)]">
         <Link href={viewer ? "/home" : "/"} aria-label="Modulr home" className="rounded-lg">
           <Logo />
         </Link>
@@ -23,7 +23,7 @@ export async function SiteHeader() {
             <>
               <SessionWatch />
               {isAdmin(viewer) ? (
-                <Link href="/admin" className={navLink}>
+                <Link href="/admin" className={cn(navLink, "hidden sm:inline-flex")}>
                   Admin
                 </Link>
               ) : null}
@@ -31,7 +31,8 @@ export async function SiteHeader() {
                 Pricing
               </Link>
               <Link href="/home" className={navLink}>
-                My subjects
+                <span className="sm:hidden">Subjects</span>
+                <span className="hidden sm:inline">My subjects</span>
               </Link>
               <Link
                 href="/account"

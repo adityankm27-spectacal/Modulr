@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { OnboardingAside } from "@/components/profile/onboarding-aside";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { completeOnboarding } from "@/lib/actions/profile";
 import { isOnboarded, requireViewer } from "@/lib/auth";
@@ -21,27 +22,29 @@ export default async function OnboardingPage({
   const profile = viewer.profile;
 
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:py-14">
-      <p className="text-sm font-bold text-muted-foreground">Step 1 of 1</p>
-      <h1 className="mt-2 text-3xl sm:text-4xl">Tell us what you study</h1>
-      <p className="mt-3 text-muted-foreground">
-        We use this to show your semester&apos;s subjects first. You can change it any time from
-        your account.
-      </p>
-      <div className="mt-8">
-        <ProfileForm
-          action={completeOnboarding}
-          colleges={colleges}
-          mode="onboarding"
-          next={next}
-          defaults={{
-            fullName: profile?.full_name ?? "",
-            collegeId: profile?.college_id ?? "",
-            branchId: profile?.branch_id ?? "",
-            semester: profile?.semester ? String(profile.semester) : "",
-          }}
-        />
-      </div>
+    <main className="mx-auto grid w-full max-w-5xl flex-1 gap-6 px-4 py-6 sm:py-10 lg:grid-cols-[2fr_3fr]">
+      <OnboardingAside />
+      <section className="py-2 lg:py-6 motion-safe:animate-rise motion-safe:[animation-delay:120ms]">
+        <h1 className="text-3xl sm:text-4xl">Tell us what you study</h1>
+        <p className="mt-3 text-muted-foreground">
+          We use this to show your semester&apos;s subjects first. You can change it any time from
+          your account.
+        </p>
+        <div className="mt-8">
+          <ProfileForm
+            action={completeOnboarding}
+            colleges={colleges}
+            mode="onboarding"
+            next={next}
+            defaults={{
+              fullName: profile?.full_name ?? "",
+              collegeId: profile?.college_id ?? "",
+              branchId: profile?.branch_id ?? "",
+              semester: profile?.semester ? String(profile.semester) : "",
+            }}
+          />
+        </div>
+      </section>
     </main>
   );
 }

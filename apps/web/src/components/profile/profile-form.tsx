@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { startTransition, useActionState, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,10 @@ export function ProfileForm({
     values.branchId || (branches.length === 1 ? (branches[0]?.id ?? "") : ""),
   );
 
-  const [semester, setSemester] = useState(values.semester);
+  // With a single semester on offer there is nothing to choose, so it starts selected.
+  const [semester, setSemester] = useState(
+    values.semester || (AVAILABLE_SEMESTERS.length === 1 ? String(AVAILABLE_SEMESTERS[0]) : ""),
+  );
 
   const describedBy = (field: string) => (errors[field] ? `${field}-error` : undefined);
 
@@ -137,29 +140,57 @@ export function ProfileForm({
           <FieldError id="branchId-error" message={errors.branchId} />
         </div>
 
-        <div>
-          <Label htmlFor="semester">Current semester</Label>
-          <Select
-            id="semester"
-            name="semester"
-            className="mt-2"
-            value={semester}
-            onChange={(e) => setSemester(e.target.value)}
-            aria-invalid={Boolean(errors.semester)}
-            aria-describedby={describedBy("semester")}
-            required
-          >
-            <option value="" disabled>
-              Choose semester
-            </option>
-            {AVAILABLE_SEMESTERS.map((n) => (
-              <option key={n} value={n}>
-                Semester {n}
+        {mode === "onboarding" ? (
+          <fieldset aria-describedby={describedBy("semester")}>
+            <legend className="font-bold">Current semester</legend>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {AVAILABLE_SEMESTERS.map((n) => (
+                <label key={n} className="relative">
+                  <input
+                    type="radio"
+                    name="semester"
+                    value={n}
+                    checked={semester === String(n)}
+                    onChange={(e) => setSemester(e.target.value)}
+                    className="peer sr-only"
+                    required
+                  />
+                  <span className="inline-flex min-h-12 cursor-pointer items-center rounded-full border-[3px] border-line bg-background px-5 font-extrabold text-foreground transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 peer-checked:bg-sunflower peer-checked:text-ink peer-checked:shadow-[0_4px_0_0_var(--line)] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring">
+                    Semester {n}
+                  </span>
+                </label>
+              ))}
+              {AVAILABLE_SEMESTERS.length < 8 ? (
+                <span className="text-sm text-muted-foreground">More semesters coming soon.</span>
+              ) : null}
+            </div>
+            <FieldError id="semester-error" message={errors.semester} />
+          </fieldset>
+        ) : (
+          <div>
+            <Label htmlFor="semester">Current semester</Label>
+            <Select
+              id="semester"
+              name="semester"
+              className="mt-2"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              aria-invalid={Boolean(errors.semester)}
+              aria-describedby={describedBy("semester")}
+              required
+            >
+              <option value="" disabled>
+                Choose semester
               </option>
-            ))}
-          </Select>
-          <FieldError id="semester-error" message={errors.semester} />
-        </div>
+              {AVAILABLE_SEMESTERS.map((n) => (
+                <option key={n} value={n}>
+                  Semester {n}
+                </option>
+              ))}
+            </Select>
+            <FieldError id="semester-error" message={errors.semester} />
+          </div>
+        )}
       </div>
 
       {mode === "onboarding" ? (
@@ -196,9 +227,16 @@ export function ProfileForm({
         ) : null}
       </div>
 
-      <Button type="submit" size="lg" block={mode === "onboarding"} disabled={pending}>
+      <Button
+        type="submit"
+        size="lg"
+        variant={mode === "onboarding" ? "sunflower" : "primary"}
+        block={mode === "onboarding"}
+        disabled={pending}
+      >
         {pending ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
         {mode === "onboarding" ? "Start learning" : "Save changes"}
+        {mode === "onboarding" && !pending ? <ArrowRight aria-hidden="true" /> : null}
       </Button>
     </form>
   );
