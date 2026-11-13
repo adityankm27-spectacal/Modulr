@@ -262,7 +262,12 @@ export default async function LandingPage() {
                 key={plan.id}
                 plan={plan}
                 featured={plan.id === monthly?.id}
-                cta={{ href: startHref, label: viewer ? "Go to my subjects" : "Start free" }}
+                // Checkout lives on /pricing; it also shows "Manage your plan" to subscribers.
+                cta={
+                  viewer
+                    ? { href: "/pricing", label: "Subscribe" }
+                    : { href: startHref, label: "Start free" }
+                }
               />
             ))}
           </div>
