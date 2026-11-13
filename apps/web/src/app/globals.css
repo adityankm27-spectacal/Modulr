@@ -128,29 +128,8 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #111018;
-    --foreground: #f6f5fa;
-    --card: #1c1a26;
-    --card-foreground: #f6f5fa;
-    --secondary: #2a2536;
-    --secondary-foreground: #f6f5fa;
-    --muted: #24212f;
-    --muted-foreground: #b4b2c2;
-    --accent: #232a52;
-    --accent-foreground: #f6f5fa;
-    --danger-text: #ff8597;
-    --link: #8c9bff;
-    --band: #1c1a26;
-    --border: #2e2b3b;
-    --input: #44405a;
-    --ring: #8c9bff;
-    --line: #f6f5fa;
-    color-scheme: dark;
-  }
-}
-
+/* The Sticker sheet theme is cream by default, whatever the system prefers.
+   Dark is opt-in only, via data-theme="dark". */
 :root[data-theme="dark"] {
   --background: #111018;
   --foreground: #f6f5fa;
