@@ -1,20 +1,16 @@
-import { CalendarDays, ListChecks, Lock } from "lucide-react";
+import { CalendarDays, Lock } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import type { PlannerData } from "@/lib/planner/types";
 import { cn } from "@/lib/utils";
-import { PlannerChecklist } from "./checklist";
 import { PlannerCalendar } from "./calendar";
 import { plannerCard } from "./kinds";
-import { PlannerTodos } from "./todos";
 
 /** The study planner shown beside the subjects on the home page. */
 export function Planner({ data }: { data: PlannerData }) {
   return (
     <div className="space-y-6">
       <PlannerCalendar events={data.events} />
-      <PlannerTodos todos={data.todos} modules={data.modules} />
-      <PlannerChecklist modules={data.modules} steps={data.steps} />
     </div>
   );
 }
@@ -33,10 +29,6 @@ export function PlannerLocked() {
         <li className="flex items-start gap-2">
           <CalendarDays className="mt-0.5 size-4 shrink-0" aria-hidden="true" />A calendar with your
           college&apos;s exams and holidays, and your own dates
-        </li>
-        <li className="flex items-start gap-2">
-          <ListChecks className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          To-do tasks and a step-by-step checklist for every module
         </li>
       </ul>
       <Link href="/pricing" className={buttonVariants({ variant: "sunflower", block: true })}>
