@@ -41,8 +41,10 @@ export function PlanCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-[1.75rem] border-[3px] border-line bg-card p-6 sm:p-8",
-        featured ? "shadow-[0_8px_0_0_var(--color-primary)]" : "shadow-[0_6px_0_0_var(--line)]",
+        "flex flex-col rounded-[1.75rem] border-[3px] border-line bg-card p-6 transition-[translate,box-shadow] duration-200 hover:-translate-y-1.5 sm:p-8",
+        featured
+          ? "shadow-[0_8px_0_0_var(--color-primary)] hover:shadow-[0_14px_0_0_var(--color-primary)]"
+          : "shadow-[0_6px_0_0_var(--line)] hover:shadow-[0_12px_0_0_var(--line)]",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -58,8 +60,12 @@ export function PlanCard({
       <p className="mt-2 font-bold">{SCOPE_LABEL[plan.scope]}</p>
       {plan.description ? <p className="mt-1 text-muted-foreground">{plan.description}</p> : null}
       <ul className="mt-6 flex-1 space-y-3">
-        {INCLUDED.map((item) => (
-          <li key={item} className="flex gap-3">
+        {INCLUDED.map((item, i) => (
+          <li
+            key={item}
+            className="flex gap-3 motion-safe:animate-rise"
+            style={{ animationDelay: `${200 + i * 90}ms` }}
+          >
             <Check className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
             <span>{item}</span>
           </li>

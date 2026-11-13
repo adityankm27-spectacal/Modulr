@@ -8,16 +8,40 @@ import { cn } from "@/lib/utils";
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" aria-hidden="true" className={cn("size-8", className)}>
-      <rect x="3" y="4" width="26" height="7" rx="3.5" fill={colors.sunflower} />
-      <rect x="3" y="12.5" width="26" height="7" rx="3.5" fill={colors.periwinkle} />
-      <rect x="3" y="21" width="26" height="7" rx="3.5" fill={colors.cobalt} />
+      <rect
+        x="3"
+        y="4"
+        width="26"
+        height="7"
+        rx="3.5"
+        fill={colors.sunflower}
+        className="transition-[translate] duration-300 ease-out group-hover/logo:translate-x-[3px]"
+      />
+      <rect
+        x="3"
+        y="12.5"
+        width="26"
+        height="7"
+        rx="3.5"
+        fill={colors.periwinkle}
+        className="transition-[translate] duration-300 ease-out group-hover/logo:-translate-x-[3px]"
+      />
+      <rect
+        x="3"
+        y="21"
+        width="26"
+        height="7"
+        rx="3.5"
+        fill={colors.cobalt}
+        className="transition-[translate] duration-300 ease-out group-hover/logo:translate-x-[3px]"
+      />
     </svg>
   );
 }
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
+    <span className={cn("group/logo inline-flex items-center gap-2", className)}>
       <LogoMark />
       <span className="font-display text-xl font-black tracking-[-0.03em]">Modulr</span>
     </span>

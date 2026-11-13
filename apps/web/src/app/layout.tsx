@@ -51,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           Skip to content
         </a>
+        <div aria-hidden="true" className="scroll-progress" />
         <SiteHeader />
         <div id="main" className="flex flex-1 flex-col">
           {children}

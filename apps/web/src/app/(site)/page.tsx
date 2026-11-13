@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
 import { PlanCard } from "@/components/marketing/plan-card";
+import { PointerArea } from "@/components/motion/pointer-area";
+import { Tilt } from "@/components/motion/tilt";
 import { buttonVariants } from "@/components/ui/button";
 import { getViewer } from "@/lib/auth";
 import { getActivePlans, getSettings } from "@/lib/catalog";
@@ -66,6 +68,7 @@ const HERO_BARS = [
     offset: "",
     delay: "300ms",
     sway: "0s",
+    depth: 14,
   },
   {
     icon: FileText,
@@ -75,6 +78,7 @@ const HERO_BARS = [
     offset: "translate-x-8",
     delay: "450ms",
     sway: "-2s",
+    depth: -24,
   },
   {
     icon: History,
@@ -84,7 +88,18 @@ const HERO_BARS = [
     offset: "",
     delay: "600ms",
     sway: "-4s",
+    depth: 32,
   },
+];
+
+const TICKER = [
+  "Every module of every subject",
+  "Animated videos",
+  "One-page notes",
+  "Formula sheets",
+  "Solved PYQs",
+  "Viva prep",
+  "Cancel any time",
 ];
 
 const STEPS = [
@@ -112,7 +127,15 @@ export default async function LandingPage() {
     <main>
       {/* Hero */}
       <section className="relative isolate overflow-hidden">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:py-20 lg:grid-cols-[1.25fr_1fr] lg:items-center">
+        <PointerArea className="relative mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:py-20 lg:grid-cols-[1.25fr_1fr] lg:items-center">
+          {/* Soft light that drifts towards the pointer. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-[460px] rounded-full bg-periwinkle/25 blur-3xl transition-[translate] duration-700 ease-out"
+            style={{
+              translate: "calc(-50% + var(--mx, 0) * 260px) calc(-50% + var(--my, 0) * 160px)",
+            }}
+          />
           <div>
             <p className="inline-block -rotate-2 rounded-full border-[3px] border-line bg-mint px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-rise">
               For engineering students
@@ -121,7 +144,7 @@ export default async function LandingPage() {
               <span className="block motion-safe:animate-rise motion-safe:[animation-delay:100ms]">
                 Every module.
               </span>
-              <span className="mt-2 inline-block -rotate-1 rounded-3xl border-[3px] border-line bg-cobalt px-4 pb-2 text-white shadow-[0_6px_0_0_var(--line)] motion-safe:animate-rise motion-safe:[animation-delay:220ms]">
+              <span className="mt-2 inline-block -rotate-1 rounded-3xl border-[3px] border-line bg-cobalt px-4 pb-2 text-white shadow-[0_6px_0_0_var(--line)] transition-[rotate,scale] duration-300 hover:scale-105 hover:rotate-2 motion-safe:animate-rise motion-safe:[animation-delay:220ms]">
                 Inside out.
               </span>
             </h1>
@@ -145,47 +168,78 @@ export default async function LandingPage() {
 
           {/* The logo's stacked bars, as the three things every module has. */}
           <div aria-hidden="true" className="relative hidden flex-col gap-5 py-6 lg:flex">
-            {HERO_BARS.map(({ icon: Icon, label, bar, chip, offset, delay, sway }) => (
+            {HERO_BARS.map(({ icon: Icon, label, bar, chip, offset, delay, sway, depth }) => (
               <div
                 key={label}
-                className={cn("motion-safe:animate-slide-in", offset)}
-                style={{ animationDelay: delay }}
+                className="transition-[translate] duration-500 ease-out"
+                style={{
+                  translate: `calc(var(--mx, 0) * ${depth}px) calc(var(--my, 0) * ${depth / 2}px)`,
+                }}
               >
                 <div
-                  className={cn(
-                    "flex h-24 items-center gap-4 rounded-full border-[3px] border-line px-3.5 shadow-[0_7px_0_0_var(--line)] motion-safe:animate-sway",
-                    bar,
-                  )}
-                  style={{ animationDelay: sway }}
+                  className={cn("motion-safe:animate-slide-in", offset)}
+                  style={{ animationDelay: delay }}
                 >
-                  <span
-                    className={cn("flex size-16 items-center justify-center rounded-full", chip)}
+                  <div
+                    className={cn(
+                      "flex h-24 items-center gap-4 rounded-full border-[3px] border-line px-3.5 shadow-[0_7px_0_0_var(--line)] transition-[scale] duration-300 hover:scale-105 motion-safe:animate-sway",
+                      bar,
+                    )}
+                    style={{ animationDelay: sway }}
                   >
-                    <Icon className="size-7" />
-                  </span>
-                  <span className="font-display text-xl font-extrabold">{label}</span>
+                    <span
+                      className={cn("flex size-16 items-center justify-center rounded-full", chip)}
+                    >
+                      <Icon className="size-7" />
+                    </span>
+                    <span className="font-display text-xl font-extrabold">{label}</span>
+                  </div>
                 </div>
               </div>
             ))}
-            <span className="absolute top-0 right-4 rotate-6 rounded-full border-[3px] border-line bg-pink px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-bob">
+            <span
+              className="absolute top-0 right-4 rotate-6 rounded-full border-[3px] border-line bg-pink px-4 py-1.5 text-sm font-extrabold text-ink transition-[translate] duration-500 ease-out motion-safe:animate-bob"
+              style={{ translate: "calc(var(--mx, 0) * -40px) calc(var(--my, 0) * -26px)" }}
+            >
               Viva prep
             </span>
-            <span className="absolute bottom-0 left-6 -rotate-6 rounded-full border-[3px] border-line bg-orange px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-bob motion-safe:[animation-delay:-2s]">
+            <span
+              className="absolute bottom-0 left-6 -rotate-6 rounded-full border-[3px] border-line bg-orange px-4 py-1.5 text-sm font-extrabold text-ink transition-[translate] duration-500 ease-out motion-safe:animate-bob motion-safe:[animation-delay:-2s]"
+              style={{ translate: "calc(var(--mx, 0) * 46px) calc(var(--my, 0) * 30px)" }}
+            >
               Formula sheets
             </span>
           </div>
-        </div>
+        </PointerArea>
       </section>
 
       {/* Value strip */}
-      <section className="border-y-[3px] border-line bg-band text-white">
-        <ul className="mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-2 px-4 py-5 text-center font-display text-sm font-bold">
-          <li>Every module of every subject</li>
-          {monthly ? (
-            <li className="text-sunflower">{formatPrice(monthly.price_paise)}/month</li>
-          ) : null}
-          <li>Cancel any time</li>
-        </ul>
+      <section className="overflow-hidden border-y-[3px] border-line bg-band text-white">
+        <div className="flex w-max hover:[animation-play-state:paused] motion-safe:animate-marquee motion-reduce:w-full motion-reduce:justify-center">
+          {[false, true].map((copy) => (
+            <ul
+              key={String(copy)}
+              aria-hidden={copy || undefined}
+              className={cn(
+                "flex shrink-0 items-center gap-10 py-5 pr-10 font-display text-sm font-bold whitespace-nowrap motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-2 motion-reduce:px-4 motion-reduce:whitespace-normal",
+                copy && "motion-reduce:hidden",
+              )}
+            >
+              {TICKER.map((item) => (
+                <li key={item} className="flex items-center gap-10">
+                  {item}
+                  <Star className="size-4 fill-sunflower text-sunflower" aria-hidden="true" />
+                </li>
+              ))}
+              {monthly ? (
+                <li className="flex items-center gap-10 text-sunflower">
+                  {formatPrice(monthly.price_paise)}/month
+                  <Star className="size-4 fill-sunflower text-sunflower" aria-hidden="true" />
+                </li>
+              ) : null}
+            </ul>
+          ))}
+        </div>
       </section>
 
       {/* Inside a module */}
@@ -198,18 +252,19 @@ export default async function LandingPage() {
         </p>
         <ul className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
           {INSIDE.map(({ icon: Icon, title, body, tone }) => (
-            <li
-              key={title}
-              className={cn(
-                "rounded-[1.75rem] border-[3px] border-line p-6 shadow-[0_7px_0_0_var(--line)]",
-                tone,
-              )}
-            >
-              <span className="flex size-12 items-center justify-center rounded-2xl border-[3px] border-line bg-white text-ink">
-                <Icon className="size-6" aria-hidden="true" />
-              </span>
-              <h3 className="mt-5 font-display text-xl font-extrabold">{title}</h3>
-              <p className="mt-2">{body}</p>
+            <li key={title} className="reveal">
+              <Tilt
+                className={cn(
+                  "group h-full rounded-[1.75rem] border-[3px] border-line p-6 shadow-[0_7px_0_0_var(--line)] hover:shadow-[0_13px_0_0_var(--line)]",
+                  tone,
+                )}
+              >
+                <span className="flex size-12 items-center justify-center rounded-2xl border-[3px] border-line bg-white text-ink transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12">
+                  <Icon className="size-6" aria-hidden="true" />
+                </span>
+                <h3 className="mt-5 font-display text-xl font-extrabold">{title}</h3>
+                <p className="mt-2">{body}</p>
+              </Tilt>
             </li>
           ))}
         </ul>
@@ -228,9 +283,9 @@ export default async function LandingPage() {
             {STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className="rounded-[1.75rem] border-[3px] border-line bg-white p-6 text-ink shadow-[0_7px_0_0_var(--color-ink)]"
+                className="reveal group rounded-[1.75rem] border-[3px] border-line bg-white p-6 text-ink shadow-[0_7px_0_0_var(--color-ink)] transition-[translate,box-shadow] duration-200 hover:-translate-y-1.5 hover:shadow-[0_13px_0_0_var(--color-ink)]"
               >
-                <span className="inline-flex size-14 -rotate-6 items-center justify-center rounded-2xl border-[3px] border-line bg-cobalt font-display text-2xl font-black text-white">
+                <span className="inline-flex size-14 -rotate-6 transition-[rotate,scale] duration-300 group-hover:scale-110 group-hover:rotate-6 items-center justify-center rounded-2xl border-[3px] border-line bg-cobalt font-display text-2xl font-black text-white">
                   {i + 1}
                 </span>
                 <h3 className="mt-4 font-display text-xl font-extrabold">{step.title}</h3>
@@ -253,7 +308,7 @@ export default async function LandingPage() {
           <p className="mt-4 max-w-prose text-lg text-muted-foreground">
             One simple plan unlocks every module of every subject.
           </p>
-          <div className="mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
+          <div className="reveal mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
             {plans.slice(0, 2).map((plan) => (
               <PlanCard
                 key={plan.id}
@@ -282,16 +337,16 @@ export default async function LandingPage() {
         <h2 id="faq-heading" className="text-3xl sm:text-5xl">
           Questions
         </h2>
-        <div className="mt-8">
+        <div className="reveal mt-8">
           <Faq items={faqItems(settings, monthly?.price_paise ?? null)} />
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="px-4 pb-16 sm:pb-24">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-[1.75rem] border-[3px] border-line bg-sunflower p-8 text-ink shadow-[0_8px_0_0_var(--line)] sm:flex-row sm:items-center sm:justify-between sm:p-12">
+        <div className="reveal mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-[1.75rem] border-[3px] border-line bg-sunflower p-8 text-ink shadow-[0_8px_0_0_var(--line)] sm:flex-row sm:items-center sm:justify-between sm:p-12">
           <div>
-            <BookOpenCheck className="size-10" aria-hidden="true" />
+            <BookOpenCheck className="size-10 motion-safe:animate-bob" aria-hidden="true" />
             <h2 className="mt-4 text-3xl sm:text-4xl">Your next exam, sorted.</h2>
           </div>
           <Link href={startHref} className={buttonVariants({ size: "lg" })}>

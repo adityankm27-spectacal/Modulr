@@ -42,14 +42,18 @@ export function ModuleList({
         });
         const locked = lock.kind !== "open" && !module.is_free_preview;
         return (
-          <li key={module.id}>
+          <li
+            key={module.id}
+            className="motion-safe:animate-rise"
+            style={{ animationDelay: `${Math.min(module.number - 1, 10) * 60}ms` }}
+          >
             <Link
               href={`/subjects/${subjectId}/modules/${module.number}`}
               className="group flex items-center gap-4 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)] active:translate-y-1 active:shadow-none"
             >
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-line bg-sunflower text-ink font-display text-lg font-black"
+                className="flex size-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-line bg-sunflower text-ink font-display text-lg font-black transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
               >
                 {module.number}
               </span>
