@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
-import { safeNextPath, signInPath } from "@/lib/redirect";
+import { signInPath } from "@/lib/redirect";
 import { createClient } from "@/lib/supabase/server";
 import { fieldErrors, onboardingSchema, profileSchema, type FieldErrors } from "@/lib/validation";
 
@@ -77,7 +77,8 @@ export async function completeOnboarding(
   }
 
   revalidatePath("/", "layout");
-  redirect(safeNextPath(formData.get("next")?.toString()));
+  // Everything is paid, so a new student lands on the plans right after signing up.
+  redirect("/pricing");
 }
 
 export async function updateProfile(
