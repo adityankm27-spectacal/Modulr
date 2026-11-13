@@ -9,19 +9,14 @@ import { CancelSubscriptionButton } from "./cancel-button";
 type Billing = Awaited<ReturnType<typeof getBilling>>;
 type Subscription = NonNullable<Billing["subscription"]>;
 
-const PAYMENT_LABEL = {
-  created: "Started",
-  authorized: "Processing",
-  captured: "Paid",
-  failed: "Failed",
-  refunded: "Refunded",
-} as const;
+const card =
+  "space-y-4 rounded-3xl border-[3px] border-line bg-card p-5 shadow-[0_5px_0_0_var(--line)] sm:p-6";
 
 function describe(sub: Subscription, hasAccess: boolean): { badge: string; line: string | null } {
   const end = sub.current_period_end ? formatDate(sub.current_period_end) : null;
   switch (sub.status) {
     case "active":
-      return { badge: "Active", line: end ? `Renews on ${end}.` : null };
+      return { badge: "Active", line: "Every module of every subject is unlocked." };
     case "pending":
       return {
         badge: "Payment due",
@@ -33,6 +28,7 @@ function describe(sub: Subscription, hasAccess: boolean): { badge: string; line:
         line: "Renewals failed several times, so the plan is paused. Subscribe again to unlock every module.",
       };
     case "cancelled":
+      // Cancelling stops future charges but keeps the period already paid for.
       return hasAccess
         ? { badge: "Cancelled", line: end ? `You keep access until ${end}.` : null }
         : { badge: "Ended", line: end ? `Ended on ${end}.` : null };
@@ -50,7 +46,7 @@ export async function BillingSection({
   compAccessUntil: string | null;
   justSubscribed: boolean;
 }) {
-  const { subscription, hasSubscriptionAccess, payments } = await getBilling(userId);
+  const { subscription, hasSubscriptionAccess } = await getBilling(userId);
   const comp = compAccessUntil && new Date(compAccessUntil) > new Date() ? compAccessUntil : null;
   const status = subscription ? describe(subscription, hasSubscriptionAccess) : null;
   const canCancel =
@@ -59,14 +55,14 @@ export async function BillingSection({
     ["active", "pending", "halted"].includes(subscription.status);
 
   return (
-    <section aria-labelledby="billing-heading" className="space-y-5 border-t pt-8">
-      <h2 id="billing-heading" className="text-xl">
+    <section aria-labelledby="billing-heading" className="space-y-5">
+      <h2 id="billing-heading" className="text-2xl">
         Plan and billing
       </h2>
 
       {justSubscribed && hasSubscriptionAccess ? (
-        <p className="flex items-start gap-2 rounded-2xl bg-mint/20 p-4 font-semibold">
-          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden="true" />
+        <p className="flex items-start gap-2 rounded-2xl border-[3px] border-line bg-mint p-4 font-bold text-ink">
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
           You&apos;re subscribed. Every module of every subject is unlocked.
         </p>
       ) : null}
@@ -78,64 +74,53 @@ export async function BillingSection({
       ) : null}
 
       {subscription && status ? (
-        <div className="space-y-3 rounded-2xl border-2 bg-card p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-bold">
-              {subscription.plans?.name ?? "Plan"}
+        <div className={card}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
               {subscription.plans ? (
-                <span className="font-normal text-muted-foreground">
-                  {" "}
-                  · {formatPrice(subscription.plans.price_paise)}/month
-                </span>
+                <p className="font-display text-3xl font-black">
+                  {formatPrice(subscription.plans.price_paise)}
+                  <span className="font-sans text-sm font-bold text-muted-foreground">
+                    {" "}
+                    / month
+                  </span>
+                </p>
               ) : null}
-            </p>
+              <p className="mt-1 text-muted-foreground">
+                {subscription.plans?.name ?? "Your"} plan
+              </p>
+            </div>
             <Badge variant={hasSubscriptionAccess ? "free" : "neutral"}>{status.badge}</Badge>
           </div>
-          {status.line ? <p className="text-muted-foreground">{status.line}</p> : null}
-          {canCancel ? (
-            <CancelSubscriptionButton
-              accessUntil={
-                subscription.current_period_end ? formatDate(subscription.current_period_end) : null
-              }
-            />
-          ) : null}
-          {!hasSubscriptionAccess ? (
-            <Link href="/pricing" className={buttonVariants({ size: "sm" })}>
-              See plans
-            </Link>
-          ) : null}
+          {status.line ? <p>{status.line}</p> : null}
+          <div className="flex flex-wrap items-center gap-3">
+            {canCancel ? (
+              <CancelSubscriptionButton
+                accessUntil={
+                  subscription.current_period_end
+                    ? formatDate(subscription.current_period_end)
+                    : null
+                }
+              />
+            ) : null}
+            {!hasSubscriptionAccess ? (
+              <Link href="/pricing" className={buttonVariants({ size: "sm" })}>
+                See plans
+              </Link>
+            ) : null}
+          </div>
         </div>
       ) : (
-        <div className="space-y-3 rounded-2xl bg-muted p-5">
-          <p>You don&apos;t have a plan yet. Subscribe to unlock every module of every subject.</p>
-          <Link href="/pricing" className={buttonVariants({ size: "sm" })}>
+        <div className={card}>
+          <p className="font-display text-2xl font-black">No plan yet</p>
+          <p className="text-muted-foreground">
+            Subscribe to unlock every module of every subject.
+          </p>
+          <Link href="/pricing" className={buttonVariants({ variant: "sunflower" })}>
             See plans
           </Link>
         </div>
       )}
-
-      {payments.length > 0 ? (
-        <div className="space-y-2">
-          <h3 className="font-sans text-base font-extrabold tracking-normal">Payment history</h3>
-          <ul className="divide-y rounded-2xl border-2">
-            {payments.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-                <span>
-                  <span className="block font-bold">{formatDate(p.paid_at ?? p.created_at)}</span>
-                  <span className="text-muted-foreground">
-                    {p.method ? `${p.method.toUpperCase()} · ` : ""}
-                    {p.provider_payment_id}
-                  </span>
-                </span>
-                <span className="text-right">
-                  <span className="block font-bold">{formatPrice(p.amount_paise)}</span>
-                  <span className="text-muted-foreground">{PAYMENT_LABEL[p.status]}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </section>
   );
 }

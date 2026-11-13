@@ -23,12 +23,12 @@ export function grantsAccess(sub: SubscriptionLike, graceDays: number, now = new
 
 /**
  * The viewer's billing picture: the subscription to show (one that currently
- * grants access, else the most recent one that got past checkout) and recent
- * payments. Abandoned checkouts (`created`) are left out.
+ * grants access, else the most recent one that got past checkout). Abandoned
+ * checkouts (`created`) are left out.
  */
 export const getBilling = cache(async (userId: string) => {
   const supabase = await createClient();
-  const [subs, payments, settings] = await Promise.all([
+  const [subs, settings] = await Promise.all([
     supabase
       .from("subscriptions")
       .select(
@@ -37,22 +37,14 @@ export const getBilling = cache(async (userId: string) => {
       .eq("user_id", userId)
       .neq("status", "created")
       .order("created_at", { ascending: false }),
-    supabase
-      .from("payments")
-      .select("id, provider_payment_id, amount_paise, status, method, paid_at, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(24),
     getSettings(),
   ]);
   if (subs.error) throw new Error(`Couldn't load subscriptions: ${subs.error.message}`);
-  if (payments.error) throw new Error(`Couldn't load payments: ${payments.error.message}`);
 
   const graceDays = settings["billing.grace_days"];
   const active = subs.data.find((s) => grantsAccess(s, graceDays)) ?? null;
   return {
     subscription: active ?? subs.data[0] ?? null,
     hasSubscriptionAccess: active !== null,
-    payments: payments.data,
   };
 });
