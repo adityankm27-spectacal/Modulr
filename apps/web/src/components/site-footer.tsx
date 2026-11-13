@@ -13,7 +13,7 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t bg-muted/50">
+    <footer className="mt-auto border-t-[3px] border-line bg-card">
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-[1fr_auto] sm:items-start">
         <div className="space-y-3">
           <Logo />

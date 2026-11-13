@@ -92,7 +92,7 @@ export function SubjectCard({
       style={
         { "--tone": color, "--tone-ink": ink, animationDelay: `${index * 70}ms` } as CSSProperties
       }
-      className="group relative isolate flex h-full flex-col overflow-hidden rounded-3xl border-2 bg-card p-6 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-(--tone) hover:shadow-[0_8px_0_0_var(--tone)] focus-visible:-translate-y-1 focus-visible:border-(--tone) focus-visible:shadow-[0_8px_0_0_var(--tone)] focus-visible:outline-none active:translate-y-0 active:shadow-none motion-safe:animate-rise"
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-[1.75rem] border-[3px] border-line bg-card p-6 shadow-[0_7px_0_0_var(--tone)] transition-[translate,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_11px_0_0_var(--tone)] focus-visible:-translate-y-1 focus-visible:shadow-[0_11px_0_0_var(--tone)] focus-visible:outline-none active:translate-y-1 active:shadow-none motion-safe:animate-rise"
     >
       {/* Soft glow in the subject's colour that follows the pointer. */}
       <span
@@ -107,7 +107,7 @@ export function SubjectCard({
       <span className="flex items-start justify-between gap-3">
         <span
           className={cn(
-            "flex size-14 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6",
+            "flex size-14 items-center justify-center rounded-2xl border-[3px] border-line transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6",
             tile,
           )}
         >

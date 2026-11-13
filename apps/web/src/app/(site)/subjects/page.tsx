@@ -48,7 +48,7 @@ export default async function SubjectsIndexPage() {
                 <h3 className="font-sans text-sm font-bold tracking-normal text-muted-foreground uppercase">
                   Semester {semester}
                 </h3>
-                <ul className="mt-2 divide-y rounded-2xl border-2">
+                <ul className="mt-3 divide-y-2 overflow-hidden rounded-2xl border-[3px] border-line bg-card shadow-[0_4px_0_0_var(--line)]">
                   {list.map((subject) => (
                     <li key={subject.id}>
                       <Link

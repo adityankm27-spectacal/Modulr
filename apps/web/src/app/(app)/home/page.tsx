@@ -30,12 +30,12 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 space-y-10 px-4 py-8 sm:py-12">
-      <header className="relative isolate overflow-hidden rounded-3xl bg-cobalt p-6 text-white sm:p-10">
+      <header className="relative isolate overflow-hidden rounded-[1.75rem] border-[3px] border-line bg-cobalt p-6 text-white shadow-[0_8px_0_0_var(--line)] sm:p-10">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-20 -right-16 size-72 rounded-full bg-periwinkle/60 blur-3xl motion-safe:animate-drift" />
           <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-sunflower/25 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
         </div>
-        <p className="inline-flex rounded-full bg-sunflower px-3 py-1 text-sm font-extrabold text-ink motion-safe:animate-rise">
+        <p className="inline-flex -rotate-2 rounded-full border-[3px] border-line bg-sunflower px-3 py-1 text-sm font-extrabold text-ink motion-safe:animate-rise">
           Semester {semester}
         </p>
         <h1 className="mt-4 text-4xl font-black sm:text-6xl motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
@@ -74,7 +74,7 @@ export default async function HomePage() {
                 <li key={item.videoId}>
                   <Link
                     href={`/subjects/${item.subjectId}/modules/${item.moduleNumber}?tab=videos&v=${item.videoId}`}
-                    className="flex h-full flex-col gap-3 rounded-2xl border-2 bg-card p-4 transition-colors hover:border-input"
+                    className="flex h-full flex-col gap-3 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)]"
                   >
                     <span className="flex items-start gap-3">
                       <PlayCircle

@@ -91,6 +91,7 @@
   --color-link: var(--link);
   --color-band: var(--band);
   --color-border: var(--border);
+  --color-line: var(--line);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --radius-sm: calc(var(--radius) - 6px);
@@ -101,17 +102,17 @@
 
 :root {
   --radius: 0.875rem;
-  --background: #ffffff;
+  --background: #fff4e2;
   --foreground: #111018;
   --card: #ffffff;
   --card-foreground: #111018;
   --primary: #2343ff;
   --primary-foreground: #ffffff;
-  --secondary: #fff4e2;
+  --secondary: #fbe3b0;
   --secondary-foreground: #111018;
-  --muted: #f4f3f8;
+  --muted: #f7e8cc;
   --muted-foreground: #4a4858;
-  --accent: #eef0ff;
+  --accent: #e4e8ff;
   --accent-foreground: #111018;
   --destructive: #ff2e4d;
   --destructive-foreground: #111018;
@@ -119,9 +120,11 @@
   --success: #1fd49e;
   --link: #2343ff;
   --band: #111018;
-  --border: #e4e2ec;
-  --input: #cfcbdc;
+  --border: #e2d2b4;
+  --input: #cdbb98;
   --ring: #2343ff;
+  /* Sticker-sheet outlines and hard shadows: ink on cream, near-white on dark. */
+  --line: #111018;
   color-scheme: light;
 }
 
@@ -143,6 +146,7 @@
     --border: #2e2b3b;
     --input: #44405a;
     --ring: #8c9bff;
+    --line: #f6f5fa;
     color-scheme: dark;
   }
 }
@@ -164,6 +168,7 @@
   --border: #2e2b3b;
   --input: #44405a;
   --ring: #8c9bff;
+  --line: #f6f5fa;
   color-scheme: dark;
 }
 

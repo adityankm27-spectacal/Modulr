@@ -41,8 +41,8 @@ export function PlanCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-3xl border-2 p-6 sm:p-8",
-        featured ? "border-primary bg-card shadow-[0_8px_0_0_var(--color-primary)]" : "bg-card",
+        "flex flex-col rounded-[1.75rem] border-[3px] border-line bg-card p-6 sm:p-8",
+        featured ? "shadow-[0_8px_0_0_var(--color-primary)]" : "shadow-[0_6px_0_0_var(--line)]",
       )}
     >
       <div className="flex items-center justify-between gap-2">

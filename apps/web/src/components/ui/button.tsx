@@ -3,16 +3,17 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-base font-bold whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-[3px] border-line px-5 text-base font-extrabold whitespace-nowrap shadow-[0_4px_0_0_var(--line)] transition-[background-color,color,box-shadow,translate] duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        outline: "border-2 border-input bg-transparent hover:bg-muted",
-        ghost: "hover:bg-muted",
-        sunflower: "bg-sunflower text-ink hover:bg-sunflower/90",
-        inverted: "bg-white text-ink hover:bg-white/90",
+        primary: "bg-primary text-primary-foreground",
+        secondary: "bg-secondary text-secondary-foreground",
+        outline: "bg-card text-foreground",
+        ghost:
+          "border-transparent shadow-none hover:translate-y-0 hover:bg-muted hover:shadow-none active:translate-y-0",
+        sunflower: "bg-sunflower text-ink",
+        inverted: "bg-white text-ink",
       },
       size: {
         default: "",

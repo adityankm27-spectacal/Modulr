@@ -7,14 +7,14 @@ import { getViewer, isAdmin } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const navLink =
-  "inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
+  "inline-flex min-h-11 items-center rounded-full px-3 text-sm font-extrabold text-foreground transition-colors hover:bg-muted";
 
 export async function SiteHeader() {
   const viewer = await getViewer();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4">
+    <header className="sticky top-0 z-40 px-4 pt-4">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 rounded-full border-[3px] border-line bg-card py-1 pr-2 pl-5 shadow-[0_5px_0_0_var(--line)]">
         <Link href={viewer ? "/home" : "/"} aria-label="Modulr home" className="rounded-lg">
           <Logo />
         </Link>

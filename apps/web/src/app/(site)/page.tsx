@@ -35,7 +35,7 @@ const INSIDE = [
     icon: Sigma,
     title: "Formula sheets",
     body: "Every formula, what each symbol means, and when to use it.",
-    tone: "bg-periwinkle text-white",
+    tone: "bg-periwinkle text-ink",
   },
   {
     icon: History,
@@ -70,7 +70,7 @@ const HERO_BARS = [
   {
     icon: FileText,
     label: "One-page notes",
-    bar: "bg-periwinkle text-white",
+    bar: "bg-periwinkle text-ink",
     chip: "bg-white text-cobalt",
     offset: "translate-x-8",
     delay: "450ms",
@@ -79,8 +79,8 @@ const HERO_BARS = [
   {
     icon: History,
     label: "Solved PYQs",
-    bar: "bg-white text-ink",
-    chip: "bg-cobalt text-white",
+    bar: "bg-cobalt text-white",
+    chip: "bg-sunflower text-ink",
     offset: "",
     delay: "600ms",
     sway: "-4s",
@@ -111,41 +111,28 @@ export default async function LandingPage() {
   return (
     <main>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-cobalt text-white">
-        {/* Slow-drifting colour washes behind everything. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-24 -left-24 size-96 rounded-full bg-periwinkle/50 blur-3xl motion-safe:animate-drift" />
-          <div className="absolute -right-32 -bottom-40 size-[28rem] rounded-full bg-sunflower/20 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
-        </div>
-
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:py-24 lg:grid-cols-[1.3fr_1fr] lg:items-center">
+      <section className="relative isolate overflow-hidden">
+        <div className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:py-20 lg:grid-cols-[1.25fr_1fr] lg:items-center">
           <div>
-            <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm font-bold motion-safe:animate-rise">
+            <p className="inline-block -rotate-2 rounded-full border-[3px] border-line bg-mint px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-rise">
               For engineering students
             </p>
-            <h1 className="mt-5 text-5xl font-black sm:text-7xl">
+            <h1 className="mt-6 text-5xl font-black sm:text-7xl">
               <span className="block motion-safe:animate-rise motion-safe:[animation-delay:100ms]">
                 Every module.
               </span>
-              <span className="relative inline-block text-sunflower motion-safe:animate-rise motion-safe:[animation-delay:220ms]">
+              <span className="mt-2 inline-block -rotate-1 rounded-3xl border-[3px] border-line bg-cobalt px-4 pb-2 text-white shadow-[0_6px_0_0_var(--line)] motion-safe:animate-rise motion-safe:[animation-delay:220ms]">
                 Inside out.
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 -bottom-1 h-2 origin-left rounded-full bg-sunflower motion-safe:animate-draw motion-safe:[animation-delay:750ms]"
-                />
               </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/90 motion-safe:animate-rise motion-safe:[animation-delay:340ms]">
+            <p className="mt-8 max-w-xl text-lg text-muted-foreground motion-safe:animate-rise motion-safe:[animation-delay:340ms]">
               Animated explainers, one-page notes, formula sheets and solved PYQs for every module
               of your syllabus. Everything you need for exams, in one place.
             </p>
-            <div className="mt-8 flex flex-col gap-3 motion-safe:animate-rise motion-safe:[animation-delay:460ms] sm:flex-row">
+            <div className="mt-9 flex flex-col gap-4 motion-safe:animate-rise motion-safe:[animation-delay:460ms] sm:flex-row">
               <Link
                 href={startHref}
-                className={cn(
-                  buttonVariants({ variant: "sunflower", size: "lg" }),
-                  "group hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--color-ink)]",
-                )}
+                className={cn(buttonVariants({ variant: "sunflower", size: "lg" }), "group")}
               >
                 {viewer ? "Go to my subjects" : "Start free"}
                 <ArrowRight
@@ -153,20 +140,14 @@ export default async function LandingPage() {
                   aria-hidden="true"
                 />
               </Link>
-              <Link
-                href="/subjects"
-                className={cn(
-                  buttonVariants({ size: "lg", variant: "outline" }),
-                  "border-white/60 text-white hover:-translate-y-0.5 hover:bg-white/10",
-                )}
-              >
+              <Link href="/subjects" className={buttonVariants({ size: "lg", variant: "outline" })}>
                 Browse subjects
               </Link>
             </div>
           </div>
 
           {/* The logo's stacked bars, as the three things every module has. */}
-          <div aria-hidden="true" className="relative hidden flex-col gap-4 lg:flex">
+          <div aria-hidden="true" className="relative hidden flex-col gap-5 py-6 lg:flex">
             {HERO_BARS.map(({ icon: Icon, label, bar, chip, offset, delay, sway }) => (
               <div
                 key={label}
@@ -175,7 +156,7 @@ export default async function LandingPage() {
               >
                 <div
                   className={cn(
-                    "flex h-24 items-center gap-4 rounded-full px-4 motion-safe:animate-sway",
+                    "flex h-24 items-center gap-4 rounded-full border-[3px] border-line px-3.5 shadow-[0_7px_0_0_var(--line)] motion-safe:animate-sway",
                     bar,
                   )}
                   style={{ animationDelay: sway }}
@@ -185,25 +166,27 @@ export default async function LandingPage() {
                   >
                     <Icon className="size-7" />
                   </span>
-                  <span className="font-display text-xl font-black">{label}</span>
+                  <span className="font-display text-xl font-extrabold">{label}</span>
                 </div>
               </div>
             ))}
-            <span className="absolute -top-6 right-6 rounded-full bg-mint px-4 py-2 text-sm font-extrabold text-ink shadow-lg motion-safe:animate-bob">
-              Formula sheets
-            </span>
-            <span className="absolute -bottom-6 left-10 rounded-full bg-pink px-4 py-2 text-sm font-extrabold text-ink shadow-lg motion-safe:animate-bob motion-safe:[animation-delay:-2s]">
+            <span className="absolute top-0 right-4 rotate-6 rounded-full border-[3px] border-line bg-pink px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-bob">
               Viva prep
+            </span>
+            <span className="absolute bottom-0 left-6 -rotate-6 rounded-full border-[3px] border-line bg-orange px-4 py-1.5 text-sm font-extrabold text-ink motion-safe:animate-bob motion-safe:[animation-delay:-2s]">
+              Formula sheets
             </span>
           </div>
         </div>
       </section>
 
       {/* Value strip */}
-      <section className="bg-sunflower text-ink">
-        <ul className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-4 text-center font-bold sm:flex-row sm:justify-center sm:gap-8">
+      <section className="border-y-[3px] border-line bg-band text-white">
+        <ul className="mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-2 px-4 py-5 text-center font-display text-sm font-bold">
           <li>Module 1 of every subject is free</li>
-          {monthly ? <li>{formatPrice(monthly.price_paise)}/month after that</li> : null}
+          {monthly ? (
+            <li className="text-sunflower">{formatPrice(monthly.price_paise)}/month after that</li>
+          ) : null}
           <li>Cancel any time</li>
         </ul>
       </section>
@@ -216,33 +199,45 @@ export default async function LandingPage() {
         <p className="mt-4 max-w-prose text-lg text-muted-foreground">
           Same six sections every time, so you always know where to look.
         </p>
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
           {INSIDE.map(({ icon: Icon, title, body, tone }) => (
-            <li key={title} className="rounded-3xl border-2 bg-card p-6">
-              <span className={cn("flex size-12 items-center justify-center rounded-2xl", tone)}>
+            <li
+              key={title}
+              className={cn(
+                "rounded-[1.75rem] border-[3px] border-line p-6 shadow-[0_7px_0_0_var(--line)]",
+                tone,
+              )}
+            >
+              <span className="flex size-12 items-center justify-center rounded-2xl border-[3px] border-line bg-white text-ink">
                 <Icon className="size-6" aria-hidden="true" />
               </span>
-              <h3 className="mt-5 font-sans text-xl font-extrabold tracking-normal">{title}</h3>
-              <p className="mt-2 text-muted-foreground">{body}</p>
+              <h3 className="mt-5 font-display text-xl font-extrabold">{title}</h3>
+              <p className="mt-2">{body}</p>
             </li>
           ))}
         </ul>
       </section>
 
       {/* How it works */}
-      <section className="bg-band text-white" aria-labelledby="how-heading">
+      <section
+        className="border-y-[3px] border-line bg-sunflower text-ink"
+        aria-labelledby="how-heading"
+      >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
           <h2 id="how-heading" className="text-3xl sm:text-5xl">
             How it works
           </h2>
-          <ol className="mt-10 grid gap-6 sm:grid-cols-3">
+          <ol className="mt-12 grid gap-7 sm:grid-cols-3">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-3xl bg-white/5 p-6">
-                <span className="font-display text-5xl font-black text-sunflower">{i + 1}</span>
-                <h3 className="mt-4 font-sans text-xl font-extrabold tracking-normal">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-white/80">{step.body}</p>
+              <li
+                key={step.title}
+                className="rounded-[1.75rem] border-[3px] border-line bg-white p-6 text-ink shadow-[0_7px_0_0_var(--color-ink)]"
+              >
+                <span className="inline-flex size-14 -rotate-6 items-center justify-center rounded-2xl border-[3px] border-line bg-cobalt font-display text-2xl font-black text-white">
+                  {i + 1}
+                </span>
+                <h3 className="mt-4 font-display text-xl font-extrabold">{step.title}</h3>
+                <p className="mt-2 text-[#4a4858]">{step.body}</p>
               </li>
             ))}
           </ol>
@@ -292,7 +287,7 @@ export default async function LandingPage() {
 
       {/* Final CTA */}
       <section className="px-4 pb-16 sm:pb-24">
-        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-3xl bg-sunflower p-8 text-ink sm:flex-row sm:items-center sm:justify-between sm:p-12">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-[1.75rem] border-[3px] border-line bg-sunflower p-8 text-ink shadow-[0_8px_0_0_var(--line)] sm:flex-row sm:items-center sm:justify-between sm:p-12">
           <div>
             <BookOpenCheck className="size-10" aria-hidden="true" />
             <h2 className="mt-4 text-3xl sm:text-4xl">Your next exam, sorted.</h2>
