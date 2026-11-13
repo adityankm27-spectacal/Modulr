@@ -34,6 +34,13 @@
   --animate-marquee: marquee 30s linear infinite;
   --animate-pop: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
 
+  --animate-eq: eq 0.9s ease-in-out infinite;
+
+  @keyframes eq {
+    50% {
+      transform: scaleY(0.35);
+    }
+  }
   @keyframes marquee {
     to {
       transform: translateX(-50%);

@@ -1,61 +1,12 @@
 "use client";
 
-import {
-  ArrowUpRight,
-  Atom,
-  Brain,
-  Code,
-  Cpu,
-  Database,
-  Globe,
-  Infinity as InfinityIcon,
-  Layers,
-  Lightbulb,
-  Network,
-  Puzzle,
-  Rocket,
-  ShieldCheck,
-  Sigma,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties, PointerEvent } from "react";
 import { pluralize } from "@/lib/format";
 import type { SubjectIcon, SubjectTone } from "@/lib/subject-style";
 import { cn } from "@/lib/utils";
-
-const ICONS: Record<SubjectIcon, LucideIcon> = {
-  graph: Network,
-  database: Database,
-  cpu: Cpu,
-  infinity: InfinityIcon,
-  trending: TrendingUp,
-  sigma: Sigma,
-  code: Code,
-  globe: Globe,
-  shield: ShieldCheck,
-  brain: Brain,
-  atom: Atom,
-  layers: Layers,
-  puzzle: Puzzle,
-  rocket: Rocket,
-  lightbulb: Lightbulb,
-};
-
-// Sunflower, mint, orange and pink are fills that need dark text (see globals.css).
-const TONES: Record<SubjectTone, { tile: string; color: string; ink: string }> = {
-  cobalt: { tile: "bg-cobalt text-white", color: "var(--color-cobalt)", ink: "white" },
-  sunflower: {
-    tile: "bg-sunflower text-ink",
-    color: "var(--color-sunflower)",
-    ink: "var(--color-ink)",
-  },
-  mint: { tile: "bg-mint text-ink", color: "var(--color-mint)", ink: "var(--color-ink)" },
-  pink: { tile: "bg-pink text-ink", color: "var(--color-pink)", ink: "var(--color-ink)" },
-  orange: { tile: "bg-orange text-ink", color: "var(--color-orange)", ink: "var(--color-ink)" },
-  periwinkle: { tile: "bg-periwinkle text-white", color: "var(--color-periwinkle)", ink: "white" },
-};
+import { SUBJECT_ICON, SUBJECT_TONE } from "./subject-visuals";
 
 /** Moves the glow to the pointer; CSS does the rest. */
 function trackPointer(event: PointerEvent<HTMLElement>) {
@@ -82,8 +33,8 @@ export function SubjectCard({
   tone: SubjectTone;
   index: number;
 }) {
-  const Icon = ICONS[icon];
-  const { tile, color, ink } = TONES[tone];
+  const Icon = SUBJECT_ICON[icon];
+  const { tile, color, ink } = SUBJECT_TONE[tone];
 
   return (
     <Link

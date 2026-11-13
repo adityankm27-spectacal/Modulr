@@ -1,3 +1,4 @@
+import { subjectStyles } from "@/lib/subject-style";
 import "server-only";
 import { resolveSettings, type AppSettings } from "@modulr/shared";
 import { cache } from "react";
@@ -295,3 +296,13 @@ export async function getContinueWatching(userId: string, limit = 3) {
     subjectName: p.videos.modules.subjects.name,
   }));
 }
+
+/** The icon and colour a subject has on the home page, so its own pages match. */
+export const getSubjectStyle = cache(
+  async (subject: { id: string; syllabus_version_id: string; semester: number }) => {
+    const siblings = await getSubjectsForSemester(subject.syllabus_version_id, subject.semester);
+    return (
+      subjectStyles(siblings).get(subject.id) ?? { icon: "atom" as const, tone: "cobalt" as const }
+    );
+  },
+);

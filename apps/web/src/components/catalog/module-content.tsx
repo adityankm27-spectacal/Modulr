@@ -198,18 +198,42 @@ async function VideosTab({
                 : 0;
             const current = video.id === selected.id;
             return (
-              <li key={video.id}>
+              <li
+                key={video.id}
+                className="motion-safe:animate-rise"
+                style={{ animationDelay: `${Math.min(index, 10) * 60}ms` }}
+              >
                 <Link
                   href={href(video.id)}
                   scroll={false}
                   aria-current={current ? "true" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl border-2 bg-card p-3 transition-colors hover:border-input",
-                    current && "border-primary",
+                    "group flex items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
+                    current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
                   )}
                 >
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted">
-                    {p?.completed ? (
+                  <span
+                    className={cn(
+                      "flex size-11 shrink-0 items-center justify-center rounded-xl transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
+                      current ? "bg-primary text-white" : "bg-muted",
+                    )}
+                  >
+                    {current ? (
+                      // Bouncing bars: this is the video in the player above.
+                      <span
+                        className="flex h-4 items-end gap-0.5"
+                        aria-label="Now playing"
+                        role="img"
+                      >
+                        {[0, 1, 2].map((bar) => (
+                          <span
+                            key={bar}
+                            className="h-full w-1 origin-bottom rounded-full bg-white motion-safe:animate-eq"
+                            style={{ animationDelay: `${bar * -0.3}s` }}
+                          />
+                        ))}
+                      </span>
+                    ) : p?.completed ? (
                       <CheckCircle2 className="size-5 text-success" aria-label="Watched" />
                     ) : (
                       <PlayCircle className="size-5" aria-hidden="true" />

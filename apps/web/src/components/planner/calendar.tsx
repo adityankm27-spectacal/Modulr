@@ -171,7 +171,7 @@ export function PlannerCalendar({ events }: { events: PlannerEvent[] }) {
                 list.length ? `, ${list.length} event${list.length === 1 ? "" : "s"}` : ""
               }`}
               className={cn(
-                "flex h-10 flex-col items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors",
+                "flex h-10 flex-col items-center justify-center rounded-lg border-2 text-sm font-bold transition-[background-color,border-color,scale] duration-150 hover:scale-110 active:scale-95",
                 isSelected
                   ? "border-line bg-sunflower text-ink"
                   : today === cell.iso
@@ -365,7 +365,7 @@ export function PlannerCalendar({ events }: { events: PlannerEvent[] }) {
                         : event.starts_on,
                     )
                   }
-                  className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-left hover:bg-muted"
+                  className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-left transition-[background-color,translate] hover:translate-x-1 hover:bg-muted"
                 >
                   <span className={cn("size-2.5 shrink-0 rounded-full", KIND[event.kind].dot)} />
                   <span className="w-16 shrink-0 text-xs font-bold text-muted-foreground">

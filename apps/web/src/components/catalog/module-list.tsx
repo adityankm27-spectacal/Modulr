@@ -1,8 +1,11 @@
-import { ChevronRight, Lock } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Badge } from "@/components/ui/badge";
 import { moduleLockState } from "@/lib/access";
 import { countsSummary, type ModuleCounts } from "@/lib/module-tabs";
+import type { SubjectTone } from "@/lib/subject-style";
+import { SUBJECT_TONE } from "./subject-visuals";
 
 export interface ModuleListItem {
   id: string;
@@ -12,12 +15,14 @@ export interface ModuleListItem {
 }
 
 export function ModuleList({
+  tone = "sunflower",
   subjectId,
   modules,
   counts,
   signedIn,
   hasSubjectAccess,
 }: {
+  tone?: SubjectTone;
   subjectId: string;
   modules: ModuleListItem[];
   counts: Map<string, ModuleCounts>;
@@ -32,8 +37,10 @@ export function ModuleList({
     );
   }
 
+  const { color, ink } = SUBJECT_TONE[tone];
+
   return (
-    <ol className="space-y-3">
+    <ol className="space-y-4" style={{ "--tone": color, "--tone-ink": ink } as CSSProperties}>
       {modules.map((module) => {
         const lock = moduleLockState({
           signedIn,
@@ -49,11 +56,11 @@ export function ModuleList({
           >
             <Link
               href={`/subjects/${subjectId}/modules/${module.number}`}
-              className="group flex items-center gap-4 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)] active:translate-y-1 active:shadow-none"
+              className="group flex items-center gap-4 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_5px_0_0_var(--line)] transition-[translate,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_9px_0_0_var(--tone)] focus-visible:-translate-y-1 focus-visible:shadow-[0_9px_0_0_var(--tone)] active:translate-y-1 active:shadow-none"
             >
               <span
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-line bg-sunflower text-ink font-display text-lg font-black transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+                className="flex size-12 shrink-0 items-center justify-center rounded-xl border-[3px] border-line bg-(--tone) text-(--tone-ink) font-display text-lg font-black transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
               >
                 {module.number}
               </span>
@@ -73,10 +80,9 @@ export function ModuleList({
                   ) : null}
                 </span>
               </span>
-              <ChevronRight
-                className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground transition-[translate,background-color,color] duration-200 group-hover:translate-x-1 group-hover:bg-(--tone) group-hover:text-(--tone-ink)">
+                <ArrowRight className="size-5" aria-hidden="true" />
+              </span>
             </Link>
           </li>
         );

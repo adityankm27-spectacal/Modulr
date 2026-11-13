@@ -1,5 +1,5 @@
 import { PointerArea } from "@/components/motion/pointer-area";
-import { PlayCircle } from "lucide-react";
+import { FileText, PlayCircle, Sigma } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SubjectCard } from "@/components/catalog/subject-card";
@@ -16,6 +16,23 @@ import { pluralize } from "@/lib/format";
 import { canUsePlanner } from "@/lib/planner/access";
 import { getPlannerData } from "@/lib/planner/queries";
 import { subjectStyles } from "@/lib/subject-style";
+
+/** Stickers floating on the right of the welcome banner. */
+const BANNER_STICKERS = [
+  {
+    icon: PlayCircle,
+    at: "top-8 right-28 -rotate-6 bg-sunflower text-ink",
+    depth: 18,
+    delay: "0s",
+  },
+  {
+    icon: FileText,
+    at: "top-28 right-4 rotate-6 bg-white text-cobalt",
+    depth: -28,
+    delay: "-1.3s",
+  },
+  { icon: Sigma, at: "bottom-8 right-36 rotate-3 bg-pink text-ink", depth: 36, delay: "-2.6s" },
+] as const;
 
 export const metadata: Metadata = { title: "My subjects", robots: { index: false } };
 
@@ -88,6 +105,27 @@ export default async function HomePage() {
             <div className="absolute -top-20 -right-16 size-72 rounded-full bg-periwinkle/60 blur-3xl motion-safe:animate-drift" />
             <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-sunflower/25 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
           </div>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-72 md:block lg:hidden xl:block"
+          >
+            {BANNER_STICKERS.map(({ icon: Icon, at, depth, delay }) => (
+              <span
+                key={at}
+                className={`absolute transition-[translate] duration-500 ease-out ${at.split(" ").slice(0, 2).join(" ")}`}
+                style={{
+                  translate: `calc(var(--mx, 0) * ${depth}px) calc(var(--my, 0) * ${depth / 2}px)`,
+                }}
+              >
+                <span
+                  className={`flex size-16 items-center justify-center rounded-2xl border-[3px] border-line shadow-[0_5px_0_0_var(--line)] motion-safe:animate-bob ${at.split(" ").slice(2).join(" ")}`}
+                  style={{ animationDelay: delay }}
+                >
+                  <Icon className="size-8" />
+                </span>
+              </span>
+            ))}
+          </div>
           <p className="inline-flex -rotate-2 rounded-full border-[3px] border-line bg-sunflower px-3 py-1 text-sm font-extrabold text-ink motion-safe:animate-rise">
             Semester {semester}
           </p>
@@ -126,13 +164,12 @@ export default async function HomePage() {
                   <li key={item.videoId}>
                     <Link
                       href={`/subjects/${item.subjectId}/modules/${item.moduleNumber}?tab=videos&v=${item.videoId}`}
-                      className="flex h-full flex-col gap-3 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)]"
+                      className="group flex h-full flex-col gap-3 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_8px_0_0_var(--color-primary)] active:translate-y-1 active:shadow-none motion-safe:animate-rise"
                     >
                       <span className="flex items-start gap-3">
-                        <PlayCircle
-                          className="mt-0.5 size-6 shrink-0 text-primary"
-                          aria-hidden="true"
-                        />
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-[scale,rotate,background-color,color] duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-primary group-hover:text-white">
+                          <PlayCircle className="size-6" aria-hidden="true" />
+                        </span>
                         <span className="min-w-0">
                           <span className="block font-bold leading-snug">{item.title}</span>
                           <span className="mt-1 block text-sm text-muted-foreground">
@@ -150,7 +187,7 @@ export default async function HomePage() {
                           aria-valuemax={100}
                         >
                           <span
-                            className="block h-full rounded-full bg-primary"
+                            className="block h-full origin-left rounded-full bg-primary motion-safe:animate-draw"
                             style={{ width: `${percent}%` }}
                           />
                         </span>

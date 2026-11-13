@@ -24,7 +24,7 @@ export function ModuleTabsNav({
 }) {
   return (
     <TabStrip label="Module sections">
-      <ul className="flex min-w-max gap-2 border-b pb-3">
+      <ul className="flex min-w-max gap-2 border-b pt-1 pb-4">
         {MODULE_TABS.map((tab) => {
           const Icon = ICONS[tab.id];
           const isActive = tab.id === active;
@@ -36,10 +36,10 @@ export function ModuleTabsNav({
                 scroll={false}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold transition-colors [&_svg]:size-4",
+                  "group flex min-h-11 items-center gap-2 rounded-full border-[3px] px-4 text-sm font-bold transition-[translate,box-shadow,background-color,border-color,color] duration-200 active:translate-y-0.5 [&_svg]:size-4 [&_svg]:transition-transform [&_svg]:duration-300 hover:[&_svg]:-rotate-12 hover:[&_svg]:scale-125",
                   isActive
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-muted-foreground hover:text-foreground",
+                    ? "border-line bg-cobalt text-white shadow-[0_4px_0_0_var(--line)]"
+                    : "border-transparent bg-muted text-muted-foreground hover:-translate-y-0.5 hover:border-line hover:bg-card hover:text-foreground hover:shadow-[0_4px_0_0_var(--line)]",
                 )}
               >
                 <Icon aria-hidden="true" />
@@ -48,7 +48,7 @@ export function ModuleTabsNav({
                   <span
                     className={cn(
                       "rounded-full px-1.5 font-mono text-xs",
-                      isActive ? "bg-background/20" : "bg-background",
+                      isActive ? "bg-white/25" : "bg-background",
                     )}
                   >
                     {count}
