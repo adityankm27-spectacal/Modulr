@@ -29,7 +29,7 @@ export interface AppSettings {
 export type AppSettingKey = keyof AppSettings;
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  "free_preview.default_module_numbers": [1],
+  "free_preview.default_module_numbers": [],
   "free_preview.trial_days": 0,
   "devices.max_active": 2,
   "devices.max_swaps_per_month": 2,

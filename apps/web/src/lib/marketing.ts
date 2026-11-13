@@ -9,8 +9,8 @@ export function faqItems(settings: AppSettings, monthlyPricePaise: number | null
   const devices = settings["devices.max_active"];
   return [
     {
-      q: "Is Modulr free?",
-      a: "Module 1 of every subject is free once you sign in. A subscription unlocks every module of every subject.",
+      q: "What do I get with a subscription?",
+      a: "Every module of every subject: animated explainer videos, one-page notes, formula sheets, solved PYQs, important questions and viva prep.",
     },
     {
       q: "How much does it cost?",

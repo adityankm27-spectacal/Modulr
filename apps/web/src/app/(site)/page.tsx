@@ -134,7 +134,7 @@ export default async function LandingPage() {
                 href={startHref}
                 className={cn(buttonVariants({ variant: "sunflower", size: "lg" }), "group")}
               >
-                {viewer ? "Go to my subjects" : "Start free"}
+                {viewer ? "Go to my subjects" : "Get started"}
                 <ArrowRight
                   className="transition-transform duration-200 group-hover:translate-x-1"
                   aria-hidden="true"
@@ -183,9 +183,9 @@ export default async function LandingPage() {
       {/* Value strip */}
       <section className="border-y-[3px] border-line bg-band text-white">
         <ul className="mx-auto flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-2 px-4 py-5 text-center font-display text-sm font-bold">
-          <li>Module 1 of every subject is free</li>
+          <li>Every module of every subject</li>
           {monthly ? (
-            <li className="text-sunflower">{formatPrice(monthly.price_paise)}/month after that</li>
+            <li className="text-sunflower">{formatPrice(monthly.price_paise)}/month</li>
           ) : null}
           <li>Cancel any time</li>
         </ul>
@@ -254,7 +254,7 @@ export default async function LandingPage() {
             Simple pricing
           </h2>
           <p className="mt-4 max-w-prose text-lg text-muted-foreground">
-            Start with the free module of any subject. Upgrade when you&apos;re ready.
+            One simple plan unlocks every module of every subject.
           </p>
           <div className="mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
             {plans.slice(0, 2).map((plan) => (
@@ -266,7 +266,7 @@ export default async function LandingPage() {
                 cta={
                   viewer
                     ? { href: "/pricing", label: "Subscribe" }
-                    : { href: startHref, label: "Start free" }
+                    : { href: startHref, label: "Get started" }
                 }
               />
             ))}
@@ -298,7 +298,7 @@ export default async function LandingPage() {
             <h2 className="mt-4 text-3xl sm:text-4xl">Your next exam, sorted.</h2>
           </div>
           <Link href={startHref} className={buttonVariants({ size: "lg" })}>
-            {viewer ? "Go to my subjects" : "Start free"}
+            {viewer ? "Go to my subjects" : "Get started"}
           </Link>
         </div>
       </section>

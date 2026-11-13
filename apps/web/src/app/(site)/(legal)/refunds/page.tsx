@@ -11,11 +11,11 @@ export default function RefundsPage() {
       intro="You can cancel any time. Here is exactly what happens when you do, and when we refund."
       sections={[
         {
-          heading: "Try before you pay",
+          heading: "Before you subscribe",
           body: (
             <p>
-              Module 1 of every subject is free, so you can check that {LEGAL.brand} suits you
-              before subscribing.
+              You can browse every subject and module on {LEGAL.brand}, and see what each module
+              includes, before you subscribe.
             </p>
           ),
         },

@@ -60,14 +60,15 @@ export default async function SubjectPage({ params }: { params: Params }) {
           <p className="flex items-start gap-3">
             <Sparkles className="mt-0.5 size-5 shrink-0 text-sunflower" aria-hidden="true" />
             <span>
-              <strong>Module 1 is free.</strong> Sign in to watch, read and practise it now.
+              <strong>Unlock every module of {subject.name}.</strong> Sign in and subscribe to
+              watch, read and practise.
             </span>
           </p>
           <Link
             href={signInPath(`/subjects/${subject.id}`)}
             className={buttonVariants({ variant: "sunflower" })}
           >
-            Start free
+            Get started
           </Link>
         </div>
       ) : null}

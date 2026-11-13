@@ -35,7 +35,7 @@ The data model **must** support multiple colleges, branches, semesters and **syl
 | Role | Access |
 |---|---|
 | Visitor | Landing, pricing, legal pages, public list of subjects/modules (titles only) |
-| Free student | Everything marked **free preview** (default: Module 1 of every subject) |
+| Free student | Nothing paid; only modules an admin has explicitly marked **free preview** (none by default since 14 Nov 2026) |
 | Subscriber | All published content |
 | Admin | Admin panel: content, users, subscriptions, plans, reports |
 | Contributor *(Phase 2)* | Can draft content for assigned subjects; an admin reviews and publishes it |
@@ -149,7 +149,7 @@ These were shown in the promo video as "coming soon". Design the schema and navi
 |---|---|
 | Plans stored in the database (price, interval, provider plan id, active flag); **never hard-code prices** | M |
 | Launch plan: **₹100 / month** (see §16, Q2 for exam-pack pricing) | M |
-| Free preview: Module 1 of every subject (configurable per module) | M |
+| ~~Free preview: Module 1 of every subject~~ **Removed 14 Nov 2026:** no module is free by default. The per-module free-preview switch still exists in the admin but is unused. | M |
 | Razorpay Subscriptions (UPI Autopay + cards) on the **website** | M |
 | Webhooks: verify signature, store event ids, process idempotently | M |
 | Subscription states: created, active, pending, halted, cancelled, completed, expired. Access while active, or while cancelled/pending until the paid period (+3-day grace) ends | M |

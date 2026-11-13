@@ -33,7 +33,7 @@ values
    'DUMMY-B', 'DUMMY Subject B', 'DUMMY placeholder subject for development.', 2, true);
 
 -- Modules: is_free_preview omitted on purpose so the app_settings default
--- (Module 1 free) is applied by the modules_default_free_preview trigger.
+-- (no free module) is applied by the modules_default_free_preview trigger.
 insert into public.modules (id, subject_id, number, title, sort_order, is_published)
 select
   format('50000000-0000-4000-8000-0000000000%s%s', s, m)::uuid,

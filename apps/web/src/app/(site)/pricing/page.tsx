@@ -10,7 +10,7 @@ import { faqItems } from "@/lib/marketing";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Module 1 of every subject is free. Unlock every module with one simple plan.",
+  description: "One simple plan unlocks every module of every subject.",
 };
 
 export default async function PricingPage() {
@@ -24,7 +24,7 @@ export default async function PricingPage() {
   const canPay = paymentsConfigured();
 
   function cta(plan: PlanCardPlan & { razorpay_plan_id: string | null }) {
-    if (!viewer) return { href: "/sign-in?next=%2Fpricing", label: "Start free" };
+    if (!viewer) return { href: "/sign-in?next=%2Fpricing", label: "Get started" };
     if (billing?.hasSubscriptionAccess) return { href: "/account", label: "Manage your plan" };
     if (canPay && plan.interval === "month" && plan.razorpay_plan_id) {
       return { node: <SubscribeButton planId={plan.id} /> };
@@ -36,7 +36,7 @@ export default async function PricingPage() {
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:py-20">
       <h1 className="text-4xl sm:text-6xl">Pricing</h1>
       <p className="mt-4 max-w-prose text-lg text-muted-foreground">
-        Module 1 of every subject is free once you sign in. Upgrade to unlock every module.
+        One simple plan unlocks every module of every subject.
       </p>
 
       {plans.length === 0 ? (

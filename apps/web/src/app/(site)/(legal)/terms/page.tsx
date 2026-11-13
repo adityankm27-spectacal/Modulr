@@ -59,8 +59,7 @@ export default async function TermsPage() {
           body: (
             <>
               <p>
-                Module 1 of every subject is free. Other content needs a paid plan, priced as shown
-                on the{" "}
+                Access to content needs a paid plan, priced as shown on the{" "}
                 <Link href="/pricing" className={link}>
                   Pricing page
                 </Link>{" "}

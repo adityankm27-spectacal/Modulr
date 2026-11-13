@@ -32,7 +32,6 @@ export default async function SubjectsIndexPage() {
       <h1 className="text-3xl sm:text-5xl">Subjects</h1>
       <p className="mt-3 max-w-prose text-muted-foreground">
         Every module comes with animated videos, short notes, a formula sheet and solved questions.
-        Module 1 of every subject is free.
       </p>
 
       {groups.size === 0 ? (

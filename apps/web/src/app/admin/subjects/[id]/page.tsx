@@ -156,7 +156,7 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
               label="Free preview"
               defaultValue="auto"
               options={[
-                { value: "auto", label: "Default (from settings: Module 1 is free)" },
+                { value: "auto", label: "Default (paid, from settings)" },
                 { value: "yes", label: "Free for signed-in students" },
                 { value: "no", label: "Paid" },
               ]}

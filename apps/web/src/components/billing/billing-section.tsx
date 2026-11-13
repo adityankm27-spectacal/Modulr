@@ -107,10 +107,7 @@ export async function BillingSection({
         </div>
       ) : (
         <div className="space-y-3 rounded-2xl bg-muted p-5">
-          <p>
-            You&apos;re on the free plan: Module 1 of every subject is open. Subscribe to unlock
-            every module.
-          </p>
+          <p>You don&apos;t have a plan yet. Subscribe to unlock every module of every subject.</p>
           <Link href="/pricing" className={buttonVariants({ size: "sm" })}>
             See plans
           </Link>
