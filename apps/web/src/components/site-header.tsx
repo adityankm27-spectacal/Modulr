@@ -27,6 +27,9 @@ export async function SiteHeader() {
                   Admin
                 </Link>
               ) : null}
+              <Link href="/pricing" className={navLink}>
+                Pricing
+              </Link>
               <Link href="/home" className={navLink}>
                 My subjects
               </Link>

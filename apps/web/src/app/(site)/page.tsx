@@ -134,7 +134,7 @@ export default async function LandingPage() {
                 href={startHref}
                 className={cn(buttonVariants({ variant: "sunflower", size: "lg" }), "group")}
               >
-                {viewer ? "Go to my subjects" : "Get started"}
+                Get started
                 <ArrowRight
                   className="transition-transform duration-200 group-hover:translate-x-1"
                   aria-hidden="true"
@@ -295,7 +295,7 @@ export default async function LandingPage() {
             <h2 className="mt-4 text-3xl sm:text-4xl">Your next exam, sorted.</h2>
           </div>
           <Link href={startHref} className={buttonVariants({ size: "lg" })}>
-            {viewer ? "Go to my subjects" : "Get started"}
+            Get started
           </Link>
         </div>
       </section>
