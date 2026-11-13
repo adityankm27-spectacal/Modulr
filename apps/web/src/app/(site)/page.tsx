@@ -140,9 +140,6 @@ export default async function LandingPage() {
                   aria-hidden="true"
                 />
               </Link>
-              <Link href="/subjects" className={buttonVariants({ size: "lg", variant: "outline" })}>
-                Browse subjects
-              </Link>
             </div>
           </div>
 

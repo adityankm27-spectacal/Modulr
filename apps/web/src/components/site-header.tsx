@@ -40,9 +40,6 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
-              <Link href="/subjects" className={cn(navLink, "hidden sm:inline-flex")}>
-                Subjects
-              </Link>
               <Link href="/pricing" className={navLink}>
                 Pricing
               </Link>
