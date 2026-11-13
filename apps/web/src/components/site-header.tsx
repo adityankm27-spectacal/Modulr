@@ -13,7 +13,7 @@ export async function SiteHeader() {
   const viewer = await getViewer();
 
   return (
-    <header className="sticky top-0 z-40 px-4 pt-4">
+    <header className="relative z-40 px-4 pt-4">
       <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 rounded-full border-[3px] border-line bg-card py-1 pr-2 pl-4 sm:pl-5 shadow-[0_5px_0_0_var(--line)]">
         <Link href={viewer ? "/home" : "/"} aria-label="Modulr home" className="rounded-lg">
           <Logo />

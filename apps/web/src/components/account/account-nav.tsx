@@ -22,7 +22,7 @@ export function AccountNav({
   return (
     <nav
       aria-label="Account sections"
-      className="rounded-3xl border-[3px] border-line bg-card p-3 shadow-[0_5px_0_0_var(--line)] lg:sticky lg:top-28 lg:self-start"
+      className="rounded-3xl border-[3px] border-line bg-card p-3 shadow-[0_5px_0_0_var(--line)] lg:sticky lg:top-4 lg:self-start"
     >
       <div className="hidden items-center gap-3 px-2 pb-4 lg:flex">
         <span

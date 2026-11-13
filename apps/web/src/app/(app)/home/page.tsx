@@ -58,7 +58,7 @@ export default async function HomePage() {
     <main className="flex flex-1 flex-col lg:flex-row lg:items-start">
       <aside
         aria-label="Dashboard"
-        className="order-2 px-4 pb-8 lg:sticky lg:top-24 lg:order-1 lg:mt-12 lg:max-h-[calc(100vh-6.5rem)] lg:w-[372px] lg:shrink-0 lg:overflow-y-auto lg:pb-2"
+        className="order-2 px-4 pb-8 lg:sticky lg:top-4 lg:order-1 lg:mt-12 lg:max-h-[calc(100vh-2rem)] lg:w-[372px] lg:shrink-0 lg:overflow-y-auto lg:pb-2"
       >
         {plannerData ? (
           <Planner data={plannerData} />
