@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getBilling } from "@/lib/billing/queries";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { CancelSubscriptionButton } from "./cancel-button";
 
 type Billing = Awaited<ReturnType<typeof getBilling>>;
@@ -13,7 +13,6 @@ const card =
   "space-y-4 rounded-3xl border-[3px] border-line bg-card p-5 shadow-[0_5px_0_0_var(--line)] sm:p-6";
 
 function describe(sub: Subscription, hasAccess: boolean): { badge: string; line: string | null } {
-  const end = sub.current_period_end ? formatDate(sub.current_period_end) : null;
   switch (sub.status) {
     case "active":
       return { badge: "Active", line: "Every module of every subject is unlocked." };
@@ -30,10 +29,13 @@ function describe(sub: Subscription, hasAccess: boolean): { badge: string; line:
     case "cancelled":
       // Cancelling stops future charges but keeps the period already paid for.
       return hasAccess
-        ? { badge: "Cancelled", line: end ? `You keep access until ${end}.` : null }
-        : { badge: "Ended", line: end ? `Ended on ${end}.` : null };
+        ? {
+            badge: "Cancelled",
+            line: "You won't be charged again. Your access continues for the period you've already paid for.",
+          }
+        : { badge: "Ended", line: null };
     default:
-      return { badge: "Ended", line: end ? `Ended on ${end}.` : null };
+      return { badge: "Ended", line: null };
   }
 }
 
@@ -47,7 +49,7 @@ export async function BillingSection({
   justSubscribed: boolean;
 }) {
   const { subscription, hasSubscriptionAccess } = await getBilling(userId);
-  const comp = compAccessUntil && new Date(compAccessUntil) > new Date() ? compAccessUntil : null;
+  const comp = Boolean(compAccessUntil && new Date(compAccessUntil) > new Date());
   const status = subscription ? describe(subscription, hasSubscriptionAccess) : null;
   const canCancel =
     subscription &&
@@ -67,11 +69,7 @@ export async function BillingSection({
         </p>
       ) : null}
 
-      {comp ? (
-        <p className="rounded-2xl bg-muted p-4">
-          You have free access until <strong>{formatDate(comp)}</strong>.
-        </p>
-      ) : null}
+      {comp ? <p className="rounded-2xl bg-muted p-4">You have free access.</p> : null}
 
       {subscription && status ? (
         <div className={card}>
@@ -94,15 +92,7 @@ export async function BillingSection({
           </div>
           {status.line ? <p>{status.line}</p> : null}
           <div className="flex flex-wrap items-center gap-3">
-            {canCancel ? (
-              <CancelSubscriptionButton
-                accessUntil={
-                  subscription.current_period_end
-                    ? formatDate(subscription.current_period_end)
-                    : null
-                }
-              />
-            ) : null}
+            {canCancel ? <CancelSubscriptionButton /> : null}
             {!hasSubscriptionAccess ? (
               <Link href="/pricing" className={buttonVariants({ size: "sm" })}>
                 See plans

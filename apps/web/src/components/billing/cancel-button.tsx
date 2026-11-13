@@ -7,14 +7,15 @@ import { Button } from "@/components/ui/button";
 import { IDLE } from "@/lib/admin/state";
 import { cancelSubscription } from "@/lib/billing/actions";
 
-export function CancelSubscriptionButton({ accessUntil }: { accessUntil: string | null }) {
+export function CancelSubscriptionButton() {
   const [state, action, pending] = useActionState(cancelSubscription, IDLE);
   return (
     <form
       action={action}
       onSubmit={(event) => {
-        const until = accessUntil ? ` You keep access until ${accessUntil}.` : "";
-        if (!window.confirm(`Cancel your plan? You won't be charged again.${until}`)) {
+        const message =
+          "Cancel your plan? You won't be charged again. You keep access for the period you've already paid for.";
+        if (!window.confirm(message)) {
           event.preventDefault();
         }
       }}
