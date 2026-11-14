@@ -10,7 +10,8 @@ import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { getViewer } from "@/lib/auth";
 import { paymentsConfigured } from "@/lib/billing";
 import { getBilling } from "@/lib/billing/queries";
-import { getActivePlans, getSettings } from "@/lib/catalog";
+import { getActivePlans, getFreeModules, getSettings } from "@/lib/catalog";
+import { freeHeadline } from "@/lib/free-modules";
 import { faqItems } from "@/lib/marketing";
 
 export const metadata: Metadata = {
@@ -19,11 +20,13 @@ export const metadata: Metadata = {
 };
 
 export default async function PricingPage() {
-  const [viewer, plans, settings] = await Promise.all([
+  const [viewer, plans, settings, freeModules] = await Promise.all([
     getViewer(),
     getActivePlans(),
     getSettings(),
+    getFreeModules(),
   ]);
+  const freeLine = freeHeadline(freeModules);
   const monthly =
     plans.find((p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all") ??
     null;
@@ -47,6 +50,7 @@ export default async function PricingPage() {
       <p className="mt-4 max-w-prose text-lg text-muted-foreground">
         Every plan unlocks every module of every subject. Pay monthly, or pay for a few months at
         once and save. Cancel any time.
+        {freeLine ? ` ${freeLine}, so you can try Modulr before you pay.` : ""}
       </p>
 
       {plans.length === 0 ? (
@@ -74,7 +78,7 @@ export default async function PricingPage() {
           Questions
         </h2>
         <div className="mt-6">
-          <Faq items={faqItems(settings, monthly?.price_paise ?? null)} />
+          <Faq items={faqItems(settings, monthly?.price_paise ?? null, freeLine)} />
         </div>
       </section>
     </main>

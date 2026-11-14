@@ -27,6 +27,7 @@ export function SubjectCard({
   name,
   description,
   moduleCount,
+  freeModules = [],
   icon,
   tone,
   index,
@@ -35,6 +36,8 @@ export function SubjectCard({
   name: string;
   description: string | null;
   moduleCount: number;
+  /** Numbers of this subject's free modules. */
+  freeModules?: number[];
   icon: SubjectIcon;
   tone: SubjectTone;
   index: number;
@@ -83,7 +86,14 @@ export function SubjectCard({
       ) : null}
       <span className="mt-auto pt-4 text-sm font-bold">
         {moduleCount > 0 ? (
-          <span>{pluralize(moduleCount, "module")}</span>
+          <span className="flex flex-wrap items-center gap-2">
+            {pluralize(moduleCount, "module")}
+            {freeModules.length > 0 ? (
+              <span className="rounded-full border-2 border-line bg-mint px-2.5 py-0.5 text-xs font-extrabold text-ink">
+                {freeModules.length === 1 ? `Module ${freeModules[0]} free` : "Free modules"}
+              </span>
+            ) : null}
+          </span>
         ) : (
           <span className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
             Coming soon

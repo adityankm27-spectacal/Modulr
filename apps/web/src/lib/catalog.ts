@@ -1,3 +1,4 @@
+import type { FreeModule } from "@/lib/free-modules";
 import { subjectStyles } from "@/lib/subject-style";
 import "server-only";
 import { resolveSettings, type AppSettings } from "@modulr/shared";
@@ -330,4 +331,34 @@ export const getSubjectStyle = cache(
       subjectStyles(siblings).get(subject.id) ?? { icon: "atom" as const, tone: "cobalt" as const }
     );
   },
+);
+
+/** Modules an admin has made free to open (sign-in needed, no plan). Cached like plans. */
+export const getFreeModules = cache(
+  unstable_cache(
+    async (): Promise<FreeModule[]> => {
+      const supabase = createPublicClient();
+      const found = rows(
+        await supabase
+          .from("modules")
+          .select("number, subject_id, subjects!inner(name, sort_order)")
+          .eq("is_free_preview", true)
+          .eq("is_published", true)
+          .eq("subjects.is_published", true)
+          .order("sort_order"),
+        "free modules",
+      );
+      return found
+        .map((m) => ({
+          subject_id: m.subject_id,
+          subject_name: m.subjects.name,
+          number: m.number,
+          order: m.subjects.sort_order,
+        }))
+        .sort((a, b) => a.order - b.order || a.number - b.number)
+        .map(({ subject_id, subject_name, number }) => ({ subject_id, subject_name, number }));
+    },
+    ["free-modules"],
+    PUBLIC_CACHE,
+  ),
 );

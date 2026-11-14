@@ -15,7 +15,8 @@ export default function RefundsPage() {
           body: (
             <p>
               You can browse every subject and module on {LEGAL.brand}, and see what each module
-              includes, before you subscribe.
+              includes, before you subscribe. Some modules are free to open once you sign in, with
+              no payment, so you can try {LEGAL.brand} first.
             </p>
           ),
         },

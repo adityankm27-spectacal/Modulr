@@ -15,7 +15,8 @@ import { PointerArea } from "@/components/motion/pointer-area";
 import { Tilt } from "@/components/motion/tilt";
 import { buttonVariants } from "@/components/ui/button";
 import { getViewer } from "@/lib/auth";
-import { getActivePlans, getSettings } from "@/lib/catalog";
+import { getActivePlans, getFreeModules, getSettings } from "@/lib/catalog";
+import { freeHeadline, freeShort } from "@/lib/free-modules";
 import { formatPrice } from "@/lib/format";
 import { faqItems } from "@/lib/marketing";
 import { cn } from "@/lib/utils";
@@ -115,11 +116,13 @@ const STEPS = [
 ];
 
 export default async function LandingPage() {
-  const [viewer, plans, settings] = await Promise.all([
+  const [viewer, plans, settings, freeModules] = await Promise.all([
     getViewer(),
     getActivePlans(),
     getSettings(),
+    getFreeModules(),
   ]);
+  const freeNote = freeShort(freeModules);
   const monthly =
     plans.find((p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all") ??
     null;
@@ -160,13 +163,18 @@ export default async function LandingPage() {
                 prefetch
                 className={cn(buttonVariants({ variant: "sunflower", size: "lg" }), "group")}
               >
-                Get started
+                {viewer || !freeNote ? "Get started" : "Start free"}
                 <ArrowRight
                   className="transition-transform duration-200 group-hover:translate-x-1"
                   aria-hidden="true"
                 />
               </Link>
             </div>
+            {freeNote ? (
+              <p className="mt-4 text-sm font-bold text-muted-foreground motion-safe:animate-rise motion-safe:[animation-delay:560ms]">
+                {freeNote}. No payment needed to start.
+              </p>
+            ) : null}
           </div>
 
           {/* The logo's stacked bars, as the three things every module has. */}
@@ -228,7 +236,7 @@ export default async function LandingPage() {
                 copy && "motion-reduce:hidden",
               )}
             >
-              {TICKER.map((item) => (
+              {(freeNote ? [freeNote, ...TICKER] : TICKER).map((item) => (
                 <li key={item} className="flex items-center gap-10">
                   {item}
                   <Star className="size-4 fill-sunflower text-sunflower" aria-hidden="true" />
@@ -346,7 +354,9 @@ export default async function LandingPage() {
           Questions
         </h2>
         <div className="reveal mt-8">
-          <Faq items={faqItems(settings, monthly?.price_paise ?? null)} />
+          <Faq
+            items={faqItems(settings, monthly?.price_paise ?? null, freeHeadline(freeModules))}
+          />
         </div>
       </section>
 

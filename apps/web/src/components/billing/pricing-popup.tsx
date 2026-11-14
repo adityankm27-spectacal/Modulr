@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 import { CheckoutPauseContext } from "./checkout-pause";
 import { PRICING_SEEN_COOKIE } from "./pricing-seen";
@@ -11,7 +12,16 @@ import { PRICING_SEEN_COOKIE } from "./pricing-seen";
  * with the X, the Esc key, a click outside, or "Maybe later". The native
  * <dialog> element keeps focus inside it and returns it afterwards.
  */
-export function PricingPopup({ userId, children }: { userId: string; children: ReactNode }) {
+export function PricingPopup({
+  userId,
+  freeLink,
+  children,
+}: {
+  userId: string;
+  /** A free module the student can open instead of subscribing now. */
+  freeLink?: { href: string; label: string } | null;
+  children: ReactNode;
+}) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -85,7 +95,15 @@ export function PricingPopup({ userId, children }: { userId: string; children: R
             {children}
           </div>
 
-          <div className="mt-10 text-center">
+          <div className="mt-10 flex flex-col items-center gap-1 text-center">
+            {freeLink ? (
+              <Link
+                href={freeLink.href}
+                className="mb-2 inline-flex min-h-11 items-center rounded-full border-[3px] border-line bg-mint px-5 font-extrabold text-ink shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none"
+              >
+                {freeLink.label}
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={close}

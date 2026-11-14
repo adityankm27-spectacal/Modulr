@@ -10,6 +10,7 @@ import { getBilling } from "@/lib/billing/queries";
 import {
   getContinueWatching,
   getCurrentSyllabusVersion,
+  getFreeModules,
   getSubjectsForSemester,
 } from "@/lib/catalog";
 import { formatTimestamp } from "@modulr/shared";
@@ -43,9 +44,10 @@ export default async function HomePage() {
   const semester = profile.semester;
 
   const syllabus = await getCurrentSyllabusVersion(profile.branch_id);
-  const [subjects, continueWatching] = await Promise.all([
+  const [subjects, continueWatching, freeModules] = await Promise.all([
     syllabus ? getSubjectsForSemester(syllabus.id, semester) : Promise.resolve([]),
     getContinueWatching(userId),
+    getFreeModules(),
   ]);
   // The planner is part of the plan: subscribers, admins and students with free access.
   // It is an extra, so if it can't load the subjects still show.
@@ -224,6 +226,9 @@ export default async function HomePage() {
                         name={subject.name}
                         description={subject.description}
                         moduleCount={subject.modules[0]?.count ?? 0}
+                        freeModules={freeModules
+                          .filter((m) => m.subject_id === subject.id)
+                          .map((m) => m.number)}
                         icon={style?.icon ?? "atom"}
                         tone={style?.tone ?? "cobalt"}
                         index={i}

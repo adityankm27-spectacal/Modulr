@@ -59,7 +59,8 @@ export default async function TermsPage() {
           body: (
             <>
               <p>
-                Access to content needs a paid plan, priced as shown on the{" "}
+                Modules marked free can be opened by any signed-in student. All other content needs
+                a paid plan, priced as shown on the{" "}
                 <Link href="/pricing" className={link}>
                   Pricing page
                 </Link>{" "}

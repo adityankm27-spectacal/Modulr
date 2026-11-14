@@ -2,7 +2,8 @@ import { cookies } from "next/headers";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { bestValuePlanId, mostPopularPlanId, PlanCard } from "@/components/marketing/plan-card";
 import { paymentsConfigured } from "@/lib/billing";
-import { getActivePlans } from "@/lib/catalog";
+import { getActivePlans, getFreeModules } from "@/lib/catalog";
+import { firstFreeHref, freeShort } from "@/lib/free-modules";
 import { PricingPopup } from "./pricing-popup";
 import { PRICING_SEEN_COOKIE } from "./pricing-seen";
 
@@ -14,7 +15,8 @@ export async function PricingWelcome({ userId }: { userId: string }) {
   const cookieStore = await cookies();
   if (cookieStore.get(PRICING_SEEN_COOKIE)?.value === userId) return null;
 
-  const plans = await getActivePlans();
+  const [plans, freeModules] = await Promise.all([getActivePlans(), getFreeModules()]);
+  const freeHref = firstFreeHref(freeModules);
   if (plans.length === 0) return null;
 
   const monthly = plans.find((p) => p.interval === "month" && p.billing_months === 1) ?? null;
@@ -24,7 +26,12 @@ export async function PricingWelcome({ userId }: { userId: string }) {
   const canPay = paymentsConfigured();
 
   return (
-    <PricingPopup userId={userId}>
+    <PricingPopup
+      userId={userId}
+      freeLink={
+        freeHref ? { href: freeHref, label: `${freeShort(freeModules)}, no payment` } : null
+      }
+    >
       {plans.map((plan, i) => (
         <PlanCard
           key={plan.id}

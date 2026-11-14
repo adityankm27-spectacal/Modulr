@@ -2,12 +2,24 @@ import type { AppSettings } from "@modulr/shared";
 import { formatPrice } from "@/lib/format";
 
 /** FAQ copy shared by the landing and pricing pages. Numbers come from the database. */
-export function faqItems(settings: AppSettings, monthlyPricePaise: number | null) {
+export function faqItems(
+  settings: AppSettings,
+  monthlyPricePaise: number | null,
+  freeHeadline: string | null = null,
+) {
   const price = monthlyPricePaise
     ? `${formatPrice(monthlyPricePaise)} a month`
     : "A small monthly fee";
   const devices = settings["devices.max_active"];
   return [
+    ...(freeHeadline
+      ? [
+          {
+            q: "Is any of it free?",
+            a: `Yes. ${freeHeadline}: sign in and open its videos, notes and solved questions with no payment. A subscription unlocks every other module.`,
+          },
+        ]
+      : []),
     {
       q: "What do I get with a subscription?",
       a: "Every module of every subject: animated explainer videos, one-page notes, formula sheets, solved PYQs, important questions and viva prep.",

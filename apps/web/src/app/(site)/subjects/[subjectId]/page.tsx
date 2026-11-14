@@ -46,8 +46,16 @@ export default async function SubjectPage({ params }: { params: Params }) {
   ]);
 
   const videoTotal = modules.reduce((sum, m) => sum + tabCount("videos", counts.get(m.id)), 0);
+  const freeNumbers = modules.filter((m) => m.is_free_preview).map((m) => m.number);
+  const freeText =
+    freeNumbers.length === 1
+      ? `Module ${freeNumbers[0]} is free`
+      : freeNumbers.length > 1
+        ? `Modules ${freeNumbers.join(", ")} are free`
+        : null;
   const chips = [
     `Semester ${subject.semester}`,
+    ...(freeText ? [freeText] : []),
     ...(modules.length > 0 ? [pluralize(modules.length, "module")] : []),
     ...(videoTotal > 0 ? [pluralize(videoTotal, "video")] : []),
   ];
@@ -82,15 +90,24 @@ export default async function SubjectPage({ params }: { params: Params }) {
           <p className="flex items-start gap-3">
             <Sparkles className="mt-0.5 size-5 shrink-0 text-sunflower" aria-hidden="true" />
             <span>
-              <strong>Unlock every module of {subject.name}.</strong> Sign in and subscribe to
-              watch, read and practise.
+              {freeText ? (
+                <>
+                  <strong>{freeText}.</strong> Sign in to watch, read and practise it now, with no
+                  payment. Subscribe to unlock every other module of {subject.name}.
+                </>
+              ) : (
+                <>
+                  <strong>Unlock every module of {subject.name}.</strong> Sign in and subscribe to
+                  watch, read and practise.
+                </>
+              )}
             </span>
           </p>
           <Link
             href={signInPath(`/subjects/${subject.id}`)}
             className={buttonVariants({ variant: "sunflower" })}
           >
-            Get started
+            {freeText ? "Start free" : "Get started"}
           </Link>
         </div>
       ) : null}
