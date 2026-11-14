@@ -53,6 +53,7 @@ export function PlanCard({
   monthlyPricePaise = null,
   featured = false,
   popular = false,
+  compact = false,
   index = 0,
   cta,
 }: {
@@ -62,6 +63,8 @@ export function PlanCard({
   featured?: boolean;
   /** Shows the "Most popular" sticker. */
   popular?: boolean;
+  /** Shorter card (used in the popup): one line of what's included instead of the full list. */
+  compact?: boolean;
   index?: number;
   cta: { href: string; label: string } | { disabledLabel: string } | { node: ReactNode };
 }) {
@@ -135,16 +138,26 @@ export function PlanCard({
       ) : null}
 
       <p className="mt-5 font-bold">{SCOPE_LABEL[plan.scope]}</p>
-      {plan.description ? <p className="mt-1 text-muted-foreground">{plan.description}</p> : null}
-      <ul className="mt-6 flex-1 space-y-3">
-        {INCLUDED.map((item) => (
-          <li key={item} className="flex gap-3">
-            <Check className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-8">
+      {compact ? (
+        <p className="mt-2 flex-1 text-sm text-muted-foreground">
+          Videos, short notes, formula sheets, solved PYQs and viva prep for every module.
+        </p>
+      ) : (
+        <>
+          {plan.description ? (
+            <p className="mt-1 text-muted-foreground">{plan.description}</p>
+          ) : null}
+          <ul className="mt-6 flex-1 space-y-3">
+            {INCLUDED.map((item) => (
+              <li key={item} className="flex gap-3">
+                <Check className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <div className={compact ? "mt-6" : "mt-8"}>
         {"node" in cta ? (
           cta.node
         ) : "href" in cta ? (

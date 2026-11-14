@@ -77,8 +77,8 @@ export async function completeOnboarding(
   }
 
   revalidatePath("/", "layout");
-  // Everything is paid, so a new student lands on the plans right after signing up.
-  redirect("/pricing");
+  // Everything is paid, so the home page shows a new student the plans in a big popup.
+  redirect("/home");
 }
 
 export async function updateProfile(
