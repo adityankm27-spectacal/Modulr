@@ -54,7 +54,7 @@ export default async function PricingPage() {
           Plans will be announced soon.
         </p>
       ) : (
-        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-center lg:gap-6">
+        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-6">
           {plans.map((plan, i) => (
             <PlanCard
               key={plan.id}

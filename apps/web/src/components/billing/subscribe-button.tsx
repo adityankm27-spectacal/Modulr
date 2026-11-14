@@ -5,6 +5,7 @@ import { Loader2, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useCheckoutPause } from "./checkout-pause";
 
 const CHECKOUT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -66,6 +67,7 @@ export function SubscribeButton({
   successHref?: string;
 }) {
   const router = useRouter();
+  const checkoutPause = useCheckoutPause();
   const [state, setState] = useState<"idle" | "starting" | "confirming">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -88,6 +90,7 @@ export function SubscribeButton({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't confirm the payment.");
       setState("idle");
+      checkoutPause?.resume();
     }
   }
 
@@ -113,15 +116,22 @@ export function SubscribeButton({
         prefill: session.prefill,
         theme: { color: colors.cobalt },
         handler: (response: CheckoutResponse) => void confirm(response),
-        modal: { ondismiss: () => setState("idle") },
+        modal: {
+          ondismiss: () => {
+            setState("idle");
+            checkoutPause?.resume();
+          },
+        },
       });
       checkout.on("payment.failed", (response) => {
         setError(response.error?.description ?? "The payment failed. Please try again.");
       });
+      checkoutPause?.pause();
       checkout.open();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't start checkout.");
       setState("idle");
+      checkoutPause?.resume();
     }
   }
 

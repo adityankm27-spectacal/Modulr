@@ -79,7 +79,7 @@ export function PlanCard({
       className={cn(
         "relative flex flex-col rounded-[1.75rem] border-[3px] border-line bg-card p-6 transition-[translate,box-shadow] duration-200 hover:-translate-y-1.5 motion-safe:animate-rise sm:p-8",
         featured
-          ? "shadow-[0_10px_0_0_var(--color-cobalt)] hover:shadow-[0_16px_0_0_var(--color-cobalt)] lg:-my-4 lg:py-12"
+          ? "shadow-[0_10px_0_0_var(--color-cobalt)] hover:shadow-[0_16px_0_0_var(--color-cobalt)]"
           : popular
             ? "shadow-[0_8px_0_0_var(--color-pink)] hover:shadow-[0_14px_0_0_var(--color-pink)]"
             : "shadow-[0_6px_0_0_var(--line)] hover:shadow-[0_12px_0_0_var(--line)]",
@@ -157,7 +157,8 @@ export function PlanCard({
           </ul>
         </>
       )}
-      <div className={compact ? "mt-6" : "mt-8"}>
+      {/* Same height whatever the button is, so buttons line up across cards. */}
+      <div className={cn("min-h-20", compact ? "mt-6" : "mt-8")}>
         {"node" in cta ? (
           cta.node
         ) : "href" in cta ? (

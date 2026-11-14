@@ -310,7 +310,7 @@ export default async function LandingPage() {
           <p className="mt-4 max-w-prose text-lg text-muted-foreground">
             Every plan unlocks every module of every subject. Save more with a longer plan.
           </p>
-          <div className="reveal mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-center lg:gap-6">
+          <div className="reveal mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-6">
             {plans.slice(0, 3).map((plan, i) => (
               <PlanCard
                 key={plan.id}
