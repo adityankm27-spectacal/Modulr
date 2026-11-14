@@ -22,6 +22,8 @@ interface Props {
   autoplay?: boolean;
   /** Admin preview: don't record progress. */
   recordProgress?: boolean;
+  /** Called as the playhead moves (used by the admin chapter editor). */
+  onTimeChange?: (seconds: number) => void;
 }
 
 type Load =
@@ -59,6 +61,7 @@ export function VideoPlayer({
   next,
   autoplay = false,
   recordProgress = true,
+  onTimeChange,
 }: Props) {
   const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
@@ -117,6 +120,7 @@ export function VideoPlayer({
     (seconds: number, total: number | null) => {
       position.current = seconds;
       setTime(seconds);
+      onTimeChange?.(seconds);
       if (total) setDuration(total);
       const done = isCompleted(seconds, total ?? duration);
       if (done && !saved.current.completed) save(seconds, true);
@@ -131,7 +135,7 @@ export function VideoPlayer({
         save(seconds, false);
       }
     },
-    [duration, save],
+    [duration, onTimeChange, save],
   );
 
   const onPause = useCallback(() => {

@@ -45,6 +45,8 @@ export function SubjectCard({
   return (
     <Link
       href={href}
+      // Fetched in the background so the subject opens at once when clicked.
+      prefetch
       onPointerMove={trackPointer}
       style={
         { "--tone": color, "--tone-ink": ink, animationDelay: `${index * 70}ms` } as CSSProperties

@@ -413,7 +413,12 @@ export default async function ModuleEditorPage({
                         <ActionForm action={saveVideo}>
                           <input type="hidden" name="id" value={v.id} />
                           <input type="hidden" name="module_id" value={mod.id} />
-                          <VideoFields defaults={v} />
+                          <VideoFields
+                            defaults={v}
+                            previewable={
+                              v.processing_status === "ready" && Boolean(v.provider_video_id)
+                            }
+                          />
                         </ActionForm>
                       </Disclosure>
                       <DeleteButton
