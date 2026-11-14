@@ -33,11 +33,8 @@ export function SubjectHero({
         <div className="absolute -bottom-24 left-1/4 size-64 rounded-full bg-radial from-white/15 to-transparent to-70% motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
         {/* Light that follows the pointer. */}
         <div
-          className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/hero:opacity-100"
-          style={{
-            background:
-              "radial-gradient(360px circle at var(--x, 50%) var(--y, 50%), rgb(255 255 255 / 0.28), transparent 70%)",
-          }}
+          className="absolute top-0 left-0 size-[720px] rounded-full bg-radial from-white/30 to-transparent to-70% opacity-0 transition-opacity duration-300 will-change-transform group-hover/hero:opacity-100"
+          style={{ translate: "calc(var(--x, 50%) - 360px) calc(var(--y, 50%) - 360px)" }}
         />
       </div>
 

@@ -98,11 +98,8 @@ export default async function HomePage() {
             {/* Light that follows the pointer across the banner. */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover/banner:opacity-100"
-              style={{
-                background:
-                  "radial-gradient(380px circle at var(--x, 50%) var(--y, 50%), rgb(255 255 255 / 0.22), transparent 70%)",
-              }}
+              className="pointer-events-none absolute top-0 left-0 -z-10 size-[760px] rounded-full bg-radial from-white/20 to-transparent to-70% opacity-0 transition-opacity duration-300 will-change-transform group-hover/banner:opacity-100"
+              style={{ translate: "calc(var(--x, 50%) - 380px) calc(var(--y, 50%) - 380px)" }}
             />
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
               <div className="absolute -top-20 -right-16 size-72 rounded-full bg-radial from-periwinkle/60 to-transparent to-70% motion-safe:animate-drift" />

@@ -39,7 +39,10 @@ export async function updateSession(request: NextRequest) {
   const claims = data?.claims;
 
   // One active device per account: sign out sessions replaced by a newer sign-in.
-  if (claims?.sub && !isSessionCheckExempt(request.nextUrl.pathname)) {
+  // Link prefetches only warm the client cache and show nothing to the user, so they skip
+  // the database lookup; the real navigation that follows does the check.
+  const isPrefetch = request.headers.has("next-router-prefetch");
+  if (claims?.sub && !isPrefetch && !isSessionCheckExempt(request.nextUrl.pathname)) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("active_session_id")
