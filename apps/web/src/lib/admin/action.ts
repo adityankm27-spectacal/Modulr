@@ -1,5 +1,6 @@
 import "server-only";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { CATALOG_CACHE_TAG } from "@/lib/catalog";
 import type { z } from "zod";
 import { getViewer, isAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -71,6 +72,8 @@ export async function runAdminAction<S extends z.ZodType>(
     const supabase = await createClient();
     const result = await handler(parsed.data, supabase);
     revalidatePath("/", "layout");
+    // Plans and settings are cached; show the admin's change straight away.
+    updateTag(CATALOG_CACHE_TAG);
     const { message, redirectTo } =
       typeof result === "object" ? result : { message: result ?? "Saved", redirectTo: undefined };
     return { status: "ok", message, redirectTo, at: Date.now() };

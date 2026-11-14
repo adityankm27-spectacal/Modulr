@@ -102,8 +102,8 @@ export default async function HomePage() {
             }}
           />
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute -top-20 -right-16 size-72 rounded-full bg-periwinkle/60 blur-3xl motion-safe:animate-drift" />
-            <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-sunflower/25 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
+            <div className="absolute -top-20 -right-16 size-72 rounded-full bg-radial from-periwinkle/60 to-transparent to-70% motion-safe:animate-drift" />
+            <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-radial from-sunflower/25 to-transparent to-70% motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
           </div>
           <div
             aria-hidden="true"

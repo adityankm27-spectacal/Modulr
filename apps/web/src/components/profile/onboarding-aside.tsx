@@ -31,8 +31,8 @@ export function OnboardingAside() {
   return (
     <aside className="relative isolate flex flex-col gap-4 overflow-hidden rounded-3xl border-[3px] border-line bg-cobalt p-6 text-white shadow-[0_6px_0_0_var(--line)] motion-safe:animate-rise lg:gap-5 lg:p-8">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-16 -right-12 size-56 rounded-full bg-periwinkle/60 blur-3xl motion-safe:animate-drift" />
-        <div className="absolute -bottom-20 -left-10 size-48 rounded-full bg-sunflower/25 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
+        <div className="absolute -top-16 -right-12 size-56 rounded-full bg-radial from-periwinkle/60 to-transparent to-70% motion-safe:animate-drift" />
+        <div className="absolute -bottom-20 -left-10 size-48 rounded-full bg-radial from-sunflower/25 to-transparent to-70% motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
       </div>
 
       <p className="inline-flex self-start rounded-full border-[3px] border-line bg-sunflower px-3 py-0.5 text-sm font-extrabold text-ink">

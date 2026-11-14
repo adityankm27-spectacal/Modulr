@@ -11,9 +11,15 @@ import { SUBJECT_ICON, SUBJECT_TONE } from "./subject-visuals";
 /** Moves the glow to the pointer; CSS does the rest. */
 function trackPointer(event: PointerEvent<HTMLElement>) {
   const card = event.currentTarget;
-  const rect = card.getBoundingClientRect();
-  card.style.setProperty("--x", `${event.clientX - rect.left}px`);
-  card.style.setProperty("--y", `${event.clientY - rect.top}px`);
+  if (card.dataset.frame) return; // at most one update per frame
+  const { clientX, clientY } = event;
+  card.dataset.frame = "1";
+  requestAnimationFrame(() => {
+    delete card.dataset.frame;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--x", `${Math.round(clientX - rect.left)}px`);
+    card.style.setProperty("--y", `${Math.round(clientY - rect.top)}px`);
+  });
 }
 
 export function SubjectCard({

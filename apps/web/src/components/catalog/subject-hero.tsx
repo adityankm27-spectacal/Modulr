@@ -29,8 +29,8 @@ export function SubjectHero({
       className="group/hero relative isolate overflow-hidden rounded-[1.75rem] border-[3px] border-line bg-(--tone) p-6 shadow-[0_8px_0_0_var(--line)] motion-safe:animate-rise sm:p-10"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 -right-16 size-72 rounded-full bg-white/30 blur-3xl motion-safe:animate-drift" />
-        <div className="absolute -bottom-24 left-1/4 size-64 rounded-full bg-white/15 blur-3xl motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
+        <div className="absolute -top-24 -right-16 size-72 rounded-full bg-radial from-white/30 to-transparent to-70% motion-safe:animate-drift" />
+        <div className="absolute -bottom-24 left-1/4 size-64 rounded-full bg-radial from-white/15 to-transparent to-70% motion-safe:animate-drift motion-safe:[animation-delay:-9s]" />
         {/* Light that follows the pointer. */}
         <div
           className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/hero:opacity-100"

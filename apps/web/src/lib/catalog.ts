@@ -1,8 +1,10 @@
 import { subjectStyles } from "@/lib/subject-style";
 import "server-only";
 import { resolveSettings, type AppSettings } from "@modulr/shared";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import type { PdfDocumentKind } from "@/lib/pdf-documents";
+import { createPublicClient } from "@/lib/supabase/public";
 import { createClient } from "@/lib/supabase/server";
 
 interface QueryResult {
@@ -22,26 +24,49 @@ function maybe<R extends QueryResult>(result: R, what: string): R["data"] {
   return result.data;
 }
 
-export const getSettings = cache(async (): Promise<AppSettings> => {
-  const supabase = await createClient();
-  const settingRows = rows(await supabase.from("app_settings").select("key, value"), "settings");
-  return resolveSettings(settingRows);
-});
+/**
+ * Tag on cached public data (plans, settings). Admin saves refresh it at once;
+ * otherwise it is re-read from the database at most every 5 minutes, so busy
+ * pages don't query these on every visit.
+ */
+export const CATALOG_CACHE_TAG = "catalog";
+const PUBLIC_CACHE = { revalidate: 300, tags: [CATALOG_CACHE_TAG] };
 
-export const getActivePlans = cache(async () => {
-  const supabase = await createClient();
-  return rows(
-    await supabase
-      .from("plans")
-      .select(
-        "id, name, description, price_paise, interval, billing_months, scope, validity_days, razorpay_plan_id",
-      )
-      .eq("is_active", true)
-      .order("sort_order")
-      .order("price_paise"),
-    "plans",
-  );
-});
+export const getSettings = cache(
+  unstable_cache(
+    async (): Promise<AppSettings> => {
+      const supabase = createPublicClient();
+      const settingRows = rows(
+        await supabase.from("app_settings").select("key, value"),
+        "settings",
+      );
+      return resolveSettings(settingRows);
+    },
+    ["app-settings"],
+    PUBLIC_CACHE,
+  ),
+);
+
+export const getActivePlans = cache(
+  unstable_cache(
+    async () => {
+      const supabase = createPublicClient();
+      return rows(
+        await supabase
+          .from("plans")
+          .select(
+            "id, name, description, price_paise, interval, billing_months, scope, validity_days, razorpay_plan_id",
+          )
+          .eq("is_active", true)
+          .order("sort_order")
+          .order("price_paise"),
+        "plans",
+      );
+    },
+    ["active-plans"],
+    PUBLIC_CACHE,
+  ),
+);
 
 export async function getCollegesWithBranches() {
   const supabase = await createClient();
