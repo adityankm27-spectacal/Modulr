@@ -1,4 +1,4 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,6 +30,11 @@ const INCLUDED = [
   "Solved PYQs, important questions and viva prep",
 ];
 
+/** The plan we call "Most popular": the 3-month plan, when there is one. */
+export function mostPopularPlanId(plans: PlanCardPlan[]) {
+  return plans.find((p) => p.interval === "month" && p.billing_months === 3)?.id ?? null;
+}
+
 /** The plan with the biggest saving against paying monthly, if any plan saves at all. */
 export function bestValuePlanId(plans: PlanCardPlan[], monthlyPricePaise: number | null) {
   let best: { id: string; discount: number } | null = null;
@@ -47,6 +52,7 @@ export function PlanCard({
   plan,
   monthlyPricePaise = null,
   featured = false,
+  popular = false,
   index = 0,
   cta,
 }: {
@@ -54,6 +60,8 @@ export function PlanCard({
   /** Price of the monthly plan, to show what a longer plan saves. */
   monthlyPricePaise?: number | null;
   featured?: boolean;
+  /** Shows the "Most popular" sticker. */
+  popular?: boolean;
   index?: number;
   cta: { href: string; label: string } | { disabledLabel: string } | { node: ReactNode };
 }) {
@@ -69,13 +77,20 @@ export function PlanCard({
         "relative flex flex-col rounded-[1.75rem] border-[3px] border-line bg-card p-6 transition-[translate,box-shadow] duration-200 hover:-translate-y-1.5 motion-safe:animate-rise sm:p-8",
         featured
           ? "shadow-[0_10px_0_0_var(--color-cobalt)] hover:shadow-[0_16px_0_0_var(--color-cobalt)] lg:-my-4 lg:py-12"
-          : "shadow-[0_6px_0_0_var(--line)] hover:shadow-[0_12px_0_0_var(--line)]",
+          : popular
+            ? "shadow-[0_8px_0_0_var(--color-pink)] hover:shadow-[0_14px_0_0_var(--color-pink)]"
+            : "shadow-[0_6px_0_0_var(--line)] hover:shadow-[0_12px_0_0_var(--line)]",
       )}
     >
       {featured ? (
         <span className="absolute -top-5 left-1/2 inline-flex -translate-x-1/2 -rotate-2 items-center gap-1.5 rounded-full border-[3px] border-line bg-sunflower px-4 py-1.5 text-sm font-extrabold whitespace-nowrap text-ink shadow-[0_4px_0_0_var(--line)] motion-safe:animate-bob">
           <Sparkles className="size-4" aria-hidden="true" />
           Best value
+        </span>
+      ) : popular ? (
+        <span className="absolute -top-5 left-1/2 inline-flex -translate-x-1/2 rotate-2 items-center gap-1.5 rounded-full border-[3px] border-line bg-pink px-4 py-1.5 text-sm font-extrabold whitespace-nowrap text-ink shadow-[0_4px_0_0_var(--line)] motion-safe:animate-bob motion-safe:[animation-delay:-2s]">
+          <Flame className="size-4" aria-hidden="true" />
+          Most popular
         </span>
       ) : null}
 

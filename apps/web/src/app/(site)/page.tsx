@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
-import { bestValuePlanId, PlanCard } from "@/components/marketing/plan-card";
+import { bestValuePlanId, mostPopularPlanId, PlanCard } from "@/components/marketing/plan-card";
 import { PointerArea } from "@/components/motion/pointer-area";
 import { Tilt } from "@/components/motion/tilt";
 import { buttonVariants } from "@/components/ui/button";
@@ -133,7 +133,7 @@ export default async function LandingPage() {
           {/* Soft light that drifts towards the pointer. */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-[460px] rounded-full bg-periwinkle/25 blur-3xl transition-[translate] duration-700 ease-out"
+            className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-[460px] rounded-full bg-radial from-periwinkle/25 to-transparent to-70% transition-[translate] duration-700 ease-out"
             style={{
               translate: "calc(-50% + var(--mx, 0) * 260px) calc(-50% + var(--my, 0) * 160px)",
             }}
@@ -320,6 +320,7 @@ export default async function LandingPage() {
                 featured={
                   plan.id === (bestValuePlanId(plans, monthly?.price_paise ?? null) ?? monthly?.id)
                 }
+                popular={plan.id === mostPopularPlanId(plans)}
                 // Checkout lives on /pricing; it also shows "Manage your plan" to subscribers.
                 cta={
                   viewer

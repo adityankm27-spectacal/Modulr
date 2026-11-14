@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Faq } from "@/components/marketing/faq";
-import { bestValuePlanId, PlanCard, type PlanCardPlan } from "@/components/marketing/plan-card";
+import {
+  bestValuePlanId,
+  mostPopularPlanId,
+  PlanCard,
+  type PlanCardPlan,
+} from "@/components/marketing/plan-card";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { getViewer } from "@/lib/auth";
 import { paymentsConfigured } from "@/lib/billing";
@@ -23,6 +28,7 @@ export default async function PricingPage() {
     plans.find((p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all") ??
     null;
   const bestValue = bestValuePlanId(plans, monthly?.price_paise ?? null);
+  const popular = mostPopularPlanId(plans);
   const billing = viewer ? await getBilling(viewer.userId) : null;
   const canPay = paymentsConfigured();
 
@@ -56,6 +62,7 @@ export default async function PricingPage() {
               index={i}
               monthlyPricePaise={monthly?.price_paise ?? null}
               featured={plan.id === (bestValue ?? monthly?.id)}
+              popular={plan.id === popular}
               cta={cta(plan)}
             />
           ))}
