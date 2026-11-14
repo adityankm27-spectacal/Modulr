@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Faq } from "@/components/marketing/faq";
-import { PlanCard } from "@/components/marketing/plan-card";
+import { bestValuePlanId, PlanCard } from "@/components/marketing/plan-card";
 import { PointerArea } from "@/components/motion/pointer-area";
 import { Tilt } from "@/components/motion/tilt";
 import { buttonVariants } from "@/components/ui/button";
@@ -120,7 +120,9 @@ export default async function LandingPage() {
     getActivePlans(),
     getSettings(),
   ]);
-  const monthly = plans.find((p) => p.interval === "month" && p.scope === "all") ?? null;
+  const monthly =
+    plans.find((p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all") ??
+    null;
   const startHref = viewer ? "/home" : "/sign-in";
 
   return (
@@ -306,14 +308,18 @@ export default async function LandingPage() {
             Simple pricing
           </h2>
           <p className="mt-4 max-w-prose text-lg text-muted-foreground">
-            One simple plan unlocks every module of every subject.
+            Every plan unlocks every module of every subject. Save more with a longer plan.
           </p>
-          <div className="reveal mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
-            {plans.slice(0, 2).map((plan) => (
+          <div className="reveal mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-center lg:gap-6">
+            {plans.slice(0, 3).map((plan, i) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
-                featured={plan.id === monthly?.id}
+                index={i}
+                monthlyPricePaise={monthly?.price_paise ?? null}
+                featured={
+                  plan.id === (bestValuePlanId(plans, monthly?.price_paise ?? null) ?? monthly?.id)
+                }
                 // Checkout lives on /pricing; it also shows "Manage your plan" to subscribers.
                 cta={
                   viewer

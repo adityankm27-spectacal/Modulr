@@ -22,8 +22,8 @@ export interface RazorpayConfig {
 
 const API = "https://api.razorpay.com/v1";
 
-/** Billing cycles per subscription. Razorpay needs a limit; 120 months is effectively open-ended. */
-const TOTAL_COUNT = 120;
+/** Razorpay needs a limit on billing cycles; 10 years is effectively open-ended. */
+const MAX_MONTHS = 120;
 
 export class RazorpayProvider implements PaymentProvider {
   readonly name = "razorpay" as const;
@@ -56,6 +56,7 @@ export class RazorpayProvider implements PaymentProvider {
   }
 
   async createPlan(plan: {
+    billingMonths: number;
     name: string;
     description: string | null;
     pricePaise: number;
@@ -63,7 +64,7 @@ export class RazorpayProvider implements PaymentProvider {
   }) {
     const data = await this.request("POST", "/plans", {
       period: "monthly",
-      interval: 1,
+      interval: plan.billingMonths,
       item: {
         name: plan.name,
         amount: plan.pricePaise,
@@ -76,11 +77,15 @@ export class RazorpayProvider implements PaymentProvider {
     return data.id;
   }
 
-  async createSubscription(input: { providerPlanId: string; notes: Record<string, string> }) {
+  async createSubscription(input: {
+    providerPlanId: string;
+    billingMonths: number;
+    notes: Record<string, string>;
+  }) {
     return toProviderSubscription(
       await this.request("POST", "/subscriptions", {
         plan_id: input.providerPlanId,
-        total_count: TOTAL_COUNT,
+        total_count: Math.ceil(MAX_MONTHS / input.billingMonths),
         quantity: 1,
         customer_notify: 1,
         notes: input.notes,

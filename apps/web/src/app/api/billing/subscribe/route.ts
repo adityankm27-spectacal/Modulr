@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     await Promise.all([
       service
         .from("plans")
-        .select("id, name, interval, razorpay_plan_id, is_active")
+        .select("id, name, interval, billing_months, razorpay_plan_id, is_active")
         .eq("id", parsed.data.planId)
         .maybeSingle(),
       service
@@ -85,6 +85,7 @@ export async function POST(request: Request) {
   try {
     const remote = await provider.createSubscription({
       providerPlanId: plan.razorpay_plan_id,
+      billingMonths: plan.billing_months,
       notes: { user_id: viewer.userId, plan_id: plan.id },
     });
     const { error } = await service.from("subscriptions").insert({

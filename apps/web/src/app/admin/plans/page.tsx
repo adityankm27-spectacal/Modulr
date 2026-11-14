@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { adminMetadata } from "@/lib/admin/metadata";
 import { savePlan } from "@/lib/admin/plan-actions";
 import { paymentsConfigured } from "@/lib/billing";
-import { formatPrice } from "@/lib/format";
+import { formatBillingPeriod, formatPrice } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
 export const generateMetadata = adminMetadata("Plans");
@@ -16,6 +16,7 @@ function PlanFields({
     name: string;
     description: string | null;
     price_paise: number;
+    billing_months: number;
     sort_order: number;
     is_active: boolean;
   };
@@ -26,10 +27,17 @@ function PlanFields({
         <TextField name="name" label="Name" defaultValue={plan?.name ?? "Monthly"} />
         <TextField
           name="price_rupees"
-          label="Price per month (₹)"
+          label="Price per billing period (₹)"
           inputMode="numeric"
           defaultValue={plan ? String(plan.price_paise / 100) : "100"}
           hint="Changing it creates a new Razorpay plan; current subscribers keep their price."
+        />
+        <TextField
+          name="billing_months"
+          label="Billed every (months)"
+          inputMode="numeric"
+          defaultValue={String(plan?.billing_months ?? 1)}
+          hint="1 for monthly, 3 for quarterly, 6 for half-yearly. Changing it creates a new Razorpay plan."
         />
         <TextField
           name="description"
@@ -57,7 +65,9 @@ export default async function PlansPage() {
   const supabase = await createClient();
   const { data: plans, error } = await supabase
     .from("plans")
-    .select("id, name, description, price_paise, interval, sort_order, is_active, razorpay_plan_id")
+    .select(
+      "id, name, description, price_paise, interval, billing_months, sort_order, is_active, razorpay_plan_id",
+    )
     .order("sort_order")
     .order("price_paise");
   if (error) throw new Error(`Couldn't load plans: ${error.message}`);
@@ -68,8 +78,8 @@ export default async function PlansPage() {
       <div>
         <h1 className="text-3xl">Plans</h1>
         <p className="mt-2 max-w-prose text-muted-foreground">
-          Monthly subscriptions paid through Razorpay (UPI Autopay and cards). Saving a plan creates
-          it in Razorpay when needed.
+          Recurring subscriptions (monthly, every 3 months, …) paid through Razorpay (UPI Autopay
+          and cards). Saving a plan creates it in Razorpay when needed.
         </p>
       </div>
 
@@ -90,7 +100,9 @@ export default async function PlansPage() {
                   {plan.name}{" "}
                   <span className="font-normal text-muted-foreground">
                     · {formatPrice(plan.price_paise)}
-                    {plan.interval === "month" ? "/month" : " one-time"}
+                    {plan.interval === "month"
+                      ? ` ${formatBillingPeriod(plan.billing_months)}`
+                      : " one-time"}
                   </span>
                 </p>
                 <div className="flex flex-wrap gap-1.5">

@@ -88,7 +88,9 @@ export default async function ModulePage({
     isFreePreview: current.is_free_preview,
     hasSubjectAccess: access,
   });
-  const monthly = plans.find((p) => p.interval === "month" && p.scope === "all");
+  const monthly = plans.find(
+    (p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all",
+  );
   const freeModule = modules.find((m) => m.is_free_preview && m.id !== current.id);
   const tone = SUBJECT_TONE[style.tone];
   const previous = modules[index - 1];

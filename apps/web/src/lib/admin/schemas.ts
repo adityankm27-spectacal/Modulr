@@ -204,6 +204,7 @@ export const planSchema = z.object({
   name: text("Name", 60),
   description: optionalText(200),
   price_rupees: intInRange("Price", 1, 100_000),
+  billing_months: intInRange("Billing period", 1, 12),
   sort_order: intInRange("Order", 0, 1000),
   is_active: checkbox,
   new_provider_plan: checkbox,

@@ -29,11 +29,17 @@ export function formatDate(value: string | Date): string {
   return indianDate.format(typeof value === "string" ? new Date(value) : value);
 }
 
+/** 1 → "per month", 3 → "every 3 months". */
+export function formatBillingPeriod(months: number): string {
+  return months === 1 ? "per month" : `every ${months} months`;
+}
+
 export function formatInterval(
   interval: Enums<"plan_interval">,
   validityDays: number | null,
+  billingMonths = 1,
 ): string {
-  if (interval === "month") return "per month";
+  if (interval === "month") return formatBillingPeriod(billingMonths);
   return validityDays ? `one-time, valid ${validityDays} days` : "one-time";
 }
 

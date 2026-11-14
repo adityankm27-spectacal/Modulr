@@ -7,7 +7,7 @@ import type { ActionState } from "./state";
 import { planSchema } from "./schemas";
 
 /**
- * Creates or edits a monthly plan. Razorpay plans can't be changed, so a new
+ * Creates or edits a recurring plan (billed every 1–12 months). Razorpay plans can't be changed, so a new
  * Razorpay plan is created when the plan has none yet, when its price changes,
  * or on request (e.g. after switching from test to live keys). Existing
  * subscribers stay on the Razorpay plan they signed up with.
@@ -18,11 +18,15 @@ export async function savePlan(_: ActionState, form: FormData) {
     planSchema,
     async ({ id, price_rupees, new_provider_plan, ...values }, supabase) => {
       const price_paise = price_rupees * 100;
-      let existing: { price_paise: number; razorpay_plan_id: string | null } | null = null;
+      let existing: {
+        price_paise: number;
+        billing_months: number;
+        razorpay_plan_id: string | null;
+      } | null = null;
       if (id) {
         const { data, error } = await supabase
           .from("plans")
-          .select("price_paise, razorpay_plan_id")
+          .select("price_paise, billing_months, razorpay_plan_id")
           .eq("id", id)
           .maybeSingle();
         check(error);
@@ -30,7 +34,10 @@ export async function savePlan(_: ActionState, form: FormData) {
         existing = data;
       }
 
-      const priceChanged = existing !== null && existing.price_paise !== price_paise;
+      // Razorpay plans are immutable, so a new price or billing period needs a new one.
+      const priceChanged =
+        existing !== null &&
+        (existing.price_paise !== price_paise || existing.billing_months !== values.billing_months);
       let razorpay_plan_id = priceChanged ? null : (existing?.razorpay_plan_id ?? null);
       let message = id ? "Plan saved" : "Plan created";
 
@@ -38,6 +45,7 @@ export async function savePlan(_: ActionState, form: FormData) {
         if (paymentsConfigured()) {
           try {
             razorpay_plan_id = await getPaymentProvider().createPlan({
+              billingMonths: values.billing_months,
               name: values.name,
               description: values.description,
               pricePaise: price_paise,

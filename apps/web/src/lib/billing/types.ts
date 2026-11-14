@@ -36,8 +36,9 @@ export interface PaymentProvider {
   readonly name: "razorpay";
   /** Public key the browser checkout needs. */
   readonly publicKey: string;
-  /** Creates a recurring monthly plan and returns its provider id. Provider plans are immutable. */
+  /** Creates a plan billed every `billingMonths` months; returns its provider id. Provider plans are immutable. */
   createPlan(plan: {
+    billingMonths: number;
     name: string;
     description: string | null;
     pricePaise: number;
@@ -45,6 +46,7 @@ export interface PaymentProvider {
   }): Promise<string>;
   createSubscription(input: {
     providerPlanId: string;
+    billingMonths: number;
     notes: Record<string, string>;
   }): Promise<ProviderSubscription>;
   getSubscription(id: string): Promise<ProviderSubscription>;

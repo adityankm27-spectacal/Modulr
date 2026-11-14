@@ -703,6 +703,7 @@ export type Database = {
       };
       plans: {
         Row: {
+          billing_months: number;
           created_at: string;
           currency: string;
           description: string | null;
@@ -719,6 +720,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          billing_months?: number;
           created_at?: string;
           currency?: string;
           description?: string | null;
@@ -734,6 +736,7 @@ export type Database = {
           validity_days?: number | null;
         };
         Update: {
+          billing_months?: number;
           created_at?: string;
           currency?: string;
           description?: string | null;

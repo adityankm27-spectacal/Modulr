@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getBilling } from "@/lib/billing/queries";
-import { formatPrice } from "@/lib/format";
+import { formatBillingPeriod, formatPrice } from "@/lib/format";
 import { CancelSubscriptionButton } from "./cancel-button";
 
 type Billing = Awaited<ReturnType<typeof getBilling>>;
@@ -80,7 +80,7 @@ export async function BillingSection({
                   {formatPrice(subscription.plans.price_paise)}
                   <span className="font-sans text-sm font-bold text-muted-foreground">
                     {" "}
-                    / month
+                    {formatBillingPeriod(subscription.plans.billing_months)}
                   </span>
                 </p>
               ) : null}

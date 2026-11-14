@@ -32,7 +32,7 @@ export const getBilling = cache(async (userId: string) => {
     supabase
       .from("subscriptions")
       .select(
-        "id, status, current_period_start, current_period_end, cancel_at_period_end, grace_until, created_at, plans(name, price_paise)",
+        "id, status, current_period_start, current_period_end, cancel_at_period_end, grace_until, created_at, plans(name, price_paise, billing_months)",
       )
       .eq("user_id", userId)
       .neq("status", "created")
