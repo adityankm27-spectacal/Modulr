@@ -206,6 +206,8 @@ async function VideosTab({
                 <Link
                   href={href(video.id)}
                   scroll={false}
+                  // Picking another video replaces the history entry, so Back leaves the module.
+                  replace
                   aria-current={current ? "true" : undefined}
                   className={cn(
                     "group flex items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
@@ -505,6 +507,7 @@ function QuestionFilterBar({
         <Link
           href={href({ marks: null, session: null })}
           scroll={false}
+          replace
           className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-link"
         >
           <X className="size-4" aria-hidden="true" />
@@ -533,6 +536,7 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
     <Link
       href={href}
       scroll={false}
+      replace
       aria-current={active ? "true" : undefined}
       className={cn(
         "inline-flex min-h-11 items-center rounded-full border-2 px-3.5 text-sm font-bold transition-colors",

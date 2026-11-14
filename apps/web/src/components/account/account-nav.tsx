@@ -43,6 +43,8 @@ export function AccountNav({
             <li key={tab} className="min-w-0 sm:shrink-0 lg:shrink">
               <Link
                 href={`/account?tab=${tab}`}
+                // Switching sections replaces the history entry, so Back leaves the account page.
+                replace
                 aria-current={current ? "page" : undefined}
                 className={cn(
                   "flex min-h-11 items-center justify-center gap-2 rounded-xl border-[3px] px-3 font-extrabold whitespace-nowrap transition-colors sm:justify-start",

@@ -268,7 +268,7 @@ export function VideoPlayer({
   useEffect(() => {
     if (countdown === null || !next) return;
     if (countdown <= 0) {
-      router.push(next.href);
+      router.replace(next.href);
       return;
     }
     const timer = setTimeout(() => setCountdown((c) => (c === null ? null : c - 1)), 1000);
@@ -378,7 +378,7 @@ export function VideoPlayer({
             </p>
             <p className="max-w-md font-display text-xl font-black">{next.title}</p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Button variant="sunflower" onClick={() => router.push(next.href)}>
+              <Button variant="sunflower" onClick={() => router.replace(next.href)}>
                 <SkipForward aria-hidden="true" />
                 Play now
               </Button>
