@@ -31,7 +31,7 @@ function describe(sub: Subscription, hasAccess: boolean): { badge: string; line:
       return hasAccess
         ? {
             badge: "Cancelled",
-            line: "You won't be charged again. Your access continues for the period you've already paid for.",
+            line: "You won't be charged again. Your access continues for the period you've already paid for. Your UPI app (GPay, PhonePe) can take a day or so to show the autopay as cancelled.",
           }
         : { badge: "Ended", line: null };
     default:
