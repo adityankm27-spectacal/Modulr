@@ -8,23 +8,24 @@ import { cn } from "@/lib/utils";
 
 // Header links prefetch the whole page in the background, so a click opens it at once.
 const navLink =
-  "inline-flex min-h-11 items-center rounded-full px-2 text-sm font-extrabold whitespace-nowrap text-foreground transition-colors hover:bg-muted sm:px-3 relative after:absolute after:inset-x-3 after:bottom-1.5 after:h-[3px] after:origin-left after:scale-x-0 after:rounded-full after:bg-cobalt after:transition-transform after:duration-300 hover:after:scale-x-100";
+  "inline-flex min-h-11 items-center rounded-full px-1.5 text-sm font-extrabold whitespace-nowrap text-foreground transition-colors hover:bg-muted sm:px-3 relative after:absolute after:inset-x-3 after:bottom-1.5 after:h-[3px] after:origin-left after:scale-x-0 after:rounded-full after:bg-cobalt after:transition-transform after:duration-300 hover:after:scale-x-100";
 
 export async function SiteHeader() {
   const viewer = await getViewer();
 
   return (
-    <header className="relative z-40 px-4 pt-4">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 rounded-full border-[3px] border-line bg-card py-1 pr-2 pl-4 sm:pl-5 shadow-[0_5px_0_0_var(--line)] motion-safe:animate-rise">
+    <header className="relative z-40 px-3 pt-4 sm:px-4">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-1 rounded-full border-[3px] border-line bg-card py-1 pr-1 pl-3 shadow-[0_5px_0_0_var(--line)] motion-safe:animate-rise sm:gap-2 sm:pr-2 sm:pl-5">
         <Link
           prefetch
           href={viewer ? "/home" : "/"}
           aria-label="Modulr home"
-          className="rounded-lg"
+          className="shrink-0 rounded-lg"
         >
-          <Logo />
+          {/* On very narrow phones the wordmark gives way so the icons always fit. */}
+          <Logo className="max-[340px]:[&>span:last-child]:hidden" />
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-1">
+        <nav aria-label="Main" className="flex shrink-0 items-center sm:gap-1">
           {viewer ? (
             <>
               <SessionWatch />
@@ -44,7 +45,7 @@ export async function SiteHeader() {
                 prefetch
                 href="/account"
                 aria-label="Account"
-                className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+                className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "shrink-0")}
               >
                 <CircleUserRound aria-hidden="true" />
               </Link>
