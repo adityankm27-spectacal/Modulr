@@ -12,6 +12,13 @@ const RESEND_SECONDS = 60;
 const OTP_LENGTH = 6;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Email-code sign-in is switched off until a custom SMTP sender is set up in Supabase:
+ * the built-in sender allows only 2 emails an hour for the whole project, so almost every
+ * visitor got "Too many attempts". Set to true to bring the email option back.
+ */
+const EMAIL_SIGN_IN_ENABLED = false;
+
 type Step = { kind: "email" } | { kind: "code"; email: string };
 
 export function SignInForm({ next, initialError }: { next: string; initialError: string | null }) {
@@ -190,39 +197,45 @@ export function SignInForm({ next, initialError }: { next: string; initialError:
         Continue with Google
       </Button>
 
-      <div className="flex items-center gap-3 text-sm text-muted-foreground" role="separator">
-        <span className="h-px flex-1 bg-border" />
-        or use your email
-        <span className="h-px flex-1 bg-border" />
-      </div>
+      {EMAIL_SIGN_IN_ENABLED ? null : <FieldError id={errorId} message={error ?? undefined} />}
 
-      <form onSubmit={onEmailSubmit} className="space-y-4" noValidate>
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            className="mt-2"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? errorId : undefined}
-          />
-          <FieldError id={errorId} message={error ?? undefined} />
-        </div>
-        <Button type="submit" block size="lg" disabled={pending !== null}>
-          {pending === "email" ? (
-            <Loader2 className="animate-spin" aria-hidden="true" />
-          ) : (
-            <Mail aria-hidden="true" />
-          )}
-          Email me a code
-        </Button>
-      </form>
+      {EMAIL_SIGN_IN_ENABLED ? (
+        <>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground" role="separator">
+            <span className="h-px flex-1 bg-border" />
+            or use your email
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <form onSubmit={onEmailSubmit} className="space-y-4" noValidate>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                className="mt-2"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? errorId : undefined}
+              />
+              <FieldError id={errorId} message={error ?? undefined} />
+            </div>
+            <Button type="submit" block size="lg" disabled={pending !== null}>
+              {pending === "email" ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Mail aria-hidden="true" />
+              )}
+              Email me a code
+            </Button>
+          </form>
+        </>
+      ) : null}
     </div>
   );
 }
