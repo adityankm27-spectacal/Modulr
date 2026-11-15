@@ -53,9 +53,13 @@ export function SignInForm({ next, initialError }: { next: string; initialError:
     inFlight.current = true;
     setError(null);
     setPending("email");
+    // The emailed link comes back through the same callback as Google sign-in, so it
+    // works on whatever domain the visitor is on (not just the project's Site URL).
+    const redirectTo = new URL("/auth/callback", window.location.origin);
+    redirectTo.searchParams.set("next", next);
     const { error } = await createClient().auth.signInWithOtp({
       email: address,
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: true, emailRedirectTo: redirectTo.toString() },
     });
     inFlight.current = false;
     setPending(null);
@@ -118,7 +122,8 @@ export function SignInForm({ next, initialError }: { next: string; initialError:
     return (
       <form onSubmit={onCodeSubmit} className="mt-8 space-y-5" noValidate>
         <p className="rounded-xl bg-muted p-4 text-sm">
-          We sent a {OTP_LENGTH}-digit code to <strong className="break-all">{step.email}</strong>.
+          We emailed <strong className="break-all">{step.email}</strong>. Open the link in that
+          email to sign in on this device, or enter the {OTP_LENGTH}-digit code if it includes one.
           It expires in 10 minutes.
         </p>
         <div>
