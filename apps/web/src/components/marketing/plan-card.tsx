@@ -1,7 +1,8 @@
-import { Check, Flame, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Flame, PiggyBank, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { AnimatedPrice } from "./animated-price";
 import { formatInterval, formatPrice } from "@/lib/format";
 import { formatPerDay, planValue } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
@@ -107,7 +108,15 @@ export function PlanCard({
       </div>
 
       <p className="mt-4 flex flex-wrap items-baseline gap-x-2">
-        <span className="font-display text-5xl font-black">{formatPrice(plan.price_paise)}</span>
+        {compact ? (
+          <AnimatedPrice
+            paise={plan.price_paise}
+            delayMs={300 + index * 120}
+            className="font-display text-5xl font-black"
+          />
+        ) : (
+          <span className="font-display text-5xl font-black">{formatPrice(plan.price_paise)}</span>
+        )}
         {value?.fullPricePaise ? (
           <s className="text-lg font-bold text-muted-foreground decoration-red decoration-2">
             <span className="sr-only">instead of </span>
@@ -137,11 +146,38 @@ export function PlanCard({
         </p>
       ) : null}
 
+      {compact && value?.fullPricePaise ? (
+        <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-mint/25 px-3 py-1 text-sm font-extrabold text-foreground">
+          <PiggyBank className="size-4" aria-hidden="true" />
+          You save {formatPrice(value.fullPricePaise - plan.price_paise)}
+        </p>
+      ) : null}
+
       <p className="mt-5 font-bold">{SCOPE_LABEL[plan.scope]}</p>
       {compact ? (
-        <p className="mt-2 flex-1 text-sm text-muted-foreground">
-          Videos, short notes, formula sheets, solved PYQs and viva prep for every module.
-        </p>
+        <details className="group mt-2 flex-1 text-sm text-muted-foreground">
+          <summary className="flex cursor-pointer list-none items-start justify-between gap-2 rounded-lg py-1 marker:hidden hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+            <span>
+              Videos, short notes, formula sheets, solved PYQs and viva prep for every module.
+            </span>
+            <ChevronDown
+              className="mt-0.5 size-4 shrink-0 transition-transform duration-300 group-open:rotate-180"
+              aria-label="Show what's included"
+            />
+          </summary>
+          <ul className="mt-3 space-y-2 text-foreground">
+            {INCLUDED.map((item, i) => (
+              <li
+                key={item}
+                style={{ animationDelay: `${i * 70}ms` }}
+                className="flex gap-2 motion-safe:group-open:animate-rise"
+              >
+                <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
       ) : (
         <>
           {plan.description ? (

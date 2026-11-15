@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
+import { Tilt } from "@/components/motion/tilt";
 import { bestValuePlanId, mostPopularPlanId, PlanCard } from "@/components/marketing/plan-card";
 import { paymentsConfigured } from "@/lib/billing";
 import { getActivePlans, getFreeModules } from "@/lib/catalog";
@@ -33,20 +34,22 @@ export async function PricingWelcome({ userId }: { userId: string }) {
       }
     >
       {plans.map((plan, i) => (
-        <PlanCard
-          key={plan.id}
-          plan={plan}
-          index={i}
-          monthlyPricePaise={monthlyPaise}
-          featured={plan.id === (bestValue ?? monthly?.id)}
-          popular={plan.id === popular}
-          compact
-          cta={
-            canPay && plan.interval === "month" && plan.razorpay_plan_id
-              ? { node: <SubscribeButton planId={plan.id} /> }
-              : { href: "/pricing", label: "See plan details" }
-          }
-        />
+        // The card leans towards the pointer; the wrapper stretches so cards stay equal height.
+        <Tilt key={plan.id} max={5} className="h-full [&>article]:h-full">
+          <PlanCard
+            plan={plan}
+            index={i}
+            monthlyPricePaise={monthlyPaise}
+            featured={plan.id === (bestValue ?? monthly?.id)}
+            popular={plan.id === popular}
+            compact
+            cta={
+              canPay && plan.interval === "month" && plan.razorpay_plan_id
+                ? { node: <SubscribeButton planId={plan.id} /> }
+                : { href: "/pricing", label: "See plan details" }
+            }
+          />
+        </Tilt>
       ))}
     </PricingPopup>
   );
