@@ -1,8 +1,13 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.25;
 
 /**
  * View-only PDF notes (spec §16 Q6: no downloads). Pages are drawn onto canvases with
@@ -21,6 +26,55 @@ export function PdfViewer({
 }) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [failed, setFailed] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
+  const [zoom, setZoom] = useState(1);
+
+  const zoomBy = useCallback((delta: number) => {
+    setZoom((z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round((z + delta) * 100) / 100)));
+  }, []);
+
+  // Native fullscreen where the browser supports it (not iPhone Safari); otherwise the
+  // same layout is shown as a fixed overlay.
+  const enterFull = () => {
+    setFull(true);
+    const el = wrapRef.current;
+    if (el && document.fullscreenEnabled) void el.requestFullscreen().catch(() => undefined);
+  };
+  const exitFull = useCallback(() => {
+    setFull(false);
+    setZoom(1);
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    // Esc leaves native fullscreen without telling us, so keep the state in step.
+    const onChange = () => {
+      if (!document.fullscreenElement) {
+        setFull(false);
+        setZoom(1);
+      }
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") exitFull();
+      else if (e.key === "+" || e.key === "=") zoomBy(ZOOM_STEP);
+      else if (e.key === "-") zoomBy(-ZOOM_STEP);
+      else if (e.key === "0") setZoom(1);
+    };
+    window.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [full, exitFull, zoomBy]);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,20 +120,82 @@ export function PdfViewer({
 
   return (
     <div
-      aria-label={title}
-      role="document"
-      className="space-y-4 select-none"
-      onContextMenu={(e) => e.preventDefault()}
+      ref={wrapRef}
+      className={
+        full ? "fixed inset-0 z-50 overflow-auto bg-background px-4 pb-8 sm:px-8" : "space-y-3"
+      }
     >
-      {Array.from({ length: pdf.numPages }, (_, i) => (
-        <PdfPage
-          key={i + 1}
-          pdf={pdf}
-          pageNumber={i + 1}
-          total={pdf.numPages}
-          watermark={watermark}
-        />
-      ))}
+      <div
+        className={
+          full
+            ? "sticky top-0 z-10 -mx-4 mb-4 flex flex-wrap items-center justify-end gap-2 border-b-2 bg-background/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
+            : "flex justify-end"
+        }
+      >
+        {full ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => zoomBy(-ZOOM_STEP)}
+              disabled={zoom <= ZOOM_MIN}
+              aria-label="Zoom out"
+            >
+              <ZoomOut aria-hidden="true" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setZoom(1)}
+              aria-label="Reset zoom"
+              className="min-w-16 tabular-nums"
+            >
+              {Math.round(zoom * 100)}%
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => zoomBy(ZOOM_STEP)}
+              disabled={zoom >= ZOOM_MAX}
+              aria-label="Zoom in"
+            >
+              <ZoomIn aria-hidden="true" />
+            </Button>
+          </>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={full ? exitFull : enterFull}
+          aria-label={full ? "Exit full screen" : "Full screen"}
+        >
+          {full ? <Minimize2 aria-hidden="true" /> : <Maximize2 aria-hidden="true" />}
+          {full ? "Exit" : "Full screen"}
+        </Button>
+      </div>
+      <div
+        aria-label={title}
+        role="document"
+        className="mx-auto space-y-4 select-none"
+        style={full ? { width: `calc(min(100%, 56rem) * ${zoom})` } : undefined}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {Array.from({ length: pdf.numPages }, (_, i) => (
+          <PdfPage
+            key={i + 1}
+            pdf={pdf}
+            pageNumber={i + 1}
+            total={pdf.numPages}
+            watermark={watermark}
+            zoom={zoom}
+            full={full}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -89,11 +205,15 @@ function PdfPage({
   pageNumber,
   total,
   watermark,
+  zoom,
+  full,
 }: {
   pdf: PDFDocumentProxy;
   pageNumber: number;
   total: number;
   watermark: { name: string; email: string } | null;
+  zoom: number;
+  full: boolean;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -164,7 +284,7 @@ function PdfPage({
       observer.disconnect();
       task?.cancel();
     };
-  }, [pdf, pageNumber]);
+  }, [pdf, pageNumber, zoom, full]);
 
   return (
     <figure className="space-y-1">
