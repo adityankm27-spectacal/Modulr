@@ -127,7 +127,11 @@ export function VideoUpload({
     handle.current = null;
 
     setPhase({ kind: "finishing" });
-    const result = await finishVideoUpload({ videoId, durationSec });
+    const result = await finishVideoUpload({
+      videoId,
+      durationSec,
+      replacedProviderVideoId: start.replacedProviderVideoId,
+    });
     setPhase(
       result.status === "ok"
         ? { kind: "done", message: result.message ?? "Uploaded" }

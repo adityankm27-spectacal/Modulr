@@ -355,7 +355,8 @@ const uploadStart = z.object({
 });
 
 export type StartUploadResult =
-  { status: "ok"; target: UploadTarget } | { status: "error"; message: string };
+  | { status: "ok"; target: UploadTarget; replacedProviderVideoId?: string }
+  | { status: "error"; message: string };
 
 /**
  * Starts an upload: creates the video on the provider if needed and returns a
@@ -365,7 +366,7 @@ export type StartUploadResult =
 export async function startVideoUpload(
   input: z.infer<typeof uploadStart>,
 ): Promise<StartUploadResult> {
-  const out: { target?: UploadTarget } = {};
+  const out: { target?: UploadTarget; replaced?: string } = {};
   const result = await runAdminAction(
     input,
     uploadStart,
@@ -374,16 +375,22 @@ export async function startVideoUpload(
         throw new AdminError("Choose a video file (MP4, MOV or WebM).");
       const { data: video, error } = await supabase
         .from("videos")
-        .select("id, title, provider, provider_video_id")
+        .select("id, title, provider, provider_video_id, processing_status")
         .eq("id", videoId)
         .maybeSingle();
       check(error);
       if (!video) throw new AdminError("That video no longer exists. Reload the page.");
 
-      const providerName = video.provider_video_id ? video.provider : configuredProviderName();
+      // An interrupted upload (still "uploading") resumes against the same provider video.
+      // Anything else that already has a file is a replacement: the provider won't take a
+      // second upload into a finished video, so it gets a fresh one and the old is removed
+      // once the new file has arrived (see finishVideoUpload).
+      const resuming = Boolean(video.provider_video_id) && video.processing_status === "uploading";
+      const providerName = resuming ? video.provider : configuredProviderName();
       const provider = getVideoProvider(providerName);
       let providerVideoId = video.provider_video_id;
-      if (!providerVideoId) {
+      if (!resuming || !providerVideoId) {
+        const previous = video.provider_video_id;
         providerVideoId = await provider.createVideo(video.title);
         check(
           (
@@ -393,10 +400,12 @@ export async function startVideoUpload(
                 provider: providerName,
                 provider_video_id: providerVideoId,
                 processing_status: "uploading",
+                ...(previous ? { thumbnail_url: null } : {}),
               })
               .eq("id", videoId)
           ).error,
         );
+        if (previous && video.provider === providerName) out.replaced = previous;
       } else {
         check(
           (
@@ -411,7 +420,9 @@ export async function startVideoUpload(
       return "Uploading";
     },
   );
-  if (result.status === "ok" && out.target) return { status: "ok", target: out.target };
+  if (result.status === "ok" && out.target) {
+    return { status: "ok", target: out.target, replacedProviderVideoId: out.replaced };
+  }
   return { status: "error", message: result.message ?? "Couldn't start the upload." };
 }
 
@@ -423,37 +434,50 @@ const uploadDone = z.object({
     .min(0)
     .max(24 * 60 * 60)
     .nullable(),
+  /** The provider video this upload replaced; removed once the new file is in. */
+  replacedProviderVideoId: z.string().min(1).max(100).optional(),
 });
 
 /** Called by the browser after the bytes are uploaded; then checks the provider's status. */
 export async function finishVideoUpload(input: z.infer<typeof uploadDone>): Promise<ActionState> {
-  return runAdminAction(input, uploadDone, async ({ videoId, durationSec }, supabase) => {
-    const { data: video, error } = await supabase
-      .from("videos")
-      .select("provider, provider_video_id, duration_sec, chapters")
-      .eq("id", videoId)
-      .maybeSingle();
-    check(error);
-    if (!video?.provider_video_id) throw new AdminError("Upload not found. Try again.");
-    const status = await getVideoProvider(video.provider).getStatus(video.provider_video_id);
-    const processing = status.status === "pending" ? "processing" : status.status;
-    check(
-      (
-        await supabase
-          .from("videos")
-          .update({
-            processing_status: processing,
-            duration_sec: status.durationSec ?? durationSec ?? video.duration_sec,
-            ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
-            ...providerChaptersUpdate(video.chapters, status),
-          })
-          .eq("id", videoId)
-      ).error,
-    );
-    return processing === "ready"
-      ? "Uploaded and ready"
-      : "Uploaded. The provider is processing it now.";
-  });
+  return runAdminAction(
+    input,
+    uploadDone,
+    async ({ videoId, durationSec, replacedProviderVideoId }, supabase) => {
+      const { data: video, error } = await supabase
+        .from("videos")
+        .select("provider, provider_video_id, duration_sec, chapters")
+        .eq("id", videoId)
+        .maybeSingle();
+      check(error);
+      if (!video?.provider_video_id) throw new AdminError("Upload not found. Try again.");
+      const status = await getVideoProvider(video.provider).getStatus(video.provider_video_id);
+      const processing = status.status === "pending" ? "processing" : status.status;
+      check(
+        (
+          await supabase
+            .from("videos")
+            .update({
+              processing_status: processing,
+              duration_sec: status.durationSec ?? durationSec ?? video.duration_sec,
+              ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
+              ...providerChaptersUpdate(video.chapters, status),
+            })
+            .eq("id", videoId)
+        ).error,
+      );
+      // The replaced file is no longer needed. Best effort: a failure only leaves an unused
+      // video on the provider, so it doesn't fail the upload.
+      if (replacedProviderVideoId && replacedProviderVideoId !== video.provider_video_id) {
+        await getVideoProvider(video.provider)
+          .deleteVideo(replacedProviderVideoId)
+          .catch(() => undefined);
+      }
+      return processing === "ready"
+        ? "Uploaded and ready"
+        : "Uploaded. The provider is processing it now.";
+    },
+  );
 }
 
 /** Re-reads processing status, duration and thumbnail from the provider. */
