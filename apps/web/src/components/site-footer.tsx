@@ -27,6 +27,8 @@ export function SiteFooter() {
               <li key={link.href}>
                 <Link
                   href={link.href}
+                  // Rarely opened, so not loaded in the background on every page view.
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center text-sm font-bold text-muted-foreground hover:text-foreground"
                 >
                   {link.label}

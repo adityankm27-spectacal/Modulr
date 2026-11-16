@@ -1,12 +1,14 @@
 import { CircleUserRound } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { IntentLink } from "@/components/intent-link";
 import { Logo } from "@/components/logo";
 import { SessionWatch } from "@/components/session-watch";
 import { getViewer, isAdmin } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-// Header links prefetch the whole page in the background, so a click opens it at once.
+// Header links open at once: the ones most visitors click next load in the background right
+// away, the rest as soon as the pointer, a finger or the keyboard reaches them.
 const navLink =
   "inline-flex min-h-11 items-center rounded-full px-1.5 text-sm font-extrabold whitespace-nowrap text-foreground transition-colors hover:bg-muted sm:px-3 relative after:absolute after:inset-x-3 after:bottom-1.5 after:h-[3px] after:origin-left after:scale-x-0 after:rounded-full after:bg-cobalt after:transition-transform after:duration-300 hover:after:scale-x-100";
 
@@ -30,25 +32,24 @@ export async function SiteHeader() {
             <>
               <SessionWatch />
               {isAdmin(viewer) ? (
-                <Link prefetch href="/admin" className={cn(navLink, "hidden sm:inline-flex")}>
+                <IntentLink href="/admin" className={cn(navLink, "hidden sm:inline-flex")}>
                   Admin
-                </Link>
+                </IntentLink>
               ) : null}
-              <Link prefetch href="/pricing" className={navLink}>
+              <IntentLink href="/pricing" className={navLink}>
                 Pricing
-              </Link>
+              </IntentLink>
               <Link prefetch href="/home" className={navLink}>
                 <span className="sm:hidden">Subjects</span>
                 <span className="hidden sm:inline">My subjects</span>
               </Link>
-              <Link
-                prefetch
+              <IntentLink
                 href="/account"
                 aria-label="Account"
                 className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "shrink-0")}
               >
                 <CircleUserRound aria-hidden="true" />
-              </Link>
+              </IntentLink>
             </>
           ) : (
             <>
