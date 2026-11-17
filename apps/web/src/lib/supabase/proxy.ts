@@ -35,19 +35,29 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Triggers a token refresh when needed. Do not run code between client creation and this call.
+  const claimsStart = Date.now();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
+  const claimsMs = Date.now() - claimsStart;
 
   // One active device per account: sign out sessions replaced by a newer sign-in.
   // Link prefetches only warm the client cache and show nothing to the user, so they skip
   // the database lookup; the real navigation that follows does the check.
   const isPrefetch = request.headers.has("next-router-prefetch");
   if (claims?.sub && !isPrefetch && !isSessionCheckExempt(request.nextUrl.pathname)) {
+    const profileStart = Date.now();
     const { data: profile } = await supabase
       .from("profiles")
       .select("active_session_id")
       .eq("id", claims.sub)
       .maybeSingle();
+    const profileMs = Date.now() - profileStart;
+    // Slow sign-in checks show up in the host's logs, so a stall can be traced to its cause.
+    if (claimsMs + profileMs > 1500) {
+      console.warn(
+        `[slow-proxy] ${request.nextUrl.pathname} claims=${claimsMs}ms profile=${profileMs}ms`,
+      );
+    }
     if (isSessionReplaced(claims.session_id, profile?.active_session_id)) {
       // Revokes this session and clears its cookies (via setAll above).
       await supabase.auth.signOut({ scope: "local" });
