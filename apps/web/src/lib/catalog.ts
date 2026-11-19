@@ -216,16 +216,19 @@ export async function getPracticalVideos(
 /** The published practicals of a subject. Titles are public; the videos are not. */
 export const getPracticals = cache(async (subjectId: string) => {
   const supabase = await createClient();
-  return rows(
-    await supabase
-      .from("practicals")
-      .select("id, number, title")
-      .eq("subject_id", subjectId)
-      .eq("is_published", true)
-      .order("sort_order")
-      .order("number"),
-    "practicals",
-  );
+  const result = await supabase
+    .from("practicals")
+    .select("id, number, title")
+    .eq("subject_id", subjectId)
+    .eq("is_published", true)
+    .order("sort_order")
+    .order("number");
+  // Practicals are an extra on the subject page: if they can't load, the modules still show.
+  if (result.error) {
+    console.error(`Failed to load practicals: ${result.error.message}`);
+    return [];
+  }
+  return result.data;
 });
 
 export const getPractical = cache(async (subjectId: string, number: number) => {
