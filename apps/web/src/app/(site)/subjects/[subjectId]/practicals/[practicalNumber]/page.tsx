@@ -105,6 +105,7 @@ export default async function PracticalPage({
         {lock.kind === "open" ? (
           <VideosTab
             practicalId={practical.id}
+            practicalNumber={practical.number}
             hrefFor={(id) => `${basePath}?v=${id}`}
             drafts={false}
             viewer={

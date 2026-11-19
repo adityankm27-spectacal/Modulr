@@ -122,6 +122,7 @@ async function TabContent({
 export async function VideosTab({
   moduleId,
   practicalId,
+  practicalNumber,
   hrefFor,
   drafts,
   viewer,
@@ -132,6 +133,8 @@ export async function VideosTab({
   /** A module's videos, or (instead) a practical's. */
   moduleId?: string;
   practicalId?: string;
+  /** The practical's own number, used to label its videos (2, or 2.1 and 2.2 when there are several). */
+  practicalNumber?: number;
   /** Link to a video within the page; modules use ?tab=videos&v=, practicals just ?v=. */
   hrefFor?: (videoId: string) => string;
   drafts: boolean;
@@ -253,7 +256,12 @@ export async function VideosTab({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-bold leading-snug">
-                      {index + 1}. {video.title}
+                      {practicalNumber === undefined
+                        ? index + 1
+                        : videos.length === 1
+                          ? practicalNumber
+                          : `${practicalNumber}.${index + 1}`}
+                      . {video.title}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                       {duration ? (
