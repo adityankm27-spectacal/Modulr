@@ -70,7 +70,7 @@ export async function getSyllabusAdmin(id: string) {
 
 export async function getSubjectAdmin(id: string) {
   const supabase = await createClient();
-  const [subject, modules, crossModule] = await Promise.all([
+  const [subject, modules, practicals, crossModule] = await Promise.all([
     supabase
       .from("subjects")
       .select(
@@ -87,6 +87,12 @@ export async function getSubjectAdmin(id: string) {
       .order("sort_order")
       .order("number"),
     supabase
+      .from("practicals")
+      .select("id, number, title, is_published, videos(count)")
+      .eq("subject_id", id)
+      .order("sort_order")
+      .order("number"),
+    supabase
       .from("questions")
       .select("id, kind, question_md, marks, sessions, frequency, is_published")
       .eq("subject_id", id)
@@ -99,6 +105,7 @@ export async function getSubjectAdmin(id: string) {
   return {
     subject: subject.data,
     modules: must(modules, "modules"),
+    practicals: must(practicals, "practicals"),
     crossModule: must(crossModule, "questions"),
   };
 }
@@ -176,4 +183,27 @@ export async function getSubjectForQuestions(subjectId: string) {
   if (subject.error) throw new Error(subject.error.message);
   if (!subject.data) return null;
   return { subject: subject.data, modules: must(modules, "modules") };
+}
+
+export async function getPracticalAdmin(id: string) {
+  const supabase = await createClient();
+  const [practical, videos] = await Promise.all([
+    supabase
+      .from("practicals")
+      .select(
+        "id, number, title, is_published, subject_id, subjects!inner(id, code, name, syllabus_version_id, syllabus_versions!inner(id, label))",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("videos")
+      .select(
+        "id, title, provider, provider_video_id, duration_sec, chapters, processing_status, is_published",
+      )
+      .eq("practical_id", id)
+      .order("sort_order"),
+  ]);
+  if (practical.error) throw new Error(practical.error.message);
+  if (!practical.data) return null;
+  return { practical: practical.data, videos: must(videos, "videos") };
 }

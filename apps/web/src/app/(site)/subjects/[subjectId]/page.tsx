@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ModuleList } from "@/components/catalog/module-list";
+import { PracticalList } from "@/components/catalog/practical-list";
 import { SubjectHero } from "@/components/catalog/subject-hero";
 import { buttonVariants } from "@/components/ui/button";
 import { getViewer } from "@/lib/auth";
@@ -10,6 +11,7 @@ import {
   getContentCounts,
   getModules,
   getSubject,
+  getPracticals,
   getSubjectStyle,
   hasSubjectAccess,
 } from "@/lib/catalog";
@@ -38,11 +40,12 @@ export default async function SubjectPage({ params }: { params: Params }) {
   const [subject, viewer] = await Promise.all([getSubject(subjectId), getViewer()]);
   if (!subject) notFound();
 
-  const [modules, counts, style, access] = await Promise.all([
+  const [modules, counts, style, access, practicals] = await Promise.all([
     getModules(subject.id),
     getContentCounts(subject.id),
     getSubjectStyle(subject),
     viewer ? hasSubjectAccess(viewer.userId, subject.id) : Promise.resolve(false),
+    getPracticals(subject.id),
   ]);
 
   const videoTotal = modules.reduce((sum, m) => sum + tabCount("videos", counts.get(m.id)), 0);
@@ -58,6 +61,7 @@ export default async function SubjectPage({ params }: { params: Params }) {
     ...(freeText ? [freeText] : []),
     ...(modules.length > 0 ? [pluralize(modules.length, "module")] : []),
     ...(videoTotal > 0 ? [pluralize(videoTotal, "video")] : []),
+    ...(practicals.length > 0 ? [pluralize(practicals.length, "practical")] : []),
   ];
   const backHref = viewer ? `/home?semester=${subject.semester}` : "/subjects";
 
@@ -127,6 +131,24 @@ export default async function SubjectPage({ params }: { params: Params }) {
           />
         </div>
       </section>
+      {practicals.length > 0 ? (
+        <section aria-labelledby="practicals-heading" className="mt-12">
+          <h2 id="practicals-heading" className="text-xl">
+            Practicals
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Watch each lab experiment explained step by step.
+          </p>
+          <div className="mt-4">
+            <PracticalList
+              subjectId={subject.id}
+              practicals={practicals}
+              tone={style.tone}
+              locked={!access}
+            />
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

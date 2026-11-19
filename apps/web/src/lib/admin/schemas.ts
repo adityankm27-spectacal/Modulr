@@ -89,14 +89,50 @@ export const moduleSchema = z.object({
   is_published: checkbox,
 });
 
+export const practicalSchema = z.object({
+  id: optionalId,
+  subject_id: id,
+  number: intInRange("Number", 1, 99),
+  title: text("Title", 200),
+  is_published: checkbox,
+});
+
+/** One experiment title per line; numbered after the practicals already there. */
+export const practicalBulkSchema = z.object({
+  subject_id: id,
+  titles: z
+    .string()
+    .max(20_000, "That list is too long.")
+    .transform((v) =>
+      v
+        .split(/\r?\n/)
+        // "1. Stack using arrays" and "1) Stack..." both lose their leading number.
+        .map((line) => line.replace(/^\s*\d+\s*[.):-]\s*/, "").trim())
+        .filter(Boolean),
+    )
+    .refine((titles) => titles.length > 0, "Add at least one title, one per line.")
+    .refine((titles) => titles.length <= 60, "Add at most 60 at a time.")
+    .refine(
+      (titles) => titles.every((t) => t.length <= 200),
+      "Keep each title under 200 characters.",
+    ),
+  is_published: checkbox,
+});
+
 export const videoSchema = z
   .object({
     id: optionalId,
-    module_id: id,
+    // A video belongs to a module or to a practical (exactly one).
+    module_id: optionalId,
+    practical_id: optionalId,
     title: text("Title", 200),
     duration: z.string().trim().optional(),
     chapters: z.string().max(10000).optional(),
     is_published: checkbox,
+  })
+  .refine((v) => Boolean(v.module_id) !== Boolean(v.practical_id), {
+    message: "A video belongs to a module or a practical.",
+    path: ["module_id"],
   })
   .transform((v, ctx) => {
     const duration = v.duration ? parseTimestamp(v.duration) : null;
@@ -188,6 +224,7 @@ export const questionSchema = z.object({
 export const PUBLISHABLE = [
   "subjects",
   "modules",
+  "practicals",
   "videos",
   "documents",
   "formula_cards",
@@ -195,7 +232,14 @@ export const PUBLISHABLE = [
 ] as const;
 export type PublishableTable = (typeof PUBLISHABLE)[number];
 
-export const REORDERABLE = ["subjects", "modules", "videos", "formula_cards", "questions"] as const;
+export const REORDERABLE = [
+  "subjects",
+  "modules",
+  "practicals",
+  "videos",
+  "formula_cards",
+  "questions",
+] as const;
 export type ReorderableTable = (typeof REORDERABLE)[number];
 
 // Monthly plans only for now: one-time exam packs need a Razorpay Orders flow (spec §16 Q2).

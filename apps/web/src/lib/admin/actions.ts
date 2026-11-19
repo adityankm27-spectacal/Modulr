@@ -18,6 +18,8 @@ import {
   formulaCardSchema,
   idSchema,
   moduleSchema,
+  practicalBulkSchema,
+  practicalSchema,
   PUBLISHABLE,
   questionSchema,
   REORDERABLE,
@@ -266,6 +268,92 @@ export async function deleteModule(_: ActionState, form: FormData) {
   });
 }
 
+// --- Practicals ----------------------------------------------------------------
+
+/** Adds or edits one practical (a lab experiment with explanation videos). */
+export async function savePractical(_: ActionState, form: FormData) {
+  return runAdminAction(form, practicalSchema, async ({ id, ...values }, supabase) => {
+    if (id) {
+      const { data, error } = await supabase
+        .from("practicals")
+        .update(values)
+        .eq("id", id)
+        .select("id");
+      check(error);
+      mustAffect(data, "practical");
+      return "Practical saved";
+    }
+    const { count } = await supabase
+      .from("practicals")
+      .select("id", { count: "exact", head: true })
+      .eq("subject_id", values.subject_id);
+    check(
+      (await supabase.from("practicals").insert({ ...values, sort_order: (count ?? 0) + 1 })).error,
+    );
+    return "Practical added";
+  });
+}
+
+/** Adds several practicals from a pasted list, numbering them after the existing ones. */
+export async function addPracticals(_: ActionState, form: FormData) {
+  return runAdminAction(form, practicalBulkSchema, async (data, supabase) => {
+    const { data: existing, error } = await supabase
+      .from("practicals")
+      .select("number")
+      .eq("subject_id", data.subject_id);
+    check(error);
+    const start = Math.max(0, ...(existing ?? []).map((p) => p.number));
+    if (start + data.titles.length > 99) {
+      throw new AdminError("A subject can have at most 99 practicals.");
+    }
+    check(
+      (
+        await supabase.from("practicals").insert(
+          data.titles.map((title, i) => ({
+            subject_id: data.subject_id,
+            number: start + i + 1,
+            sort_order: start + i + 1,
+            title,
+            is_published: data.is_published,
+          })),
+        )
+      ).error,
+    );
+    return `${data.titles.length} practicals added`;
+  });
+}
+
+/** Deletes a practical together with its videos (the files are removed from the provider too). */
+export async function deletePractical(_: ActionState, form: FormData) {
+  return runAdminAction(form, idSchema, async ({ id }, supabase) => {
+    const { data: practical } = await supabase
+      .from("practicals")
+      .select("subject_id")
+      .eq("id", id)
+      .maybeSingle();
+    const { data: videos } = await supabase
+      .from("videos")
+      .select("provider, provider_video_id")
+      .eq("practical_id", id);
+    for (const video of videos ?? []) {
+      if (!video.provider_video_id) continue;
+      try {
+        await getVideoProvider(video.provider).deleteVideo(video.provider_video_id);
+      } catch (error) {
+        // Don't block the delete; a leftover provider copy can be cleaned up by hand.
+        console.error(error);
+      }
+    }
+    const { data, error } = await supabase.from("practicals").delete().eq("id", id).select("id");
+    check(error);
+    mustAffect(data, "practical");
+    return {
+      message: "Practical deleted",
+      redirectTo: practical ? `/admin/subjects/${practical.subject_id}` : "/admin/catalog",
+    };
+  });
+}
+
 // --- Generic toggles and ordering -------------------------------------------
 
 const flagSchema = z.object({
@@ -332,10 +420,14 @@ export async function saveVideo(_: ActionState, form: FormData) {
       }
       return "Video saved";
     }
+    // New videos go at the end of their module's or practical's list.
+    const parent = values.module_id
+      ? ({ column: "module_id", id: values.module_id } as const)
+      : ({ column: "practical_id", id: values.practical_id ?? "" } as const);
     const { count } = await supabase
       .from("videos")
       .select("id", { count: "exact", head: true })
-      .eq("module_id", values.module_id);
+      .eq(parent.column, parent.id);
     check(
       (
         await supabase

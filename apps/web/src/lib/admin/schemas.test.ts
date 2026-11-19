@@ -4,6 +4,7 @@ import {
   documentSchema,
   formulaCardSchema,
   moduleSchema,
+  practicalBulkSchema,
   questionSchema,
   subjectSchema,
   videoSchema,
@@ -181,5 +182,26 @@ describe("other content schemas accept unticked checkboxes", () => {
       when_to_use: "",
       is_published: false,
     });
+  });
+
+  it("practical list: strips numbering, blank lines and extra spaces", () => {
+    const data = practicalBulkSchema.parse({
+      subject_id: subject,
+      titles:
+        "1. Stack using arrays\n\n2) Linear queue using arrays\n  Postfix evaluation  \n12 - DFS\n",
+    });
+    expect(data.titles).toEqual([
+      "Stack using arrays",
+      "Linear queue using arrays",
+      "Postfix evaluation",
+      "DFS",
+    ]);
+    expect(data.is_published).toBe(false);
+  });
+
+  it("practical list: rejects an empty list", () => {
+    expect(practicalBulkSchema.safeParse({ subject_id: subject, titles: " \n \n" }).success).toBe(
+      false,
+    );
   });
 });

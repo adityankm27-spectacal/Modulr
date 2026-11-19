@@ -198,6 +198,50 @@ export async function getVideos(moduleId: string, { drafts = false }: ContentOpt
   return rows(await query, "videos");
 }
 
+/** A practical's videos. Like module videos, RLS only returns them to students with access. */
+export async function getPracticalVideos(
+  practicalId: string,
+  { drafts = false }: ContentOptions = {},
+) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("videos")
+    .select("id, title, duration_sec, chapters, is_published, processing_status, thumbnail_url")
+    .eq("practical_id", practicalId)
+    .order("sort_order");
+  if (!drafts) query = query.eq("is_published", true);
+  return rows(await query, "practical videos");
+}
+
+/** The published practicals of a subject. Titles are public; the videos are not. */
+export const getPracticals = cache(async (subjectId: string) => {
+  const supabase = await createClient();
+  return rows(
+    await supabase
+      .from("practicals")
+      .select("id, number, title")
+      .eq("subject_id", subjectId)
+      .eq("is_published", true)
+      .order("sort_order")
+      .order("number"),
+    "practicals",
+  );
+});
+
+export const getPractical = cache(async (subjectId: string, number: number) => {
+  const supabase = await createClient();
+  return maybe(
+    await supabase
+      .from("practicals")
+      .select("id, number, title, subject_id")
+      .eq("subject_id", subjectId)
+      .eq("number", number)
+      .eq("is_published", true)
+      .maybeSingle(),
+    "practical",
+  );
+});
+
 export async function getDocument(
   moduleId: string,
   kind: PdfDocumentKind,

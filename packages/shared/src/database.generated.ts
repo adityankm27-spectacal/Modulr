@@ -753,6 +753,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      practicals: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_published: boolean;
+          number: number;
+          sort_order: number;
+          subject_id: string;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_published?: boolean;
+          number: number;
+          sort_order?: number;
+          subject_id: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_published?: boolean;
+          number?: number;
+          sort_order?: number;
+          subject_id?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practicals_subject_id_fkey";
+            columns: ["subject_id"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           active_session_id: string | null;
@@ -1209,7 +1251,8 @@ export type Database = {
           duration_sec: number | null;
           id: string;
           is_published: boolean;
-          module_id: string;
+          module_id: string | null;
+          practical_id: string | null;
           processing_status: Database["public"]["Enums"]["video_processing_status"];
           provider: Database["public"]["Enums"]["video_provider"];
           provider_video_id: string | null;
@@ -1228,7 +1271,8 @@ export type Database = {
           duration_sec?: number | null;
           id?: string;
           is_published?: boolean;
-          module_id: string;
+          module_id?: string | null;
+          practical_id?: string | null;
           processing_status?: Database["public"]["Enums"]["video_processing_status"];
           provider: Database["public"]["Enums"]["video_provider"];
           provider_video_id?: string | null;
@@ -1246,7 +1290,8 @@ export type Database = {
           duration_sec?: number | null;
           id?: string;
           is_published?: boolean;
-          module_id?: string;
+          module_id?: string | null;
+          practical_id?: string | null;
           processing_status?: Database["public"]["Enums"]["video_processing_status"];
           provider?: Database["public"]["Enums"]["video_provider"];
           provider_video_id?: string | null;
@@ -1263,6 +1308,13 @@ export type Database = {
             columns: ["module_id"];
             isOneToOne: false;
             referencedRelation: "modules";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "videos_practical_id_fkey";
+            columns: ["practical_id"];
+            isOneToOne: false;
+            referencedRelation: "practicals";
             referencedColumns: ["id"];
           },
         ];
@@ -1350,6 +1402,8 @@ export type Database = {
     Functions: {
       can_inspect_user: { Args: { p_user: string }; Returns: boolean };
       has_access: { Args: { p_module: string; p_user: string }; Returns: boolean };
+      has_practical_access: { Args: { p_practical: string; p_user: string }; Returns: boolean };
+      practical_visible: { Args: { p_practical: string }; Returns: boolean };
       has_subject_access: { Args: { p_subject: string; p_user: string }; Returns: boolean };
       is_admin: { Args: { p_user?: string }; Returns: boolean };
       module_content_counts: {

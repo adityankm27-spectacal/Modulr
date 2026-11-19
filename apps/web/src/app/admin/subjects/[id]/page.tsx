@@ -15,7 +15,13 @@ import { RenameModule } from "@/components/admin/rename-module";
 import { SortableList } from "@/components/admin/sortable-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { deleteSubject, saveModule, saveSubject } from "@/lib/admin/actions";
+import {
+  addPracticals,
+  deleteSubject,
+  savePractical,
+  saveModule,
+  saveSubject,
+} from "@/lib/admin/actions";
 import { getSubjectAdmin } from "@/lib/admin/queries";
 import { plainPreview } from "@/lib/format";
 import { isUuid } from "@/lib/validation";
@@ -34,8 +40,9 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
   const { id } = await params;
   const data = isUuid(id) ? await getSubjectAdmin(id) : null;
   if (!data) notFound();
-  const { subject, modules, crossModule } = data;
+  const { subject, modules, practicals, crossModule } = data;
   const nextNumber = Math.max(0, ...modules.map((m) => m.number)) + 1;
+  const nextPracticalNumber = Math.max(0, ...practicals.map((p) => p.number)) + 1;
 
   return (
     <>
@@ -170,6 +177,88 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
                 { value: "no", label: "Paid" },
               ]}
             />
+            <CheckboxField name="is_published" label="Publish now" />
+          </ActionForm>
+        </Disclosure>
+      </AdminSection>
+
+      <AdminSection
+        title="Practicals"
+        description="Lab experiments with explanation videos. They sit on the subject page below the modules, and subscribers can watch them. Open one to add its videos."
+      >
+        {practicals.length === 0 ? (
+          <EmptyState>
+            No practicals yet. Add them below, one by one or as a pasted list.
+          </EmptyState>
+        ) : (
+          <SortableList
+            table="practicals"
+            items={practicals.map((p) => ({
+              id: p.id,
+              label: `Practical ${p.number}`,
+              content: (
+                <div className="flex flex-wrap items-center justify-between gap-3 pr-2">
+                  <Link href={`/admin/practicals/${p.id}`} className="min-w-0">
+                    <span className="block font-bold text-link">
+                      {p.number}. {p.title}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {p.videos[0]?.count ?? 0} {p.videos[0]?.count === 1 ? "video" : "videos"}
+                    </span>
+                  </Link>
+                  <FlagToggle
+                    table="practicals"
+                    id={p.id}
+                    value={p.is_published}
+                    label={`Practical ${p.number}`}
+                  />
+                </div>
+              ),
+            }))}
+          />
+        )}
+
+        <Disclosure
+          defaultOpen={practicals.length === 0}
+          summary={
+            <>
+              <Plus className="size-4" aria-hidden="true" /> Add several practicals at once
+            </>
+          }
+        >
+          <ActionForm action={addPracticals} submitLabel="Add practicals" resetOnSuccess>
+            <input type="hidden" name="subject_id" value={subject.id} />
+            <TextAreaField
+              name="titles"
+              label="Titles, one per line"
+              hint="Numbers at the start of a line (like 1. or 2)) are ignored. They are numbered after the ones already here."
+              rows={8}
+              placeholder={"Stack using arrays\nLinear queue using arrays"}
+            />
+            <CheckboxField name="is_published" label="Publish now" />
+          </ActionForm>
+        </Disclosure>
+
+        <Disclosure
+          summary={
+            <>
+              <Plus className="size-4" aria-hidden="true" /> Add one practical
+            </>
+          }
+        >
+          <ActionForm action={savePractical} submitLabel="Add practical" resetOnSuccess>
+            <input type="hidden" name="subject_id" value={subject.id} />
+            <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
+              <TextField
+                name="number"
+                label="Number"
+                type="number"
+                min={1}
+                max={99}
+                defaultValue={nextPracticalNumber}
+              />
+              <TextField name="title" label="Title" />
+            </div>
             <CheckboxField name="is_published" label="Publish now" />
           </ActionForm>
         </Disclosure>

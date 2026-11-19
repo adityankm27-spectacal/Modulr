@@ -3,6 +3,7 @@ import { Eye, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, CheckboxField, TextField } from "@/components/admin/action-form";
+import { AdminVideoList } from "@/components/admin/admin-video-list";
 import { RenameModule } from "@/components/admin/rename-module";
 import { AdminSection, Breadcrumbs, Disclosure, EmptyState } from "@/components/admin/admin-ui";
 import { DeleteButton } from "@/components/admin/delete-button";
@@ -11,8 +12,6 @@ import { FormulaCardFields } from "@/components/admin/formula-card-fields";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { PdfSlot } from "@/components/admin/pdf-slot";
 import { SortableList } from "@/components/admin/sortable-list";
-import { VideoFields } from "@/components/admin/video-fields";
-import { VideoUpload } from "@/components/admin/video-upload";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -21,14 +20,11 @@ import {
   saveDocument,
   saveFormulaCard,
   saveModule,
-  refreshVideoStatus,
-  saveVideo,
 } from "@/lib/admin/actions";
 import { getModuleAdmin, getModuleContentAdmin } from "@/lib/admin/queries";
-import { formatDuration, plainPreview, pluralize } from "@/lib/format";
+import { plainPreview, pluralize } from "@/lib/format";
 import { QUESTION_SHEET_KIND } from "@/lib/pdf-documents";
 import { cn } from "@/lib/utils";
-import { configuredProviderName } from "@/lib/video";
 import { isUuid } from "@/lib/validation";
 import { adminMetadata } from "@/lib/admin/metadata";
 
@@ -42,20 +38,6 @@ const TABS = [
   { id: "details", label: "Details" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
-
-const PROVIDER_LABEL = {
-  bunny: "Bunny Stream",
-  vdocipher: "VdoCipher",
-  dev: "the local dev store",
-} as const;
-
-const STATUS_LABEL = {
-  pending: "No file yet",
-  uploading: "Uploading",
-  processing: "Processing",
-  ready: "Ready",
-  failed: "Failed",
-} as const;
 
 const KINDS = [
   { kind: "pyq", label: "PYQs" },
@@ -358,103 +340,7 @@ export default async function ModuleEditorPage({
         : null}
 
       {tab === "videos" ? (
-        <AdminSection
-          title="Videos"
-          description={`Uploads go straight to ${PROVIDER_LABEL[configuredProviderName()]}. Students can only watch videos that are ready and published.`}
-        >
-          {content.videos.length === 0 ? (
-            <EmptyState>No videos yet. Add one, then upload its file.</EmptyState>
-          ) : (
-            <SortableList
-              table="videos"
-              items={content.videos.map((v) => ({
-                id: v.id,
-                label: v.title,
-                content: (
-                  <div className="space-y-3 pr-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-bold">{v.title}</span>
-                      <span className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          variant={
-                            v.processing_status === "ready"
-                              ? "free"
-                              : v.processing_status === "failed"
-                                ? "locked"
-                                : "highlight"
-                          }
-                        >
-                          {STATUS_LABEL[v.processing_status]}
-                        </Badge>
-                        {v.duration_sec ? <Badge>{formatDuration(v.duration_sec)}</Badge> : null}
-                        <FlagToggle
-                          table="videos"
-                          id={v.id}
-                          value={v.is_published}
-                          label={v.title}
-                        />
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap items-start gap-3">
-                      <VideoUpload
-                        videoId={v.id}
-                        hasFile={Boolean(v.provider_video_id)}
-                        label={v.title}
-                      />
-                      {v.provider_video_id && v.processing_status !== "ready" ? (
-                        <ActionForm
-                          action={refreshVideoStatus}
-                          submitLabel="Refresh status"
-                          submitVariant="ghost"
-                          className="space-y-0"
-                        >
-                          <input type="hidden" name="id" value={v.id} />
-                        </ActionForm>
-                      ) : null}
-                    </div>
-                    {v.provider_video_id ? (
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {PROVIDER_LABEL[v.provider]} · {v.provider_video_id}
-                      </p>
-                    ) : null}
-                    <div className="flex flex-wrap items-start gap-1">
-                      <Disclosure summary="Edit details and chapters">
-                        <ActionForm action={saveVideo}>
-                          <input type="hidden" name="id" value={v.id} />
-                          <input type="hidden" name="module_id" value={mod.id} />
-                          <VideoFields
-                            defaults={v}
-                            previewable={
-                              v.processing_status === "ready" && Boolean(v.provider_video_id)
-                            }
-                          />
-                        </ActionForm>
-                      </Disclosure>
-                      <DeleteButton
-                        action={deleteContent}
-                        fields={{ table: "videos", id: v.id }}
-                        what={`“${v.title}” (also removes the file from the provider)`}
-                      />
-                    </div>
-                  </div>
-                ),
-              }))}
-            />
-          )}
-          <Disclosure
-            defaultOpen={content.videos.length === 0}
-            summary={
-              <>
-                <Plus className="size-4" aria-hidden="true" /> Add video
-              </>
-            }
-          >
-            <ActionForm action={saveVideo} submitLabel="Add video" resetOnSuccess>
-              <input type="hidden" name="module_id" value={mod.id} />
-              <VideoFields />
-            </ActionForm>
-          </Disclosure>
-        </AdminSection>
+        <AdminVideoList videos={content.videos} parent={{ field: "module_id", id: mod.id }} />
       ) : null}
 
       {tab === "details" ? (

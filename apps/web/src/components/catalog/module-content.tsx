@@ -14,6 +14,7 @@ import {
   getFormulaCards,
   getNotesPdfUrl,
   getQuestions,
+  getPracticalVideos,
   getVideos,
   getWatchProgress,
   type QuestionRow,
@@ -118,23 +119,32 @@ async function TabContent({
   }
 }
 
-async function VideosTab({
+export async function VideosTab({
   moduleId,
+  practicalId,
+  hrefFor,
   drafts,
   viewer,
   basePath,
   selectedVideoId,
   autoplay,
 }: {
-  moduleId: string;
+  /** A module's videos, or (instead) a practical's. */
+  moduleId?: string;
+  practicalId?: string;
+  /** Link to a video within the page; modules use ?tab=videos&v=, practicals just ?v=. */
+  hrefFor?: (videoId: string) => string;
   drafts: boolean;
   viewer: Props["viewer"];
   basePath: string;
   selectedVideoId?: string;
   autoplay: boolean;
 }) {
-  const videos = await getVideos(moduleId, { drafts });
-  if (videos.length === 0) return <Empty>No videos for this module yet.</Empty>;
+  const noun = practicalId ? "practical" : "module";
+  const videos = practicalId
+    ? await getPracticalVideos(practicalId, { drafts })
+    : await getVideos(moduleId ?? "", { drafts });
+  if (videos.length === 0) return <Empty>No videos for this {noun} yet.</Empty>;
 
   const progress = viewer
     ? await getWatchProgress(
@@ -148,9 +158,9 @@ async function VideosTab({
     ready.find((v) => !progress.get(v.id)?.completed) ??
     ready[0] ??
     videos[0];
-  if (!selected) return <Empty>No videos for this module yet.</Empty>;
+  if (!selected) return <Empty>No videos for this {noun} yet.</Empty>;
 
-  const href = (id: string) => `${basePath}?tab=videos&v=${id}`;
+  const href = hrefFor ?? ((id: string) => `${basePath}?tab=videos&v=${id}`);
   const after = videos
     .slice(videos.indexOf(selected) + 1)
     .find((v) => v.processing_status === "ready");
@@ -187,7 +197,7 @@ async function VideosTab({
         <h2 className="font-sans text-lg font-extrabold tracking-normal">{selected.title}</h2>
       </section>
 
-      <section aria-label="All videos in this module">
+      <section aria-label={`All videos in this ${noun}`}>
         <ol className="space-y-2">
           {videos.map((video, index) => {
             const p = progress.get(video.id);
