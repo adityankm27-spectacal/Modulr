@@ -94,6 +94,36 @@ describe("other content schemas accept unticked checkboxes", () => {
     expect(data.is_free_preview).toBeUndefined(); // database default applies
   });
 
+  it("accepts what the Rename button sends and keeps the other settings", () => {
+    const published = moduleSchema.parse({
+      id: subject,
+      subject_id: subject,
+      number: "2",
+      title: "  Trees and Heaps  ",
+      is_free_preview: "no",
+      is_published: "on",
+    });
+    expect(published).toMatchObject({ number: 2, title: "Trees and Heaps", is_published: true });
+    expect(published.is_free_preview).toBe("no");
+
+    // An unpublished module sends no is_published field at all.
+    const draft = moduleSchema.parse({
+      id: subject,
+      subject_id: subject,
+      number: "2",
+      title: "Trees",
+      is_free_preview: "yes",
+    });
+    expect(draft.is_published).toBe(false);
+    expect(draft.is_free_preview).toBe("yes");
+  });
+
+  it("rejects an empty module name", () => {
+    expect(moduleSchema.safeParse({ subject_id: subject, number: "2", title: "   " }).success).toBe(
+      false,
+    );
+  });
+
   it("document keeps the optimistic-lock version", () => {
     expect(
       documentSchema.parse({

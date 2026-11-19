@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Manrope, Unbounded } from "next/font/google";
 import type { ReactNode } from "react";
+import { NavWatchdog } from "@/components/nav-watchdog";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteUrl } from "@/lib/env";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         <div aria-hidden="true" className="scroll-progress" />
+        <NavWatchdog />
         <SiteHeader />
         <div id="main" className="flex flex-1 flex-col">
           {children}

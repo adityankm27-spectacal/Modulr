@@ -3,6 +3,7 @@ import { Eye, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActionForm, CheckboxField, TextField } from "@/components/admin/action-form";
+import { RenameModule } from "@/components/admin/rename-module";
 import { AdminSection, Breadcrumbs, Disclosure, EmptyState } from "@/components/admin/admin-ui";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
@@ -98,6 +99,14 @@ export default async function ModuleEditorPage({
             {mod.number}. {mod.title}
           </h1>
           <div className="flex flex-wrap items-center gap-2">
+            <RenameModule
+              id={mod.id}
+              subjectId={mod.subject_id}
+              number={mod.number}
+              title={mod.title}
+              isFreePreview={mod.is_free_preview}
+              isPublished={mod.is_published}
+            />
             <FlagToggle
               table="modules"
               id={mod.id}

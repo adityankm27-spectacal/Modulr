@@ -11,6 +11,7 @@ import {
 import { AdminSection, Breadcrumbs, Disclosure, EmptyState } from "@/components/admin/admin-ui";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
+import { RenameModule } from "@/components/admin/rename-module";
 import { SortableList } from "@/components/admin/sortable-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -108,7 +109,15 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
                         questions
                       </span>
                     </Link>
-                    <span className="flex flex-wrap gap-2">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <RenameModule
+                        id={m.id}
+                        subjectId={subject.id}
+                        number={m.number}
+                        title={m.title}
+                        isFreePreview={m.is_free_preview}
+                        isPublished={m.is_published}
+                      />
                       <FlagToggle
                         table="modules"
                         id={m.id}
