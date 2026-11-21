@@ -96,8 +96,16 @@ describe("hasAccess", () => {
 });
 
 describe("subscriptionGrantsAccess", () => {
-  it.each(["created", "halted", "completed", "expired"] as const)("denies %s", (status) => {
+  it.each(["created", "completed", "expired"] as const)("denies %s", (status) => {
     expect(subscriptionGrantsAccess(sub({ status }), opts)).toBe(false);
+  });
+
+  it("keeps a halted (paused) subscription's access until the paid period ends", () => {
+    const halted = (currentPeriodEnd: Date | null) =>
+      sub({ status: "halted", currentPeriodEnd });
+    expect(subscriptionGrantsAccess(halted(day(5)), opts)).toBe(true);
+    expect(subscriptionGrantsAccess(halted(day(-1)), opts)).toBe(false);
+    expect(subscriptionGrantsAccess(halted(null), opts)).toBe(false);
   });
 
   it.each(["cancelled", "pending"] as const)("allows %s within period + grace", (status) => {

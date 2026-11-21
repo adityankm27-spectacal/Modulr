@@ -44,7 +44,7 @@ export function verifyWebhookSignature(secret: string, rawBody: string, signatur
 /**
  * Razorpay subscription states → Modulr's. `authenticated` (mandate set up,
  * first charge not yet confirmed) grants nothing yet; `paused` is treated like
- * `halted` (no access).
+ * `halted` (access only until the already-paid period ends).
  */
 export function mapSubscriptionStatus(status: string): SubscriptionStatus | null {
   switch (status) {

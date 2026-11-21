@@ -50,13 +50,18 @@ export interface EntitlementOptions {
  * Whether a subscription currently grants access: always while `active`;
  * while `cancelled` or `pending`, until the paid period end plus grace.
  * `grace_until`, when set explicitly (e.g. by a webhook), wins over the
- * computed grace window.
+ * computed grace window. A `halted` subscription (which includes a paused
+ * autopay mandate) keeps the access that was already paid for, until the
+ * paid period end; with no period end (nothing was ever paid) it grants none.
  */
 export function subscriptionGrantsAccess(
   sub: EntitlementSubscription,
   opts: Pick<EntitlementOptions, "now" | "graceDays">,
 ): boolean {
   if (sub.status === "active") return true;
+  if (sub.status === "halted") {
+    return sub.currentPeriodEnd !== null && opts.now < sub.currentPeriodEnd;
+  }
   if (sub.status !== "cancelled" && sub.status !== "pending") return false;
   const accessEnd =
     sub.graceUntil ??

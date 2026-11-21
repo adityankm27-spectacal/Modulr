@@ -9,12 +9,14 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Faq } from "@/components/marketing/faq";
 import { bestValuePlanId, mostPopularPlanId, PlanCard } from "@/components/marketing/plan-card";
 import { PointerArea } from "@/components/motion/pointer-area";
 import { Tilt } from "@/components/motion/tilt";
 import { buttonVariants } from "@/components/ui/button";
 import { getViewer } from "@/lib/auth";
+import { getBilling } from "@/lib/billing/queries";
 import { getActivePlans, getFreeModules, getSettings } from "@/lib/catalog";
 import { freeHeadline, freeShort } from "@/lib/free-modules";
 import { formatPrice } from "@/lib/format";
@@ -122,6 +124,19 @@ export default async function LandingPage() {
     getSettings(),
     getFreeModules(),
   ]);
+  // Paying students (a subscription, or free access given by an admin) go straight
+  // to their subjects. If the billing lookup fails, show the landing page instead.
+  if (viewer?.profile) {
+    let paid = false;
+    try {
+      const { hasSubscriptionAccess } = await getBilling(viewer.userId);
+      const comp = viewer.profile.comp_access_until;
+      paid = hasSubscriptionAccess || Boolean(comp && new Date(comp) > new Date());
+    } catch (error) {
+      console.error(error);
+    }
+    if (paid) redirect("/home");
+  }
   const freeNote = freeShort(freeModules);
   const monthly =
     plans.find((p) => p.interval === "month" && p.billing_months === 1 && p.scope === "all") ??
