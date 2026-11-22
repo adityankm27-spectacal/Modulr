@@ -61,9 +61,10 @@ describe("subscription state transitions", () => {
     expect(access(row, new Date(end.getTime() + 4 * DAY))).toBe(false);
   });
 
-  it("halted ends access immediately; a later charge restores it with the new period", () => {
+  it("halted keeps the paid period, then ends; a later charge restores it with the new period", () => {
     const halted = replay([remote("active"), remote("pending"), remote("halted")]);
-    expect(access(halted, start)).toBe(false);
+    expect(access(halted, start)).toBe(true);
+    expect(access(halted, new Date(end.getTime() + DAY))).toBe(false);
     const nextEnd = new Date(end.getTime() + 30 * DAY);
     const charged = replay([remote("active"), remote("halted"), remote("active", end, nextEnd)]);
     expect(charged.current_period_end).toBe(nextEnd.toISOString());

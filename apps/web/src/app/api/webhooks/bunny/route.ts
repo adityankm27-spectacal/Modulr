@@ -27,6 +27,10 @@ export async function POST(request: Request) {
     .select("id, duration_sec, chapters")
     .eq("provider", "bunny")
     .eq("provider_video_id", parsed.data.VideoGuid)
+    // A mirrored subject (e.g. IT FM -> CS FM) has more than one row for the same video:
+    // read the original (mirror_of is null) and update every row below.
+    .order("mirror_of", { ascending: true, nullsFirst: true })
+    .limit(1)
     .maybeSingle();
   // Unknown videos are acknowledged so Bunny doesn't keep retrying.
   if (!video) return json({ ok: true, ignored: true });
@@ -40,7 +44,8 @@ export async function POST(request: Request) {
       ...(status.thumbnailUrl ? { thumbnail_url: status.thumbnailUrl } : {}),
       ...providerChaptersUpdate(video.chapters, status),
     })
-    .eq("id", video.id);
+    .eq("provider", "bunny")
+    .eq("provider_video_id", parsed.data.VideoGuid);
   if (error) return apiError(500, "Update failed");
   return json({ ok: true, status: status.status });
 }

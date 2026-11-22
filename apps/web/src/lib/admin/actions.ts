@@ -614,7 +614,15 @@ const pdfAttach = z.object({
 
 /** Best effort: a leftover file is harmless (unreachable once no document points at it). */
 async function removePdfFile(supabase: Supabase, path: string | null | undefined) {
-  if (path) await supabase.storage.from("notes").remove([path]);
+  if (!path) return;
+  // A mirrored subject's document shares the file with its original: keep it while any
+  // document still points at it.
+  const { count } = await supabase
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("pdf_path", path);
+  if (count) return;
+  await supabase.storage.from("notes").remove([path]);
 }
 
 /**
@@ -772,7 +780,18 @@ export async function deleteContent(_: ActionState, form: FormData) {
         .select("provider, provider_video_id")
         .eq("id", id)
         .maybeSingle();
-      if (data?.provider_video_id) {
+      // A mirrored copy (e.g. IT FM -> CS FM) shares its original's file. Deleting the copy
+      // must not delete the file; deleting the original removes its copies with it.
+      const { count: sharedBy } = data?.provider_video_id
+        ? await supabase
+            .from("videos")
+            .select("id", { count: "exact", head: true })
+            .eq("provider", data.provider)
+            .eq("provider_video_id", data.provider_video_id)
+            .neq("id", id)
+            .or(`mirror_of.is.null,mirror_of.neq.${id}`)
+        : { count: 0 };
+      if (data?.provider_video_id && !sharedBy) {
         try {
           await getVideoProvider(data.provider).deleteVideo(data.provider_video_id);
         } catch (error) {

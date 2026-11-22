@@ -375,6 +375,7 @@ export type Database = {
       };
       documents: {
         Row: {
+          mirror_of: string | null;
           content_md: string;
           created_at: string;
           id: string;
@@ -388,6 +389,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           content_md?: string;
           created_at?: string;
           id?: string;
@@ -400,6 +402,7 @@ export type Database = {
           version?: number;
         };
         Update: {
+          mirror_of?: string | null;
           content_md?: string;
           created_at?: string;
           id?: string;
@@ -486,6 +489,7 @@ export type Database = {
       };
       formula_cards: {
         Row: {
+          mirror_of: string | null;
           created_at: string;
           formula_latex: string;
           id: string;
@@ -500,6 +504,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           created_at?: string;
           formula_latex: string;
           id?: string;
@@ -513,6 +518,7 @@ export type Database = {
           when_to_use?: string;
         };
         Update: {
+          mirror_of?: string | null;
           created_at?: string;
           formula_latex?: string;
           id?: string;
@@ -594,6 +600,7 @@ export type Database = {
       };
       modules: {
         Row: {
+          mirror_of: string | null;
           created_at: string;
           id: string;
           is_free_preview: boolean;
@@ -606,6 +613,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           created_at?: string;
           id?: string;
           is_free_preview: boolean;
@@ -617,6 +625,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          mirror_of?: string | null;
           created_at?: string;
           id?: string;
           is_free_preview?: boolean;
@@ -929,6 +938,7 @@ export type Database = {
       };
       questions: {
         Row: {
+          mirror_of: string | null;
           answer_md: string;
           created_at: string;
           frequency: Database["public"]["Enums"]["question_frequency"] | null;
@@ -946,6 +956,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           answer_md?: string;
           created_at?: string;
           frequency?: Database["public"]["Enums"]["question_frequency"] | null;
@@ -962,6 +973,7 @@ export type Database = {
           version?: number;
         };
         Update: {
+          mirror_of?: string | null;
           answer_md?: string;
           created_at?: string;
           frequency?: Database["public"]["Enums"]["question_frequency"] | null;
@@ -1209,6 +1221,7 @@ export type Database = {
       };
       topics: {
         Row: {
+          mirror_of: string | null;
           created_at: string;
           id: string;
           module_id: string;
@@ -1218,6 +1231,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           created_at?: string;
           id?: string;
           module_id: string;
@@ -1226,6 +1240,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          mirror_of?: string | null;
           created_at?: string;
           id?: string;
           module_id?: string;
@@ -1245,6 +1260,7 @@ export type Database = {
       };
       videos: {
         Row: {
+          mirror_of: string | null;
           captions_url: string | null;
           chapters: NonNullable<Json>;
           created_at: string;
@@ -1265,6 +1281,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          mirror_of?: string | null;
           captions_url?: string | null;
           chapters?: NonNullable<Json>;
           created_at?: string;
@@ -1284,6 +1301,7 @@ export type Database = {
           version?: number;
         };
         Update: {
+          mirror_of?: string | null;
           captions_url?: string | null;
           chapters?: NonNullable<Json>;
           created_at?: string;
