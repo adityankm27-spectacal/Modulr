@@ -81,6 +81,7 @@ export function VideoPlayer({
   const saved = useRef({ at: Date.now(), position: resumeAt, completed: false });
   const resumeDone = useRef(false);
   const retried = useRef(false);
+  const playing = useRef(false);
 
   // ---- Playback URL ---------------------------------------------------------
   useEffect(() => {
@@ -224,10 +225,15 @@ export function VideoPlayer({
           if (update) onTime(update.seconds, update.duration);
           break;
         }
+        case "play":
+          playing.current = true;
+          break;
         case "pause":
+          playing.current = false;
           onPause();
           break;
         case "ended":
+          playing.current = false;
           onEnded();
           break;
       }
@@ -269,6 +275,87 @@ export function VideoPlayer({
     else void container.current?.requestFullscreen();
   };
 
+  // ---- Keyboard shortcuts ----------------------------------------------------------
+  // The provider's iframe is cross-origin and its own shortcuts don't fire (and its
+  // fullscreen is switched off on purpose), so the page handles the keys itself:
+  // Space / K play-pause, ← → seek 5s, J / L seek 10s, F full screen.
+  const togglePlay = useCallback(() => {
+    if (videoEl.current) {
+      if (videoEl.current.paused) void videoEl.current.play().catch(() => undefined);
+      else videoEl.current.pause();
+    } else if (playing.current) {
+      command("pause");
+    } else {
+      command("play");
+    }
+  }, [command]);
+
+  const skip = useCallback(
+    (delta: number) => {
+      const end = duration ?? Number.POSITIVE_INFINITY;
+      seek(Math.min(Math.max(0, position.current + delta), end), false);
+    },
+    [duration, seek],
+  );
+
+  useEffect(() => {
+    if (!playback) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      // Buttons and links use Space/Enter themselves.
+      if (target?.closest("button, a, [role='button'], [role='switch']") && event.key === " ") {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      // A native <video> already handles its own Space and arrows when focused.
+      if (target === videoEl.current && key !== "f") return;
+      switch (key) {
+        case " ":
+        case "k":
+          togglePlay();
+          break;
+        case "arrowright":
+          skip(5);
+          break;
+        case "arrowleft":
+          skip(-5);
+          break;
+        case "l":
+          skip(10);
+          break;
+        case "j":
+          skip(-10);
+          break;
+        case "f":
+          if (canFullscreen) toggleFullscreen();
+          else return;
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [canFullscreen, playback, skip, togglePlay]);
+
+  // Clicking the video moves keyboard focus into the iframe, where the page can't see
+  // keys. Take focus back so the shortcuts keep working after a click.
+  useEffect(() => {
+    if (playback?.kind !== "iframe") return;
+    const reclaim = () => {
+      setTimeout(() => {
+        if (document.activeElement === iframe.current) {
+          container.current?.focus({ preventScroll: true });
+        }
+      }, 0);
+    };
+    window.addEventListener("blur", reclaim);
+    return () => window.removeEventListener("blur", reclaim);
+  }, [playback?.kind]);
+
   useEffect(() => {
     if (countdown === null || !next) return;
     if (countdown <= 0) {
@@ -285,9 +372,10 @@ export function VideoPlayer({
     <div className="space-y-3">
       <div
         ref={container}
+        tabIndex={-1}
         onContextMenu={(e) => e.preventDefault()}
         className={cn(
-          "relative overflow-hidden rounded-2xl bg-ink",
+          "relative overflow-hidden rounded-2xl bg-ink outline-none",
           fullscreen
             ? "flex h-full w-full items-center justify-center rounded-none"
             : "aspect-video",
