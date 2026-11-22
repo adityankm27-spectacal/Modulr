@@ -278,7 +278,7 @@ export function VideoPlayer({
   // ---- Keyboard shortcuts ----------------------------------------------------------
   // The provider's iframe is cross-origin and its own shortcuts don't fire (and its
   // fullscreen is switched off on purpose), so the page handles the keys itself:
-  // Space / K play-pause, ← → seek 5s, J / L seek 10s, F full screen.
+  // Space / K play-pause, ← → and J / L seek 10s, F full screen.
   const togglePlay = useCallback(() => {
     if (videoEl.current) {
       if (videoEl.current.paused) void videoEl.current.play().catch(() => undefined);
@@ -317,10 +317,10 @@ export function VideoPlayer({
           togglePlay();
           break;
         case "arrowright":
-          skip(5);
+          skip(10);
           break;
         case "arrowleft":
-          skip(-5);
+          skip(-10);
           break;
         case "l":
           skip(10);
