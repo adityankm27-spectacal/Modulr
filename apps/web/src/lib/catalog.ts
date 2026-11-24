@@ -218,7 +218,7 @@ export const getPracticals = cache(async (subjectId: string) => {
   const supabase = await createClient();
   const result = await supabase
     .from("practicals")
-    .select("id, number, title")
+    .select("id, number, title, is_free_preview")
     .eq("subject_id", subjectId)
     .eq("is_published", true)
     .order("sort_order")
@@ -236,7 +236,7 @@ export const getPractical = cache(async (subjectId: string, number: number) => {
   return maybe(
     await supabase
       .from("practicals")
-      .select("id, number, title, subject_id")
+      .select("id, number, title, subject_id, is_free_preview")
       .eq("subject_id", subjectId)
       .eq("number", number)
       .eq("is_published", true)

@@ -184,7 +184,7 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
 
       <AdminSection
         title="Practicals"
-        description="Lab experiments with explanation videos. They sit on the subject page below the modules, and subscribers can watch them. Open one to add its videos."
+        description="Lab experiments with explanation videos. They sit on the subject page below the modules. Subscribers can watch them; practicals marked Free preview are open to every signed-in student. Open one to add its videos."
       >
         {practicals.length === 0 ? (
           <EmptyState>
@@ -206,12 +206,21 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
                       {p.videos[0]?.count ?? 0} {p.videos[0]?.count === 1 ? "video" : "videos"}
                     </span>
                   </Link>
-                  <FlagToggle
-                    table="practicals"
-                    id={p.id}
-                    value={p.is_published}
-                    label={`Practical ${p.number}`}
-                  />
+                  <span className="flex flex-wrap items-center gap-2">
+                    <FlagToggle
+                      table="practicals"
+                      id={p.id}
+                      field="is_free_preview"
+                      value={p.is_free_preview}
+                      label={`Practical ${p.number}`}
+                    />
+                    <FlagToggle
+                      table="practicals"
+                      id={p.id}
+                      value={p.is_published}
+                      label={`Practical ${p.number}`}
+                    />
+                  </span>
                 </div>
               ),
             }))}

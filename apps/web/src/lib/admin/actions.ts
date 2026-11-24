@@ -366,8 +366,8 @@ const flagSchema = z.object({
 /** Publish/unpublish any content row, or toggle a module's free preview. */
 export async function setFlag(_: ActionState, form: FormData) {
   return runAdminAction(form, flagSchema, async ({ table, id, field, value }, supabase) => {
-    if (field === "is_free_preview" && table !== "modules") {
-      throw new AdminError("Only modules have a free preview.");
+    if (field === "is_free_preview" && table !== "modules" && table !== "practicals") {
+      throw new AdminError("Only modules and practicals have a free preview.");
     }
     const { data, error } = await supabase
       .from(table)
