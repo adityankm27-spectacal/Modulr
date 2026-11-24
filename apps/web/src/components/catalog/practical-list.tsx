@@ -14,7 +14,7 @@ export function PracticalList({
   subjectId: string;
   practicals: { id: string; number: number; title: string }[];
   tone: SubjectTone;
-  /** The viewer has no access to the videos yet. */
+  /** The viewer is signed out, so the (free) videos need a sign-in first. */
   locked: boolean;
 }) {
   const { color, ink } = SUBJECT_TONE[tone];
@@ -46,11 +46,11 @@ export function PracticalList({
               <span className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 {locked ? (
                   <>
-                    <Lock className="size-3.5" aria-hidden="true" /> Subscribers
+                    <Lock className="size-3.5" aria-hidden="true" /> Free · sign in to watch
                   </>
                 ) : (
                   <>
-                    <FlaskConical className="size-3.5" aria-hidden="true" /> Video explanation
+                    <FlaskConical className="size-3.5" aria-hidden="true" /> Free · video explanation
                   </>
                 )}
               </span>

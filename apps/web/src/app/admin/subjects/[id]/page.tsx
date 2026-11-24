@@ -184,7 +184,7 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
 
       <AdminSection
         title="Practicals"
-        description="Lab experiments with explanation videos. They sit on the subject page below the modules, and subscribers can watch them. Open one to add its videos."
+        description="Lab experiments with explanation videos. They sit on the subject page below the modules, and every signed-in student can watch them for free. Open one to add its videos."
       >
         {practicals.length === 0 ? (
           <EmptyState>

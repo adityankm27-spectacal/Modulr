@@ -60,10 +60,10 @@ export default async function PracticalPage({
     viewer ? hasSubjectAccess(viewer.userId, subject.id) : Promise.resolve(false),
     getActivePlans(),
   ]);
-  // Practical videos follow the subject's paid access; none are free previews.
+  // Practicals are free: any signed-in student can watch them, no subscription needed.
   const lock = moduleLockState({
     signedIn: Boolean(viewer),
-    isFreePreview: false,
+    isFreePreview: true,
     hasSubjectAccess: access,
   });
   const monthly = plans.find(

@@ -144,7 +144,7 @@ export default async function SubjectPage({ params }: { params: Params }) {
               subjectId={subject.id}
               practicals={practicals}
               tone={style.tone}
-              locked={!access}
+              locked={!viewer}
             />
           </div>
         </section>
