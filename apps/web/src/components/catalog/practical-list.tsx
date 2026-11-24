@@ -12,7 +12,7 @@ export function PracticalList({
   locked,
 }: {
   subjectId: string;
-  practicals: { id: string; number: number; title: string; is_free_preview: boolean }[];
+  practicals: { id: string; number: number; title: string }[];
   tone: SubjectTone;
   /** The viewer has no access to the videos yet. */
   locked: boolean;
@@ -44,14 +44,13 @@ export function PracticalList({
               <span className="sr-only">Practical {practical.number}: </span>
               <span className="block leading-snug font-bold">{practical.title}</span>
               <span className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                {locked && !practical.is_free_preview ? (
+                {locked ? (
                   <>
                     <Lock className="size-3.5" aria-hidden="true" /> Subscribers
                   </>
                 ) : (
                   <>
-                    <FlaskConical className="size-3.5" aria-hidden="true" />{" "}
-                    {practical.is_free_preview ? "Free · video explanation" : "Video explanation"}
+                    <FlaskConical className="size-3.5" aria-hidden="true" /> Video explanation
                   </>
                 )}
               </span>

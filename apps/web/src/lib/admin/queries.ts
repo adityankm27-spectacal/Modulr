@@ -88,7 +88,7 @@ export async function getSubjectAdmin(id: string) {
       .order("number"),
     supabase
       .from("practicals")
-      .select("id, number, title, is_published, is_free_preview, videos(count)")
+      .select("id, number, title, is_published, videos(count)")
       .eq("subject_id", id)
       .order("sort_order")
       .order("number"),

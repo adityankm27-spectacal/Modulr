@@ -764,7 +764,6 @@ export type Database = {
       };
       practicals: {
         Row: {
-          is_free_preview: boolean;
           created_at: string;
           id: string;
           is_published: boolean;
@@ -776,7 +775,6 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
-          is_free_preview?: boolean;
           created_at?: string;
           id?: string;
           is_published?: boolean;
@@ -787,7 +785,6 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          is_free_preview?: boolean;
           created_at?: string;
           id?: string;
           is_published?: boolean;
