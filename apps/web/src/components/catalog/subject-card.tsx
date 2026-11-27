@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import type { CSSProperties, PointerEvent } from "react";
 import { pluralize } from "@/lib/format";
 import type { SubjectIcon, SubjectTone } from "@/lib/subject-style";
@@ -48,8 +48,7 @@ export function SubjectCard({
   return (
     <Link
       href={href}
-      // Fetched in the background so the subject opens at once when clicked.
-      prefetch
+      // Loads on hover, focus or the start of a tap, not for every card on screen.
       onPointerMove={trackPointer}
       style={
         { "--tone": color, "--tone-ink": ink, animationDelay: `${index * 70}ms` } as CSSProperties

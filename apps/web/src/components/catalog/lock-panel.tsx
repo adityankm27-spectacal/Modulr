@@ -1,6 +1,6 @@
 import { Lock, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { buttonVariants } from "@/components/ui/button";
 import type { ModuleLockState } from "@/lib/access";
 import { formatPrice } from "@/lib/format";

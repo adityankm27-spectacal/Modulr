@@ -1,6 +1,6 @@
 import { readChapters } from "@modulr/shared";
 import { CheckCircle2, Clock, Loader2, PlayCircle, X } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import type { ReactNode } from "react";
 import { FormulaCard } from "@/components/content/formula-card";
 import { ContentGuard } from "@/components/content/content-guard";

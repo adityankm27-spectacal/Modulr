@@ -8,7 +8,7 @@ import {
   Sigma,
   Star,
 } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { redirect } from "next/navigation";
 import { Faq } from "@/components/marketing/faq";
 import { bestValuePlanId, mostPopularPlanId, PlanCard } from "@/components/marketing/plan-card";
@@ -175,7 +175,6 @@ export default async function LandingPage() {
             <div className="mt-9 flex flex-col gap-4 motion-safe:animate-rise motion-safe:[animation-delay:460ms] sm:flex-row">
               <Link
                 href={startHref}
-                prefetch
                 className={cn(buttonVariants({ variant: "sunflower", size: "lg" }), "group")}
               >
                 {viewer || !freeNote ? "Get started" : "Start free"}
@@ -382,7 +381,7 @@ export default async function LandingPage() {
             <BookOpenCheck className="size-10 motion-safe:animate-bob" aria-hidden="true" />
             <h2 className="mt-4 text-3xl sm:text-4xl">Your next exam, sorted.</h2>
           </div>
-          <Link href={startHref} prefetch className={buttonVariants({ size: "lg" })}>
+          <Link href={startHref} className={buttonVariants({ size: "lg" })}>
             Get started
           </Link>
         </div>

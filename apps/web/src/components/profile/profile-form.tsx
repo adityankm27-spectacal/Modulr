@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { startTransition, useActionState, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";

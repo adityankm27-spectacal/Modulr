@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { notFound, redirect } from "next/navigation";
 import { LockPanel } from "@/components/catalog/lock-panel";
 import { VideosTab } from "@/components/catalog/module-content";

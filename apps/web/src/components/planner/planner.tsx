@@ -1,5 +1,5 @@
 import { CalendarDays, Lock } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { buttonVariants } from "@/components/ui/button";
 import type { PlannerData } from "@/lib/planner/types";
 import { cn } from "@/lib/utils";

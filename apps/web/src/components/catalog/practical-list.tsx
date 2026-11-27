@@ -1,5 +1,5 @@
 import { FlaskConical, Lock } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import type { CSSProperties } from "react";
 import type { SubjectTone } from "@/lib/subject-style";
 import { SUBJECT_TONE } from "./subject-visuals";

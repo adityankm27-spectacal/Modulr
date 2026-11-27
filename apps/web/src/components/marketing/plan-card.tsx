@@ -1,5 +1,5 @@
 import { Check, ChevronDown, Flame, PiggyBank, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import type { ReactNode } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { AnimatedPrice } from "./animated-price";

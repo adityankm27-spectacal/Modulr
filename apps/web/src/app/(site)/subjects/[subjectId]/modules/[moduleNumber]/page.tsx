@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { notFound, redirect } from "next/navigation";
 import type { CSSProperties } from "react";
 import { LockPanel } from "@/components/catalog/lock-panel";
@@ -28,9 +28,10 @@ async function load(params: Params) {
   const { subjectId, moduleNumber } = await params;
   const number = Number(moduleNumber);
   if (!isUuid(subjectId) || !Number.isInteger(number) || number < 1) return null;
-  const subject = await getSubject(subjectId);
+  // Fetched together: the modules query only needs the id, and an unpublished
+  // subject's modules are discarded below.
+  const [subject, modules] = await Promise.all([getSubject(subjectId), getModules(subjectId)]);
   if (!subject) return null;
-  const modules = await getModules(subject.id);
   const index = modules.findIndex((m) => m.number === number);
   const current = modules[index];
   if (!current) return null;
@@ -59,7 +60,7 @@ export default async function ModulePage({
     autoplay?: string | string[];
   }>;
 }) {
-  const data = await load(params);
+  const [data, viewer] = await Promise.all([load(params), getViewer()]);
   if (!data) notFound();
   const { subject, modules, current, index } = data;
 
@@ -69,7 +70,6 @@ export default async function ModulePage({
   const basePath = `/subjects/${subject.id}/modules/${current.number}`;
   const returnTo = tab === "videos" ? basePath : `${basePath}?tab=${tab}`;
 
-  const viewer = await getViewer();
   if (viewer && !isOnboarded(viewer.profile)) {
     redirect(`/onboarding?next=${encodeURIComponent(returnTo)}`);
   }

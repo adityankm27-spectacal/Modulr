@@ -11,7 +11,7 @@ import {
   Smartphone,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { useEffect, useRef, type ReactNode } from "react";
 import { CheckoutPauseContext } from "./checkout-pause";
 import { PRICING_SEEN_COOKIE } from "./pricing-seen";

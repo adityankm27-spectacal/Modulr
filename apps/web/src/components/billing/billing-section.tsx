@@ -1,5 +1,5 @@
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { getBilling } from "@/lib/billing/queries";

@@ -1,5 +1,5 @@
 import { ArrowRight, Lock } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import type { CSSProperties } from "react";
 import { Badge } from "@/components/ui/badge";
 import { moduleLockState } from "@/lib/access";

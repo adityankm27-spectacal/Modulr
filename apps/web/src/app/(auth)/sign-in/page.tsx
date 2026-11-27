@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
 import { safeNextPath } from "@/lib/redirect";

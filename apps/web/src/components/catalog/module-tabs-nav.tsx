@@ -1,5 +1,5 @@
 import { FileText, History, MessageCircleQuestion, PlayCircle, Sigma, Star } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { MODULE_TABS, tabCount, type ModuleCounts, type ModuleTabId } from "@/lib/module-tabs";
 import { cn } from "@/lib/utils";
 import { TabStrip } from "./tab-strip";

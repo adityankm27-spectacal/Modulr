@@ -1,5 +1,5 @@
 import { CreditCard, LogOut, UserRound, type LucideIcon } from "lucide-react";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { initials, type AccountTab } from "@/lib/account-tabs";
 import { cn } from "@/lib/utils";
 

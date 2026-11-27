@@ -1,7 +1,7 @@
 import { PointerArea } from "@/components/motion/pointer-area";
 import { FileText, PlayCircle, Sigma } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { SubjectCard } from "@/components/catalog/subject-card";
 import { PricingWelcome } from "@/components/billing/pricing-welcome";
 import { Planner, PlannerLocked, PlannerUnavailable } from "@/components/planner/planner";
@@ -43,15 +43,19 @@ export default async function HomePage() {
   // Students only see the semester they chose; they can change it from their account.
   const semester = profile.semester;
 
-  const syllabus = await getCurrentSyllabusVersion(profile.branch_id);
-  const [subjects, continueWatching, freeModules] = await Promise.all([
-    syllabus ? getSubjectsForSemester(syllabus.id, semester) : Promise.resolve([]),
-    getContinueWatching(userId),
-    getFreeModules(),
-  ]);
+  // Everything that doesn't depend on the syllabus starts at once instead of one after another.
+  const [{ syllabus, subjects }, continueWatching, freeModules, { hasSubscriptionAccess }] =
+    await Promise.all([
+      getCurrentSyllabusVersion(profile.branch_id).then(async (syllabus) => ({
+        syllabus,
+        subjects: syllabus ? await getSubjectsForSemester(syllabus.id, semester) : [],
+      })),
+      getContinueWatching(userId),
+      getFreeModules(),
+      getBilling(userId),
+    ]);
   // The planner is part of the plan: subscribers, admins and students with free access.
   // It is an extra, so if it can't load the subjects still show.
-  const { hasSubscriptionAccess } = await getBilling(userId);
   const plannerAllowed = canUsePlanner({
     role: profile.role,
     compAccessUntil: profile.comp_access_until,

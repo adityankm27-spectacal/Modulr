@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { getPublishedSubjects } from "@/lib/catalog";
 
 export const metadata: Metadata = {

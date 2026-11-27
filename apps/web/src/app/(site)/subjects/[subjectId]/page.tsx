@@ -1,6 +1,6 @@
 import { ChevronLeft, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { notFound } from "next/navigation";
 import { ModuleList } from "@/components/catalog/module-list";
 import { PracticalList } from "@/components/catalog/practical-list";

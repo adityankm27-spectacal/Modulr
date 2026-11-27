@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/intent-link";
 import { LegalPage, SupportEmail } from "@/components/marketing/legal-page";
 import { getSettings } from "@/lib/catalog";
 import { LEGAL, operatorNames } from "@/lib/legal";
