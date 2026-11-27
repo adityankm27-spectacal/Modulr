@@ -161,7 +161,7 @@ export async function VideosTab({
   const videos = practicalId
     ? await getPracticalVideos(practicalId, { drafts })
     : await getVideos(moduleId ?? "", { drafts });
-  if (videos.length === 0) return <Empty>No videos for this {noun} yet.</Empty>;
+  if (videos.length === 0) return <ComingSoon>Videos for this {noun} are on their way.</ComingSoon>;
 
   const progress = viewer
     ? await getWatchProgress(
@@ -175,7 +175,7 @@ export async function VideosTab({
     ready.find((v) => !progress.get(v.id)?.completed) ??
     ready[0] ??
     videos[0];
-  if (!selected) return <Empty>No videos for this {noun} yet.</Empty>;
+  if (!selected) return <ComingSoon>Videos for this {noun} are on their way.</ComingSoon>;
 
   const href = hrefFor ?? ((id: string) => `${basePath}?tab=videos&v=${id}`);
   const after = videos
@@ -349,7 +349,7 @@ async function NotesTab({
   const doc = await getDocument(moduleId, "short_notes", { drafts });
   // An uploaded PDF replaces the Markdown notes; the Markdown stays saved but hidden.
   if (!doc || (!doc.pdf_path && !doc.content_md.trim())) {
-    return <Empty>Notes for this module are being written.</Empty>;
+    return <ComingSoon>Short notes for this module are on their way.</ComingSoon>;
   }
   return (
     <article>
@@ -376,7 +376,7 @@ async function SlidesTab({
   viewer: Props["viewer"];
 }) {
   const slides = await getSlides(moduleId, { drafts });
-  if (slides.length === 0) return <Empty>Slides for this module are on their way.</Empty>;
+  if (slides.length === 0) return <ComingSoon>Slides for this module are on their way.</ComingSoon>;
   // PDFs open in the view-only viewer (signed now, like notes); PowerPoint and Word files
   // are downloaded through /api/slides/:id, which signs a URL only when clicked.
   const pdfUrls = await Promise.all(
@@ -460,7 +460,7 @@ async function FormulasTab({
   const hasPdf = Boolean(sheet?.pdf_path);
   const hasSheet = !hasPdf && Boolean(sheet?.content_md.trim());
   if (cards.length === 0 && !hasSheet && !hasPdf)
-    return <Empty>Formulas for this module are being written.</Empty>;
+    return <ComingSoon>Formulas for this module are on their way.</ComingSoon>;
 
   return (
     <div className="space-y-8">
@@ -513,7 +513,7 @@ async function QuestionsTab({
     return hasPdf ? (
       <DocumentPdf doc={sheet} viewer={viewer} />
     ) : (
-      <Empty>No questions for this module yet.</Empty>
+      <ComingSoon>{QUESTION_LABEL[kind]} for this module are on their way.</ComingSoon>
     );
   }
 
@@ -661,4 +661,24 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
 
 function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-2xl bg-muted p-6 text-muted-foreground">{children}</p>;
+}
+
+const QUESTION_LABEL = { pyq: "PYQs", important: "Important questions", viva: "Viva questions" };
+
+/** A tab with nothing published yet: says it's coming rather than that it's missing. */
+function ComingSoon({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-4 rounded-2xl bg-muted p-6">
+      <span
+        aria-hidden="true"
+        className="flex size-12 shrink-0 -rotate-6 items-center justify-center rounded-xl border-[3px] border-line bg-sunflower text-ink shadow-[0_4px_0_0_var(--line)]"
+      >
+        <Clock className="size-6" />
+      </span>
+      <div>
+        <p className="font-display text-xl font-black">Coming soon</p>
+        <p className="mt-0.5 text-muted-foreground">{children}</p>
+      </div>
+    </div>
+  );
 }

@@ -2,10 +2,10 @@
 export const MODULE_TABS = [
   { id: "videos", label: "Videos" },
   { id: "notes", label: "Short notes" },
-  { id: "slides", label: "Slides" },
   { id: "formulas", label: "Formulas" },
-  { id: "pyqs", label: "PYQs" },
   { id: "important", label: "Important Qs" },
+  { id: "slides", label: "Slides" },
+  { id: "pyqs", label: "PYQs" },
   { id: "viva", label: "Viva" },
 ] as const;
 
