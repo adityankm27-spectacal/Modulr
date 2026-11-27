@@ -11,12 +11,15 @@ import { FlagToggle } from "@/components/admin/flag-toggle";
 import { FormulaCardFields } from "@/components/admin/formula-card-fields";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { PdfSlot } from "@/components/admin/pdf-slot";
+import { SlideUpload } from "@/components/admin/slide-upload";
 import { SortableList } from "@/components/admin/sortable-list";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   deleteContent,
   deleteModule,
+  removeSlide,
+  renameSlide,
   saveDocument,
   saveFormulaCard,
   saveModule,
@@ -24,6 +27,7 @@ import {
 import { getModuleAdmin, getModuleContentAdmin } from "@/lib/admin/queries";
 import { plainPreview, pluralize } from "@/lib/format";
 import { QUESTION_SHEET_KIND } from "@/lib/pdf-documents";
+import { formatFileSize, SLIDE_FILE_TYPES, slideExtension } from "@/lib/slide-files";
 import { cn } from "@/lib/utils";
 import { isUuid } from "@/lib/validation";
 import { adminMetadata } from "@/lib/admin/metadata";
@@ -35,6 +39,7 @@ const TABS = [
   { id: "formulas", label: "Formulas" },
   { id: "questions", label: "Questions" },
   { id: "videos", label: "Videos" },
+  { id: "slides", label: "Slides" },
   { id: "details", label: "Details" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
@@ -341,6 +346,64 @@ export default async function ModuleEditorPage({
 
       {tab === "videos" ? (
         <AdminVideoList videos={content.videos} parent={{ field: "module_id", id: mod.id }} />
+      ) : null}
+
+      {tab === "slides" ? (
+        <AdminSection
+          title="Slides"
+          description="Lecture decks and handouts for this module. Add as many files as you like; students see them in order of upload."
+        >
+          <SlideUpload moduleId={mod.id} />
+          {content.slides.length === 0 ? (
+            <EmptyState>No files yet.</EmptyState>
+          ) : (
+            <ul className="space-y-3">
+              {content.slides.map((slide) => {
+                const ext = slideExtension(slide.file_name ?? "");
+                const meta = [
+                  ext ? SLIDE_FILE_TYPES[ext].label : null,
+                  slide.file_name,
+                  formatFileSize(slide.file_size),
+                ].filter(Boolean);
+                return (
+                  <li key={slide.id} className="space-y-3 rounded-2xl border-2 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold break-words">{slide.title}</p>
+                        <p className="text-sm break-all text-muted-foreground">
+                          {meta.join(" · ")}
+                        </p>
+                      </div>
+                      <span className="flex items-center gap-2">
+                        {slide.mirror_of ? <Badge>Mirrored copy</Badge> : null}
+                        <FlagToggle
+                          table="documents"
+                          id={slide.id}
+                          value={slide.is_published}
+                          label={slide.title}
+                        />
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-start gap-2">
+                      <SlideUpload moduleId={mod.id} replaceId={slide.id} />
+                      <Disclosure summary="Edit title">
+                        <ActionForm action={renameSlide} submitLabel="Save title">
+                          <input type="hidden" name="id" value={slide.id} />
+                          <TextField name="title" label="Title" defaultValue={slide.title} />
+                        </ActionForm>
+                      </Disclosure>
+                      <DeleteButton
+                        action={removeSlide}
+                        fields={{ id: slide.id }}
+                        what={`“${slide.title}”`}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </AdminSection>
       ) : null}
 
       {tab === "details" ? (

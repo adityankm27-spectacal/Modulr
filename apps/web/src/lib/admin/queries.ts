@@ -125,7 +125,7 @@ export async function getModuleAdmin(id: string) {
 
 export async function getModuleContentAdmin(moduleId: string) {
   const supabase = await createClient();
-  const [videos, documents, cards, questions] = await Promise.all([
+  const [videos, documents, cards, questions, slides] = await Promise.all([
     supabase
       .from("videos")
       .select(
@@ -148,12 +148,19 @@ export async function getModuleContentAdmin(moduleId: string) {
       .select("id, kind, question_md, marks, sessions, frequency, is_published")
       .eq("module_id", moduleId)
       .order("sort_order"),
+    supabase
+      .from("documents")
+      .select("id, title, file_name, file_size, is_published, mirror_of, updated_at")
+      .eq("module_id", moduleId)
+      .eq("kind", "slides")
+      .order("created_at"),
   ]);
   return {
     videos: must(videos, "videos"),
     documents: must(documents, "documents"),
     cards: must(cards, "formula cards"),
     questions: must(questions, "questions"),
+    slides: must(slides, "slides"),
   };
 }
 

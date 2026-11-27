@@ -1,5 +1,14 @@
 import { readChapters } from "@modulr/shared";
-import { CheckCircle2, Clock, Loader2, PlayCircle, X } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Download,
+  FileText,
+  Loader2,
+  PlayCircle,
+  Presentation,
+  X,
+} from "lucide-react";
 import { IntentLink as Link } from "@/components/intent-link";
 import type { ReactNode } from "react";
 import { FormulaCard } from "@/components/content/formula-card";
@@ -15,6 +24,8 @@ import {
   getNotesPdfUrl,
   getQuestions,
   getPracticalVideos,
+  getSlideFileUrl,
+  getSlides,
   getVideos,
   getWatchProgress,
   type QuestionRow,
@@ -28,6 +39,7 @@ import {
   type QuestionFilters,
 } from "@/lib/questions";
 import { QUESTION_SHEET_KIND } from "@/lib/pdf-documents";
+import { formatFileSize, SLIDE_FILE_TYPES, slideExtension } from "@/lib/slide-files";
 import { cn } from "@/lib/utils";
 import { resumePosition } from "@/lib/video/watch";
 import { VideoPlayer } from "@/components/video/video-player";
@@ -91,6 +103,8 @@ async function TabContent({
       );
     case "notes":
       return <NotesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
+    case "slides":
+      return <SlidesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "formulas":
       return <FormulasTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "pyqs":
@@ -349,6 +363,83 @@ async function NotesTab({
         <Markdown>{doc.content_md}</Markdown>
       )}
     </article>
+  );
+}
+
+async function SlidesTab({
+  moduleId,
+  drafts,
+  viewer,
+}: {
+  moduleId: string;
+  drafts: boolean;
+  viewer: Props["viewer"];
+}) {
+  const slides = await getSlides(moduleId, { drafts });
+  if (slides.length === 0) return <Empty>Slides for this module are on their way.</Empty>;
+  // PDFs open in the view-only viewer (signed now, like notes); PowerPoint and Word files
+  // are downloaded through /api/slides/:id, which signs a URL only when clicked.
+  const pdfUrls = await Promise.all(
+    slides.map((slide) =>
+      slide.file_path && slideExtension(slide.file_path) === "pdf"
+        ? getSlideFileUrl(slide.file_path)
+        : Promise.resolve(null),
+    ),
+  );
+  return (
+    <div className="space-y-8">
+      {slides.map((slide, index) => {
+        const ext = slideExtension(slide.file_path ?? "");
+        const pdfUrl = pdfUrls[index];
+        const draft =
+          drafts && !slide.is_published ? <Badge variant="highlight">Draft</Badge> : null;
+        if (ext === "pdf") {
+          return pdfUrl ? (
+            <section key={slide.id} aria-label={slide.title} className="space-y-3">
+              <h2 className="flex flex-wrap items-center gap-2 font-sans text-lg font-extrabold tracking-normal">
+                {slide.title}
+                {draft}
+              </h2>
+              <PdfViewer
+                url={pdfUrl}
+                title={slide.title}
+                watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
+              />
+            </section>
+          ) : null;
+        }
+        const Icon = ext === "doc" || ext === "docx" ? FileText : Presentation;
+        const meta = [ext ? SLIDE_FILE_TYPES[ext].label : null, formatFileSize(slide.file_size)]
+          .filter(Boolean)
+          .join(" · ");
+        return (
+          <section
+            key={slide.id}
+            aria-label={slide.title}
+            className="flex flex-wrap items-center gap-4 rounded-2xl border-[3px] border-line bg-card p-4 shadow-[0_4px_0_0_var(--line)]"
+          >
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted">
+              <Icon className="size-6" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="flex flex-wrap items-center gap-2 font-sans text-base font-extrabold tracking-normal break-words">
+                {slide.title}
+                {draft}
+              </h2>
+              {meta ? <p className="text-sm text-muted-foreground">{meta}</p> : null}
+            </div>
+            {/* A plain link: it is an API route that redirects to the file, never prefetched. */}
+            <a
+              href={`/api/slides/${slide.id}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border-[3px] border-line bg-cobalt px-4 text-sm font-bold text-white shadow-[0_4px_0_0_var(--line)] transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              <Download className="size-4" aria-hidden="true" />
+              Download
+            </a>
+          </section>
+        );
+      })}
+    </div>
   );
 }
 

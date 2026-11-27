@@ -378,6 +378,9 @@ export type Database = {
           mirror_of: string | null;
           content_md: string;
           created_at: string;
+          file_name: string | null;
+          file_path: string | null;
+          file_size: number | null;
           id: string;
           is_published: boolean;
           kind: Database["public"]["Enums"]["document_kind"];
@@ -392,6 +395,9 @@ export type Database = {
           mirror_of?: string | null;
           content_md?: string;
           created_at?: string;
+          file_name?: string | null;
+          file_path?: string | null;
+          file_size?: number | null;
           id?: string;
           is_published?: boolean;
           kind: Database["public"]["Enums"]["document_kind"];
@@ -405,6 +411,9 @@ export type Database = {
           mirror_of?: string | null;
           content_md?: string;
           created_at?: string;
+          file_name?: string | null;
+          file_path?: string | null;
+          file_size?: number | null;
           id?: string;
           is_published?: boolean;
           kind?: Database["public"]["Enums"]["document_kind"];
@@ -1442,6 +1451,7 @@ export type Database = {
           important_questions: number;
           module_id: string;
           pyqs: number;
+          slides: number;
           videos: number;
           viva_questions: number;
         }[];
@@ -1462,7 +1472,8 @@ export type Database = {
         | "practical"
         | "pyq_sheet"
         | "important_sheet"
-        | "viva_sheet";
+        | "viva_sheet"
+        | "slides";
       payment_status: "created" | "authorized" | "captured" | "failed" | "refunded";
       plan_interval: "month" | "one_time";
       plan_scope: "all" | "subject" | "semester";
@@ -1597,6 +1608,7 @@ export const Constants = {
         "pyq_sheet",
         "important_sheet",
         "viva_sheet",
+        "slides",
       ],
       payment_status: ["created", "authorized", "captured", "failed", "refunded"],
       plan_interval: ["month", "one_time"],

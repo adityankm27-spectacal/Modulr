@@ -12,6 +12,7 @@ const counts: ModuleCounts = {
   has_pyq_sheet: false,
   has_important_sheet: false,
   has_viva_sheet: false,
+  slides: 0,
 };
 
 const empty: ModuleCounts = {
@@ -25,6 +26,7 @@ const empty: ModuleCounts = {
   has_pyq_sheet: false,
   has_important_sheet: false,
   has_viva_sheet: false,
+  slides: 0,
 };
 
 describe("parseModuleTab", () => {
@@ -44,6 +46,7 @@ describe("tabCount", () => {
     expect(tabCount("formulas", { ...counts, formula_cards: 0 })).toBe(1);
     expect(tabCount("viva", counts)).toBe(1);
     expect(tabCount("pyqs", undefined)).toBe(0);
+    expect(tabCount("slides", { ...counts, slides: 3 })).toBe(3);
   });
 
   it("counts a PDF question sheet as content on its tab", () => {

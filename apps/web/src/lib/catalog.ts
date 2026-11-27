@@ -275,6 +275,35 @@ export async function getNotesPdfUrl(pdfPath: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
+/** A module's Slides tab files, oldest first (RLS keeps out what the viewer can't read). */
+export async function getSlides(moduleId: string, { drafts = false }: ContentOptions = {}) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("documents")
+    .select("id, title, file_path, file_name, file_size, updated_at, is_published")
+    .eq("module_id", moduleId)
+    .eq("kind", "slides")
+    .order("created_at");
+  if (!drafts) query = query.eq("is_published", true);
+  return rows(await query, "slides");
+}
+
+/**
+ * Short-lived signed URL for a Slides-tab file, signed with the viewer's own session so
+ * the `slides` storage policy decides. `download` makes the browser save it under that
+ * name instead of opening it. Null if not allowed.
+ */
+export async function getSlideFileUrl(
+  filePath: string,
+  { download }: { download?: string } = {},
+): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.storage
+    .from("slides")
+    .createSignedUrl(filePath, NOTES_PDF_TTL_SECONDS, download ? { download } : undefined);
+  return data?.signedUrl ?? null;
+}
+
 export async function getFormulaCards(moduleId: string, { drafts = false }: ContentOptions = {}) {
   const supabase = await createClient();
   let query = supabase

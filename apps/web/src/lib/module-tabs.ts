@@ -1,7 +1,8 @@
-/** The six sections every module pack has (spec §4), in display order. */
+/** The sections every module pack has (spec §4, plus uploaded slides), in display order. */
 export const MODULE_TABS = [
   { id: "videos", label: "Videos" },
   { id: "notes", label: "Short notes" },
+  { id: "slides", label: "Slides" },
   { id: "formulas", label: "Formulas" },
   { id: "pyqs", label: "PYQs" },
   { id: "important", label: "Important Qs" },
@@ -27,6 +28,8 @@ export interface ModuleCounts {
   has_pyq_sheet: boolean;
   has_important_sheet: boolean;
   has_viva_sheet: boolean;
+  /** Published files on the Slides tab. */
+  slides: number;
 }
 
 export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): number {
@@ -36,6 +39,8 @@ export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): nu
       return counts.videos;
     case "notes":
       return counts.has_short_notes ? 1 : 0;
+    case "slides":
+      return counts.slides;
     case "formulas":
       return (
         counts.formula_cards + (counts.has_formula_sheet && counts.formula_cards === 0 ? 1 : 0)
@@ -55,6 +60,7 @@ export function countsSummary(counts: ModuleCounts | undefined): string {
   const parts: string[] = [];
   if (counts.videos) parts.push(`${counts.videos} ${counts.videos === 1 ? "video" : "videos"}`);
   if (counts.has_short_notes) parts.push("Notes");
+  if (counts.slides) parts.push("Slides");
   if (counts.formula_cards || counts.has_formula_sheet) parts.push("Formulas");
   if (counts.pyqs) parts.push(`${counts.pyqs} ${counts.pyqs === 1 ? "PYQ" : "PYQs"}`);
   else if (counts.has_pyq_sheet) parts.push("PYQs");

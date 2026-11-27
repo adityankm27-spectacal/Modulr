@@ -12,6 +12,7 @@ export const DOCUMENT_KINDS = [
   "pyq_sheet",
   "important_sheet",
   "viva_sheet",
+  "slides",
 ] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 

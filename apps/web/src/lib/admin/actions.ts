@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateQuestionImport, type ImportValidation } from "@/lib/question-import";
 import { configuredProviderName, getVideoProvider } from "@/lib/video";
 import { PDF_DOCUMENT_KINDS } from "@/lib/pdf-documents";
+import { SLIDE_MAX_BYTES, SLIDE_PATH_PATTERN, slideExtension } from "@/lib/slide-files";
 import { providerChaptersUpdate } from "@/lib/video/chapters";
 import type { UploadTarget } from "@/lib/video/types";
 import { AdminError, check, runAdminAction } from "./action";
@@ -679,6 +680,109 @@ export async function removePdf(_: ActionState, form: FormData) {
     check((await supabase.from("documents").update({ pdf_path: null }).eq("id", id)).error);
     await removePdfFile(supabase, doc.pdf_path);
     return "PDF removed.";
+  });
+}
+
+// --- Slides tab files ------------------------------------------------------------
+
+const slideAttach = z.object({
+  moduleId: z.uuid(),
+  // Uploaded by the admin's browser to slides/<module id>/<random uuid>.<ext>.
+  path: z.string().regex(SLIDE_PATH_PATTERN, "Invalid file path."),
+  fileName: z.string().trim().min(1).max(255),
+  fileSize: z.number().int().positive().max(SLIDE_MAX_BYTES),
+  title: z.string().trim().min(1, "Give the file a title.").max(200),
+  /** Replace the file of this existing slides document instead of adding a new one. */
+  replaceId: z.uuid().optional(),
+});
+
+/** Best effort, like removePdfFile: keeps a file that a mirrored document still shares. */
+async function removeSlideFile(supabase: Supabase, path: string | null | undefined) {
+  if (!path) return;
+  const { count } = await supabase
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("file_path", path);
+  if (count) return;
+  await supabase.storage.from("slides").remove([path]);
+}
+
+/**
+ * Called after the browser uploaded a file to the `slides` bucket: adds it to the
+ * module's Slides tab as a draft, or swaps the file of an existing slides document.
+ */
+export async function attachSlide(input: z.infer<typeof slideAttach>): Promise<ActionState> {
+  return runAdminAction(input, slideAttach, async (values, supabase) => {
+    const { moduleId, path, fileName, fileSize, title, replaceId } = values;
+    if (!path.startsWith(`${moduleId}/`))
+      throw new AdminError("That file belongs to another module.");
+    if (slideExtension(fileName) !== slideExtension(path))
+      throw new AdminError("The file name doesn't match the uploaded file.");
+    const file = { file_path: path, file_name: fileName, file_size: fileSize };
+    if (replaceId) {
+      const { data: existing, error } = await supabase
+        .from("documents")
+        .select("id, file_path, is_published")
+        .eq("id", replaceId)
+        .eq("module_id", moduleId)
+        .eq("kind", "slides")
+        .maybeSingle();
+      check(error);
+      if (!existing) throw new AdminError("That file no longer exists. Reload the page.");
+      check((await supabase.from("documents").update(file).eq("id", existing.id)).error);
+      if (existing.file_path !== path) await removeSlideFile(supabase, existing.file_path);
+      return existing.is_published
+        ? "File replaced. Students see the new one now."
+        : "File replaced. It's still a draft.";
+    }
+    check(
+      (
+        await supabase.from("documents").insert({
+          module_id: moduleId,
+          kind: "slides",
+          title,
+          content_md: "",
+          is_published: false,
+          ...file,
+        })
+      ).error,
+    );
+    return "File added as a draft. Publish it to show it to students.";
+  });
+}
+
+const slideTitle = z.object({
+  id: z.uuid(),
+  title: z.string().trim().min(1, "Give the file a title.").max(200),
+});
+
+export async function renameSlide(_: ActionState, form: FormData) {
+  return runAdminAction(form, slideTitle, async ({ id, title }, supabase) => {
+    const { data, error } = await supabase
+      .from("documents")
+      .update({ title })
+      .eq("id", id)
+      .eq("kind", "slides")
+      .select("id");
+    check(error);
+    mustAffect(data, "file");
+    return "Title saved";
+  });
+}
+
+/** Deletes a slides document and (unless a mirror still shares it) its file. */
+export async function removeSlide(_: ActionState, form: FormData) {
+  return runAdminAction(form, idSchema, async ({ id }, supabase) => {
+    const { data, error } = await supabase
+      .from("documents")
+      .delete()
+      .eq("id", id)
+      .eq("kind", "slides")
+      .select("file_path");
+    check(error);
+    const doc = mustAffect(data, "file");
+    await removeSlideFile(supabase, doc.file_path);
+    return "File deleted.";
   });
 }
 
