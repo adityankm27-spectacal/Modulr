@@ -94,20 +94,34 @@ export async function getCurrentSyllabusVersion(branchId: string) {
   );
 }
 
-export async function getSubjectsForSemester(syllabusVersionId: string, semester: number) {
-  const supabase = await createClient();
-  return rows(
-    await supabase
-      .from("subjects")
-      .select("id, code, name, description, modules(count)")
-      .eq("syllabus_version_id", syllabusVersionId)
-      .eq("semester", semester)
-      .eq("is_published", true)
-      .eq("modules.is_published", true)
-      .order("sort_order"),
-    "subjects",
-  );
-}
+/*
+ * Catalog structure (subjects, modules, tab counts) is the same for every visitor and
+ * only lists published items, so it is read with the anonymous client and cached across
+ * requests like plans: admin saves refresh it at once (updateTag in lib/admin/action.ts),
+ * otherwise it is re-read at most every 5 minutes. Paid content itself (videos, notes,
+ * questions) is still read per viewer, through RLS.
+ */
+
+export const getSubjectsForSemester = cache(
+  unstable_cache(
+    async (syllabusVersionId: string, semester: number) => {
+      const supabase = createPublicClient();
+      return rows(
+        await supabase
+          .from("subjects")
+          .select("id, code, name, description, modules(count)")
+          .eq("syllabus_version_id", syllabusVersionId)
+          .eq("semester", semester)
+          .eq("is_published", true)
+          .eq("modules.is_published", true)
+          .order("sort_order"),
+        "subjects",
+      );
+    },
+    ["subjects-for-semester"],
+    PUBLIC_CACHE,
+  ),
+);
 
 /** Every published subject with its syllabus context, for the public index and sitemap. */
 export async function getPublishedSubjects() {
@@ -125,41 +139,62 @@ export async function getPublishedSubjects() {
   );
 }
 
-export const getSubject = cache(async (subjectId: string) => {
-  const supabase = await createClient();
-  return maybe(
-    await supabase
-      .from("subjects")
-      .select(
-        "id, code, name, description, semester, syllabus_version_id, syllabus_versions!inner(label, branches!inner(name, code))",
-      )
-      .eq("id", subjectId)
-      .eq("is_published", true)
-      .maybeSingle(),
-    "subject",
-  );
-});
+export const getSubject = cache(
+  unstable_cache(
+    async (subjectId: string) => {
+      const supabase = createPublicClient();
+      return maybe(
+        await supabase
+          .from("subjects")
+          .select(
+            "id, code, name, description, semester, syllabus_version_id, syllabus_versions!inner(label, branches!inner(name, code))",
+          )
+          .eq("id", subjectId)
+          .eq("is_published", true)
+          .maybeSingle(),
+        "subject",
+      );
+    },
+    ["subject"],
+    PUBLIC_CACHE,
+  ),
+);
 
-export const getModules = cache(async (subjectId: string) => {
-  const supabase = await createClient();
-  return rows(
-    await supabase
-      .from("modules")
-      .select("id, number, title, is_free_preview")
-      .eq("subject_id", subjectId)
-      .eq("is_published", true)
-      .order("sort_order")
-      .order("number"),
-    "modules",
-  );
-});
+export const getModules = cache(
+  unstable_cache(
+    async (subjectId: string) => {
+      const supabase = createPublicClient();
+      return rows(
+        await supabase
+          .from("modules")
+          .select("id, number, title, is_free_preview")
+          .eq("subject_id", subjectId)
+          .eq("is_published", true)
+          .order("sort_order")
+          .order("number"),
+        "modules",
+      );
+    },
+    ["modules"],
+    PUBLIC_CACHE,
+  ),
+);
+
+// Cached as rows (a Map isn't serialisable), turned into a Map per request.
+const getContentCountRows = unstable_cache(
+  async (subjectId: string) => {
+    const supabase = createPublicClient();
+    return rows(
+      await supabase.rpc("module_content_counts", { p_subject: subjectId }),
+      "content counts",
+    );
+  },
+  ["content-counts"],
+  PUBLIC_CACHE,
+);
 
 export const getContentCounts = cache(async (subjectId: string) => {
-  const supabase = await createClient();
-  const countRows = rows(
-    await supabase.rpc("module_content_counts", { p_subject: subjectId }),
-    "content counts",
-  );
+  const countRows = await getContentCountRows(subjectId);
   return new Map(countRows.map((row) => [row.module_id, row]));
 });
 

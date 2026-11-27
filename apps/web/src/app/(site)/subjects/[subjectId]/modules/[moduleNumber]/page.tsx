@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { IntentLink as Link } from "@/components/intent-link";
 import { notFound, redirect } from "next/navigation";
-import type { CSSProperties } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { LockPanel } from "@/components/catalog/lock-panel";
 import { ModuleContent } from "@/components/catalog/module-content";
 import { ModuleTabsNav } from "@/components/catalog/module-tabs-nav";
@@ -134,24 +134,31 @@ export default async function ModulePage({
 
       <div className="mt-6">
         {lock.kind === "open" ? (
-          <ModuleContent
-            moduleId={current.id}
-            subjectId={subject.id}
-            tab={tab}
-            basePath={basePath}
-            filters={filters}
-            viewer={
-              viewer
-                ? {
-                    userId: viewer.userId,
-                    name: viewer.profile?.full_name ?? "",
-                    email: viewer.email ?? "",
-                  }
-                : null
-            }
-            selectedVideoId={typeof query.v === "string" ? query.v : undefined}
-            autoplay={query.autoplay === "1"}
-          />
+          // The tab's content streams in after the header and tabs, so a page switch shows
+          // the new page at once instead of waiting for videos, notes or a PDF link.
+          <Suspense
+            key={`${tab}:${query.marks ?? ""}:${query.session ?? ""}`}
+            fallback={<TabSkeleton />}
+          >
+            <ModuleContent
+              moduleId={current.id}
+              subjectId={subject.id}
+              tab={tab}
+              basePath={basePath}
+              filters={filters}
+              viewer={
+                viewer
+                  ? {
+                      userId: viewer.userId,
+                      name: viewer.profile?.full_name ?? "",
+                      email: viewer.email ?? "",
+                    }
+                  : null
+              }
+              selectedVideoId={typeof query.v === "string" ? query.v : undefined}
+              autoplay={query.autoplay === "1"}
+            />
+          </Suspense>
         ) : (
           <LockPanel
             lock={lock}
@@ -205,5 +212,17 @@ export default async function ModulePage({
         ) : null}
       </nav>
     </main>
+  );
+}
+
+/** Placeholder while a tab's content streams in; sized roughly like a video or a notes page. */
+function TabSkeleton() {
+  return (
+    <div aria-busy="true" className="space-y-3">
+      <span className="sr-only">Loading</span>
+      <div className="aspect-video w-full animate-pulse rounded-2xl bg-muted" />
+      <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
+      <div className="h-5 w-1/2 animate-pulse rounded bg-muted" />
+    </div>
   );
 }
