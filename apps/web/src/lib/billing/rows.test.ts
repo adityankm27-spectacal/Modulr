@@ -95,6 +95,8 @@ describe("paymentRow", () => {
           status: "captured",
           method: "upi",
           paidAt: start,
+          failureCode: null,
+          failureReason: null,
         },
         { id: "s1", user_id: "u1" },
       ),
@@ -108,6 +110,8 @@ describe("paymentRow", () => {
       status: "captured",
       method: "upi",
       paid_at: start.toISOString(),
+      failure_code: null,
+      failure_reason: null,
     });
   });
 });

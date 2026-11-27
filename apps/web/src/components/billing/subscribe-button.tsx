@@ -19,7 +19,9 @@ interface RazorpayInstance {
   open(): void;
   on(
     event: "payment.failed",
-    handler: (response: { error?: { description?: string } }) => void,
+    handler: (response: {
+      error?: { description?: string; metadata?: { payment_id?: string } };
+    }) => void,
   ): void;
 }
 
@@ -125,6 +127,15 @@ export function SubscribeButton({
       });
       checkout.on("payment.failed", (response) => {
         setError(response.error?.description ?? "The payment failed. Please try again.");
+        // Keeps the attempt and Razorpay's reason on our side for support. Best effort:
+        // the student sees the same message whether or not this is saved.
+        const paymentId = response.error?.metadata?.payment_id;
+        if (paymentId) {
+          void post("/api/billing/failed", {
+            paymentId,
+            subscriptionId: session.subscriptionId,
+          }).catch(() => {});
+        }
       });
       checkoutPause?.pause();
       checkout.open();

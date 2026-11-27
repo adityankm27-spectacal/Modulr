@@ -80,6 +80,32 @@ describe("Razorpay mapping", () => {
     expect(
       toProviderPayment({ id: "pay_2", amount: 10000, status: "failed", created_at: 1 }).paidAt,
     ).toBeNull();
+    expect(captured).toMatchObject({ failureCode: null, failureReason: null });
+  });
+
+  it("keeps Razorpay's reason on failed payments", () => {
+    const failed = toProviderPayment({
+      id: "pay_3",
+      amount: 9900,
+      status: "failed",
+      method: "upi",
+      error_code: "BAD_REQUEST_ERROR",
+      error_reason: "payment_cancelled",
+      error_description: "  You may have cancelled the payment.  ",
+    });
+    expect(failed).toMatchObject({
+      failureCode: "BAD_REQUEST_ERROR",
+      failureReason: "You may have cancelled the payment.",
+    });
+    // Falls back to the short reason when there is no description.
+    expect(
+      toProviderPayment({
+        id: "pay_4",
+        amount: 9900,
+        status: "failed",
+        error_reason: "payment_timed_out",
+      }).failureReason,
+    ).toBe("payment_timed_out");
   });
 
   it("parses webhook bodies, falling back to a body hash for the event id", () => {

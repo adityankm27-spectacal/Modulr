@@ -110,8 +110,16 @@ export function toProviderPayment(entity: Entity): ProviderPayment {
     status,
     method: typeof entity.method === "string" ? entity.method : null,
     paidAt: status === "captured" || status === "refunded" ? fromUnix(entity.created_at) : null,
+    failureCode: status === "failed" ? text(entity.error_code) : null,
+    // The description is the readable one ("You may have cancelled the payment…"); the
+    // reason ("payment_cancelled") is the fallback.
+    failureReason:
+      status === "failed" ? (text(entity.error_description) ?? text(entity.error_reason)) : null,
   };
 }
+
+const text = (value: unknown) =>
+  typeof value === "string" && value.trim() ? value.trim().slice(0, 500) : null;
 
 /**
  * Parses a webhook body whose signature was already verified. The event id

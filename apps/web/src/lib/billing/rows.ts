@@ -32,5 +32,7 @@ export function paymentRow(
     status: payment.status,
     method: payment.method,
     paid_at: payment.paidAt?.toISOString() ?? null,
+    failure_code: payment.failureCode,
+    failure_reason: payment.failureReason,
   };
 }

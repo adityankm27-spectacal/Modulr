@@ -651,6 +651,8 @@ export type Database = {
           amount_paise: number;
           created_at: string;
           currency: string;
+          failure_code: string | null;
+          failure_reason: string | null;
           id: string;
           method: string | null;
           paid_at: string | null;
@@ -667,6 +669,8 @@ export type Database = {
           amount_paise: number;
           created_at?: string;
           currency?: string;
+          failure_code?: string | null;
+          failure_reason?: string | null;
           id?: string;
           method?: string | null;
           paid_at?: string | null;
@@ -682,6 +686,8 @@ export type Database = {
           amount_paise?: number;
           created_at?: string;
           currency?: string;
+          failure_code?: string | null;
+          failure_reason?: string | null;
           id?: string;
           method?: string | null;
           paid_at?: string | null;

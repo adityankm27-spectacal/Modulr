@@ -18,6 +18,9 @@ export interface ProviderPayment {
   status: PaymentStatus;
   method: string | null;
   paidAt: Date | null;
+  /** Provider's error code and reason; only set on failed payments. */
+  failureCode: string | null;
+  failureReason: string | null;
 }
 
 /** A verified webhook delivery, reduced to what Modulr acts on. */
