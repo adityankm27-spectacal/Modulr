@@ -468,3 +468,20 @@
     margin: 0;
   }
 }
+
+/* Top bar while an in-app navigation is on its way (components/nav-progress.tsx):
+ * quick start, then creeps towards 90% until the page arrives. */
+@keyframes nav-progress {
+  0% {
+    width: 0;
+  }
+  10% {
+    width: 35%;
+  }
+  100% {
+    width: 90%;
+  }
+}
+.nav-progress-run {
+  animation: nav-progress 8s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}

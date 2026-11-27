@@ -41,10 +41,14 @@ export async function updateSession(request: NextRequest) {
   const claimsMs = Date.now() - claimsStart;
 
   // One active device per account: sign out sessions replaced by a newer sign-in.
-  // Link prefetches only warm the client cache and show nothing to the user, so they skip
-  // the database lookup; the real navigation that follows does the check.
-  const isPrefetch = request.headers.has("next-router-prefetch");
-  if (claims?.sub && !isPrefetch && !isSessionCheckExempt(request.nextUrl.pathname)) {
+  // In-app navigations (client router requests: prefetches and link clicks) skip the
+  // database lookup, since it sits in front of every page switch. Full page loads, API
+  // calls and form actions still check, and SessionWatch polls /api/session every 30 s,
+  // so a replaced device is still signed out within about half a minute.
+  const isRouterRequest =
+    request.headers.has("next-router-prefetch") ||
+    (request.headers.get("rsc") === "1" && !request.headers.has("next-action"));
+  if (claims?.sub && !isRouterRequest && !isSessionCheckExempt(request.nextUrl.pathname)) {
     const profileStart = Date.now();
     const { data: profile } = await supabase
       .from("profiles")

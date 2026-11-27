@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Manrope, Unbounded } from "next/font/google";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { NavProgress } from "@/components/nav-progress";
 import { NavWatchdog } from "@/components/nav-watchdog";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -54,6 +55,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
         <div aria-hidden="true" className="scroll-progress" />
         <NavWatchdog />
+        {/* useSearchParams needs a Suspense boundary; the bar renders nothing until a click. */}
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
         <SiteHeader />
         <div id="main" className="flex flex-1 flex-col">
           {children}
