@@ -797,9 +797,19 @@ async function CodeTab({
     getCodePrograms(moduleId, { drafts }),
     getDocument(moduleId, "code_sheet", { drafts }),
   ]);
-  const pdf = sheet?.pdf_path ? <DocumentPdf doc={sheet} viewer={viewer} /> : null;
+  const sheetPdf = sheet?.pdf_path ? <DocumentPdf doc={sheet} viewer={viewer} /> : null;
   const selected = programs.find((p) => p.id === selectedProgramId) ?? programs[0];
-  if (!selected) return pdf ?? <ComingSoon>Code for this module is on its way.</ComingSoon>;
+  if (!selected) return sheetPdf ?? <ComingSoon>Code for this module is on its way.</ComingSoon>;
+  // A program's own PDF; programs without one show the module-wide PDF, if any.
+  const pdf = selected.pdf_path ? (
+    <DocumentPdf
+      key={selected.id}
+      doc={{ id: selected.id, title: selected.title, pdf_path: selected.pdf_path }}
+      viewer={viewer}
+    />
+  ) : (
+    sheetPdf
+  );
   const programHref = (id: string) => `${basePath}?tab=code&p=${id}`;
   const hasCode = Boolean(selected.code.trim());
   const hasVideos = (await getCodeProgramVideos(selected.id, { drafts })).length > 0;
@@ -851,7 +861,7 @@ async function CodeTab({
         </nav>
       ) : null}
 
-      {/* Video first, then the module's Code PDF, then the program's own code. */}
+      {/* Video first, then the program's Code PDF, then its pasted code. */}
       <section aria-label={selected.title} className="space-y-6">
         <h2 className="text-2xl break-words">{selected.title}</h2>
         {hasVideos ? (

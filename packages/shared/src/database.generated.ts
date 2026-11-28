@@ -276,6 +276,7 @@ export type Database = {
           is_published: boolean;
           language: string;
           module_id: string;
+          pdf_path: string | null;
           sort_order: number;
           title: string;
           updated_at: string;
@@ -288,6 +289,7 @@ export type Database = {
           is_published?: boolean;
           language?: string;
           module_id: string;
+          pdf_path?: string | null;
           sort_order?: number;
           title: string;
           updated_at?: string;
@@ -299,6 +301,7 @@ export type Database = {
           is_published?: boolean;
           language?: string;
           module_id?: string;
+          pdf_path?: string | null;
           sort_order?: number;
           title?: string;
           updated_at?: string;

@@ -256,7 +256,7 @@ export async function getCodePrograms(moduleId: string, { drafts = false }: Cont
   const supabase = await createClient();
   let query = supabase
     .from("code_programs")
-    .select("id, title, language, code, is_published")
+    .select("id, title, language, code, pdf_path, is_published")
     .eq("module_id", moduleId)
     .order("sort_order");
   if (!drafts) query = query.eq("is_published", true);

@@ -227,7 +227,7 @@ export async function getCodeProgramAdmin(id: string) {
     supabase
       .from("code_programs")
       .select(
-        "id, title, code, language, is_published, module_id, modules!inner(id, number, title, subject_id, subjects!inner(id, name, syllabus_versions!inner(id, label)))",
+        "id, title, code, language, is_published, module_id, pdf_path, modules!inner(id, number, title, subject_id, subjects!inner(id, name, syllabus_versions!inner(id, label)))",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -241,17 +241,8 @@ export async function getCodeProgramAdmin(id: string) {
   ]);
   if (program.error) throw new Error(program.error.message);
   if (!program.data) return null;
-  // The module's Code PDF, which can be managed from any of its programs too.
-  const sheet = await supabase
-    .from("documents")
-    .select("id, title, pdf_path, is_published")
-    .eq("module_id", program.data.module_id)
-    .eq("kind", "code_sheet")
-    .maybeSingle();
-  if (sheet.error) throw new Error(sheet.error.message);
   return {
     program: program.data,
     videos: must(videos, "videos"),
-    codeSheet: sheet.data ?? undefined,
   };
 }

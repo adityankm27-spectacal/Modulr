@@ -4,7 +4,7 @@ import { CheckCircle2, FileText, Loader2, TriangleAlert, Upload } from "lucide-r
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { attachPdf } from "@/lib/admin/actions";
+import { attachPdf, attachProgramPdf } from "@/lib/admin/actions";
 import type { PdfDocumentKind } from "@/lib/pdf-documents";
 import { createClient } from "@/lib/supabase/client";
 
@@ -19,18 +19,22 @@ type Phase =
 
 /**
  * Uploads a PDF straight from the admin's browser to the private `notes` bucket
- * (storage policy: admins only), then attaches it to the module's document of `kind`.
+ * (storage policy: admins only), then attaches it to the module's document of `kind`,
+ * or, with `programId`, to that code program.
  */
 export function PdfUpload({
   moduleId,
   kind,
+  programId,
   title,
   hasPdf,
   hint,
 }: {
   moduleId: string;
-  kind: PdfDocumentKind;
-  title: string;
+  /** The module document to attach to, unless `programId` is given. */
+  kind?: PdfDocumentKind;
+  programId?: string;
+  title?: string;
   hasPdf: boolean;
   /** What students see, shown while no PDF is attached. */
   hint: string;
@@ -57,7 +61,11 @@ export function PdfUpload({
       setPhase({ kind: "error", message: `Upload failed: ${error.message}` });
       return;
     }
-    const result = await attachPdf({ moduleId, kind, path, title });
+    const result = programId
+      ? await attachProgramPdf({ programId, path })
+      : kind && title
+        ? await attachPdf({ moduleId, kind, path, title })
+        : { status: "error" as const, message: "Nothing to attach the PDF to." };
     if (result.status === "error") {
       setPhase({ kind: "error", message: result.message ?? "Couldn't attach the PDF." });
       return;

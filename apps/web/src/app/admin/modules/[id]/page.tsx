@@ -420,7 +420,7 @@ export default async function ModuleEditorPage({
             moduleTitle={mod.title}
             kind="code_sheet"
             doc={content.documents.find((d) => d.kind === "code_sheet")}
-            hint="Upload a PDF with this module's code, e.g. a lab manual or program sheet. Students see it at the top of the Code tab, above the programs."
+            hint="Optional: one PDF for the whole module. It shows only for programs without their own PDF. To give a program its own PDF, open the program below."
             showPublish
           />
           <ActionForm action={saveCodeProgram} submitLabel="Add program" resetOnSuccess>

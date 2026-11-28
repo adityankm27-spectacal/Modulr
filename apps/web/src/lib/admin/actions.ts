@@ -688,6 +688,11 @@ async function removePdfFile(supabase: Supabase, path: string | null | undefined
     .select("id", { count: "exact", head: true })
     .eq("pdf_path", path);
   if (count) return;
+  const { count: programs } = await supabase
+    .from("code_programs")
+    .select("id", { count: "exact", head: true })
+    .eq("pdf_path", path);
+  if (programs) return;
   await supabase.storage.from("notes").remove([path]);
 }
 
@@ -744,6 +749,54 @@ export async function removePdf(_: ActionState, form: FormData) {
     if (!doc) throw new AdminError("Document not found. Reload the page.");
     check((await supabase.from("documents").update({ pdf_path: null }).eq("id", id)).error);
     await removePdfFile(supabase, doc.pdf_path);
+    return "PDF removed.";
+  });
+}
+
+const programPdfAttach = z.object({
+  programId: z.uuid(),
+  // Uploaded by the admin's browser to notes/<module id>/<random uuid>.pdf.
+  path: z.string().regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/, "Invalid file path."),
+});
+
+/** Called after the browser uploaded a PDF: makes it this program's own Code PDF. */
+export async function attachProgramPdf(
+  input: z.infer<typeof programPdfAttach>,
+): Promise<ActionState> {
+  return runAdminAction(input, programPdfAttach, async ({ programId, path }, supabase) => {
+    const { data: program, error } = await supabase
+      .from("code_programs")
+      .select("module_id, pdf_path, is_published")
+      .eq("id", programId)
+      .maybeSingle();
+    check(error);
+    if (!program) throw new AdminError("Program not found. Reload the page.");
+    if (!path.startsWith(`${program.module_id}/`))
+      throw new AdminError("That file belongs to another module.");
+    check(
+      (await supabase.from("code_programs").update({ pdf_path: path }).eq("id", programId)).error,
+    );
+    if (program.pdf_path && program.pdf_path !== path) {
+      await removePdfFile(supabase, program.pdf_path);
+    }
+    return program.is_published
+      ? "PDF attached. Students see it under this program's video."
+      : "PDF attached. Students will see it once the program is published.";
+  });
+}
+
+/** Removes a program's own Code PDF and deletes the file. */
+export async function removeProgramPdf(_: ActionState, form: FormData) {
+  return runAdminAction(form, idSchema, async ({ id }, supabase) => {
+    const { data: program, error } = await supabase
+      .from("code_programs")
+      .select("pdf_path")
+      .eq("id", id)
+      .maybeSingle();
+    check(error);
+    if (!program) throw new AdminError("Program not found. Reload the page.");
+    check((await supabase.from("code_programs").update({ pdf_path: null }).eq("id", id)).error);
+    await removePdfFile(supabase, program.pdf_path);
     return "PDF removed.";
   });
 }
