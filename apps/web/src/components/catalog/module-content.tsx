@@ -204,6 +204,9 @@ export async function VideosTab({
     .slice(videos.indexOf(selected) + 1)
     .find((v) => v.processing_status === "ready");
   const saved = progress.get(selected.id);
+  // A program with one video: its title is already above the player and a one-item list
+  // adds nothing, so the code follows the video directly.
+  const single = Boolean(codeProgramId) && videos.length === 1;
 
   return (
     <div className="space-y-6">
@@ -233,109 +236,113 @@ export async function VideosTab({
             <p className="font-semibold">This video is still being prepared. Check back soon.</p>
           </div>
         )}
-        <h2 className="font-sans text-lg font-extrabold tracking-normal">{selected.title}</h2>
+        {single ? null : (
+          <h2 className="font-sans text-lg font-extrabold tracking-normal">{selected.title}</h2>
+        )}
       </section>
 
-      <section aria-label={`All videos in this ${noun}`}>
-        <ol className="space-y-2">
-          {videos.map((video, index) => {
-            const p = progress.get(video.id);
-            const duration = formatDuration(video.duration_sec);
-            const percent =
-              p && video.duration_sec
-                ? Math.min(100, Math.round((p.position_sec / video.duration_sec) * 100))
-                : 0;
-            const current = video.id === selected.id;
-            return (
-              <li
-                key={video.id}
-                className="motion-safe:animate-rise"
-                style={{ animationDelay: `${Math.min(index, 10) * 60}ms` }}
-              >
-                <Link
-                  href={href(video.id)}
-                  scroll={false}
-                  // Picking another video replaces the history entry, so Back leaves the module.
-                  replace
-                  aria-current={current ? "true" : undefined}
-                  className={cn(
-                    "group flex items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
-                    current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
-                  )}
+      {single ? null : (
+        <section aria-label={`All videos in this ${noun}`}>
+          <ol className="space-y-2">
+            {videos.map((video, index) => {
+              const p = progress.get(video.id);
+              const duration = formatDuration(video.duration_sec);
+              const percent =
+                p && video.duration_sec
+                  ? Math.min(100, Math.round((p.position_sec / video.duration_sec) * 100))
+                  : 0;
+              const current = video.id === selected.id;
+              return (
+                <li
+                  key={video.id}
+                  className="motion-safe:animate-rise"
+                  style={{ animationDelay: `${Math.min(index, 10) * 60}ms` }}
                 >
-                  <span
+                  <Link
+                    href={href(video.id)}
+                    scroll={false}
+                    // Picking another video replaces the history entry, so Back leaves the module.
+                    replace
+                    aria-current={current ? "true" : undefined}
                     className={cn(
-                      "flex size-11 shrink-0 items-center justify-center rounded-xl transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
-                      current ? "bg-primary text-white" : "bg-muted",
+                      "group flex items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
+                      current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
                     )}
                   >
-                    {current ? (
-                      // Bouncing bars: this is the video in the player above.
-                      <span
-                        className="flex h-4 items-end gap-0.5"
-                        aria-label="Now playing"
-                        role="img"
-                      >
-                        {[0, 1, 2].map((bar) => (
-                          <span
-                            key={bar}
-                            className="h-full w-1 origin-bottom rounded-full bg-white motion-safe:animate-eq"
-                            style={{ animationDelay: `${bar * -0.3}s` }}
-                          />
-                        ))}
-                      </span>
-                    ) : p?.completed ? (
-                      <CheckCircle2 className="size-5 text-success" aria-label="Watched" />
-                    ) : (
-                      <PlayCircle className="size-5" aria-hidden="true" />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-bold leading-snug">
-                      {practicalNumber === undefined
-                        ? index + 1
-                        : videos.length === 1
-                          ? practicalNumber
-                          : `${practicalNumber}.${index + 1}`}
-                      . {video.title}
+                    <span
+                      className={cn(
+                        "flex size-11 shrink-0 items-center justify-center rounded-xl transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
+                        current ? "bg-primary text-white" : "bg-muted",
+                      )}
+                    >
+                      {current ? (
+                        // Bouncing bars: this is the video in the player above.
+                        <span
+                          className="flex h-4 items-end gap-0.5"
+                          aria-label="Now playing"
+                          role="img"
+                        >
+                          {[0, 1, 2].map((bar) => (
+                            <span
+                              key={bar}
+                              className="h-full w-1 origin-bottom rounded-full bg-white motion-safe:animate-eq"
+                              style={{ animationDelay: `${bar * -0.3}s` }}
+                            />
+                          ))}
+                        </span>
+                      ) : p?.completed ? (
+                        <CheckCircle2 className="size-5 text-success" aria-label="Watched" />
+                      ) : (
+                        <PlayCircle className="size-5" aria-hidden="true" />
+                      )}
                     </span>
-                    <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                      {duration ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="size-3.5" aria-hidden="true" />
-                          {duration}
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold leading-snug">
+                        {practicalNumber === undefined
+                          ? index + 1
+                          : videos.length === 1
+                            ? practicalNumber
+                            : `${practicalNumber}.${index + 1}`}
+                        . {video.title}
+                      </span>
+                      <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                        {duration ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="size-3.5" aria-hidden="true" />
+                            {duration}
+                          </span>
+                        ) : null}
+                        {readChapters(video.chapters).length ? (
+                          <span>{pluralize(readChapters(video.chapters).length, "chapter")}</span>
+                        ) : null}
+                        {video.processing_status !== "ready" ? <Badge>Processing</Badge> : null}
+                        {drafts && !video.is_published ? (
+                          <Badge variant="highlight">Draft</Badge>
+                        ) : null}
+                      </span>
+                      {percent > 0 && !p?.completed ? (
+                        <span
+                          className="mt-2 block h-1.5 overflow-hidden rounded-full bg-muted"
+                          role="progressbar"
+                          aria-label={`${percent}% watched`}
+                          aria-valuenow={percent}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        >
+                          <span
+                            className="block h-full rounded-full bg-primary"
+                            style={{ width: `${percent}%` }}
+                          />
                         </span>
                       ) : null}
-                      {readChapters(video.chapters).length ? (
-                        <span>{pluralize(readChapters(video.chapters).length, "chapter")}</span>
-                      ) : null}
-                      {video.processing_status !== "ready" ? <Badge>Processing</Badge> : null}
-                      {drafts && !video.is_published ? (
-                        <Badge variant="highlight">Draft</Badge>
-                      ) : null}
                     </span>
-                    {percent > 0 && !p?.completed ? (
-                      <span
-                        className="mt-2 block h-1.5 overflow-hidden rounded-full bg-muted"
-                        role="progressbar"
-                        aria-label={`${percent}% watched`}
-                        aria-valuenow={percent}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        <span
-                          className="block h-full rounded-full bg-primary"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      )}
     </div>
   );
 }
@@ -794,14 +801,12 @@ async function CodeTab({
             fileName={javaFileName(selected.code, selected.title)}
             language={selected.language}
           />
-        ) : (
-          // One message for whatever is missing, not a box each for the video and the code.
+        ) : hasVideos ? null : (
+          // Only when there's nothing at all; a video on its own needs no placeholder.
           <ComingSoon>
-            {hasVideos
-              ? "The code for this program is on its way."
-              : pdf
-                ? "The video and code for this program are on their way. Until then, the PDF above has it."
-                : "The video and code for this program are on their way."}
+            {pdf
+              ? "The video and code for this program are on their way. Until then, the PDF above has it."
+              : "The video and code for this program are on their way."}
           </ComingSoon>
         )}
       </section>
