@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { SESSION_REPLACED } from "@/lib/session";
 
 const CHECK_EVERY_MS = 30_000;
+/** Coming back to the tab fires both "visibilitychange" and "focus": check once. */
+const MIN_GAP_MS = 5_000;
 
 /**
  * Signs this tab out within ~30 s when the account signs in on another device, even
@@ -13,9 +15,13 @@ const CHECK_EVERY_MS = 30_000;
 export function SessionWatch() {
   useEffect(() => {
     let stopped = false;
+    let lastCheck = 0;
 
     async function check() {
       if (stopped || document.visibilityState !== "visible") return;
+      const now = Date.now();
+      if (now - lastCheck < MIN_GAP_MS) return;
+      lastCheck = now;
       try {
         const res = await fetch("/api/session", { cache: "no-store" });
         if (res.status !== 401) return;
