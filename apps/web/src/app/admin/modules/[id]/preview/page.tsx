@@ -25,6 +25,7 @@ export default async function ModulePreviewPage({
     session?: string;
     v?: string;
     p?: string;
+    s?: string;
   }>;
 }) {
   const { id } = await params;
@@ -82,6 +83,7 @@ export default async function ModulePreviewPage({
         }
         selectedVideoId={query.v}
         selectedProgramId={query.p}
+        selectedSlideId={query.s}
       />
     </div>
   );

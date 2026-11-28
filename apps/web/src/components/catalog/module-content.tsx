@@ -68,6 +68,8 @@ interface Props {
   selectedVideoId?: string;
   /** `?p=` on the Code tab. */
   selectedProgramId?: string;
+  /** `?s=` on the Slides tab, when a module has more than one file. */
+  selectedSlideId?: string;
   autoplay?: boolean;
 }
 
@@ -93,6 +95,7 @@ async function TabContent({
   viewer,
   selectedVideoId,
   selectedProgramId,
+  selectedSlideId,
   autoplay = false,
 }: Props) {
   switch (tab) {
@@ -122,7 +125,15 @@ async function TabContent({
     case "notes":
       return <NotesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "slides":
-      return <SlidesTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
+      return (
+        <SlidesTab
+          moduleId={moduleId}
+          drafts={drafts}
+          viewer={viewer}
+          basePath={basePath}
+          selectedSlideId={selectedSlideId}
+        />
+      );
     case "formulas":
       return <FormulasTab moduleId={moduleId} drafts={drafts} viewer={viewer} />;
     case "pyqs":
@@ -397,17 +408,27 @@ async function NotesTab({
   );
 }
 
+/**
+ * Uploaded slide files. With several (e.g. 1.1 and 1.2), a picker at the top switches
+ * between them and only the chosen one is shown; `?s=` selects it.
+ */
 async function SlidesTab({
   moduleId,
   drafts,
   viewer,
+  basePath,
+  selectedSlideId,
 }: {
   moduleId: string;
   drafts: boolean;
   viewer: Props["viewer"];
+  basePath: string;
+  selectedSlideId?: string;
 }) {
-  const slides = await getSlides(moduleId, { drafts });
-  if (slides.length === 0) return <ComingSoon>Slides for this module are on their way.</ComingSoon>;
+  const all = await getSlides(moduleId, { drafts });
+  const chosen = all.find((s) => s.id === selectedSlideId) ?? all[0];
+  if (!chosen) return <ComingSoon>Slides for this module are on their way.</ComingSoon>;
+  const slides = [chosen];
   // PDFs open in the view-only viewer (signed now, like notes); PowerPoint and Word files
   // are downloaded through /api/slides/:id, which signs a URL only when clicked.
   const pdfUrls = await Promise.all(
@@ -418,7 +439,51 @@ async function SlidesTab({
     ),
   );
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {all.length > 1 ? (
+        <nav aria-label="Slides in this module">
+          <ol className="grid gap-2 sm:grid-cols-2">
+            {all.map((slide, index) => {
+              const current = slide.id === chosen.id;
+              const ext = slideExtension(slide.file_path ?? "");
+              return (
+                <li key={slide.id}>
+                  <Link
+                    href={`${basePath}?tab=slides&s=${slide.id}`}
+                    scroll={false}
+                    replace
+                    aria-current={current ? "true" : undefined}
+                    className={cn(
+                      "group flex h-full items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
+                      current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex size-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
+                        current ? "bg-primary text-white" : "bg-muted",
+                      )}
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold leading-snug break-words">
+                        {slide.title}
+                      </span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                        {ext ? SLIDE_FILE_TYPES[ext].label : null}
+                        {drafts && !slide.is_published ? (
+                          <Badge variant="highlight">Draft</Badge>
+                        ) : null}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      ) : null}
       {slides.map((slide, index) => {
         const ext = slideExtension(slide.file_path ?? "");
         const pdfUrl = pdfUrls[index];

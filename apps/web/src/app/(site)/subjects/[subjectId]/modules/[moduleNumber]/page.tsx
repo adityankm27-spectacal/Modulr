@@ -60,6 +60,7 @@ export default async function ModulePage({
     v?: string | string[];
     autoplay?: string | string[];
     p?: string | string[];
+    s?: string | string[];
   }>;
 }) {
   const [data, viewer] = await Promise.all([load(params), getViewer()]);
@@ -139,7 +140,7 @@ export default async function ModulePage({
         // switching tabs happens in the browser with no wait. A new key per server render
         // (a filter, a chosen video or program) resets the open tab to the URL's.
         <InstantModuleTabs
-          key={[tab, query.v, query.p, query.marks, query.session].join(":")}
+          key={[tab, query.v, query.p, query.s, query.marks, query.session].join(":")}
           basePath={basePath}
           initialTab={tab}
           counts={counts.get(current.id)}
@@ -158,6 +159,7 @@ export default async function ModulePage({
                   // A chosen video or program belongs to the tab it was picked on.
                   selectedVideoId={id === tab && typeof query.v === "string" ? query.v : undefined}
                   selectedProgramId={typeof query.p === "string" ? query.p : undefined}
+                  selectedSlideId={typeof query.s === "string" ? query.s : undefined}
                   autoplay={id === tab && query.autoplay === "1"}
                 />
               </Suspense>,
