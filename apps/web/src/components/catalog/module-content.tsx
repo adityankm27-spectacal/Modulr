@@ -835,7 +835,7 @@ async function CodeTab({
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold leading-snug">{program.title}</span>
                       <span className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                        <span className="font-mono">
+                        <span className="min-w-0 font-mono [overflow-wrap:anywhere]">
                           {javaFileName(program.code, program.title)}
                         </span>
                         {drafts && !program.is_published ? (
