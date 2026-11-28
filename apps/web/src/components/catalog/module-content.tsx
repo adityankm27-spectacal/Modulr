@@ -345,7 +345,7 @@ async function DocumentPdf({
   doc,
   viewer,
 }: {
-  doc: { title: string; pdf_path: string | null } | null;
+  doc: { id: string; title: string; pdf_path: string | null } | null;
   viewer: Props["viewer"];
 }) {
   const url = doc?.pdf_path ? await getNotesPdfUrl(doc.pdf_path) : null;
@@ -355,6 +355,8 @@ async function DocumentPdf({
       url={url}
       title={doc.title}
       watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
+      userId={viewer?.userId ?? null}
+      marksKey={`doc:${doc.id}:${doc.pdf_path}`}
     />
   );
 }
@@ -426,6 +428,8 @@ async function SlidesTab({
                 url={pdfUrl}
                 title={slide.title}
                 watermark={viewer ? { name: viewer.name, email: viewer.email } : null}
+                userId={viewer?.userId ?? null}
+                marksKey={`slide:${slide.id}:${slide.file_path}`}
               />
             </section>
           ) : null;
