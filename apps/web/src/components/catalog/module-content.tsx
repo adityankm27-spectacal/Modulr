@@ -741,47 +741,52 @@ async function CodeTab({
 
   return (
     <div className="space-y-6">
-      {pdf}
-      <nav aria-label="Programs in this module">
-        <ol className="grid gap-2 sm:grid-cols-2">
-          {programs.map((program, index) => {
-            const current = program.id === selected.id;
-            return (
-              <li key={program.id}>
-                <Link
-                  href={programHref(program.id)}
-                  scroll={false}
-                  replace
-                  aria-current={current ? "true" : undefined}
-                  className={cn(
-                    "group flex h-full items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
-                    current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
-                  )}
-                >
-                  <span
+      {/* Only worth showing when there's another program to switch to. */}
+      {programs.length > 1 ? (
+        <nav aria-label="Programs in this module">
+          <ol className="grid gap-2 sm:grid-cols-2">
+            {programs.map((program, index) => {
+              const current = program.id === selected.id;
+              return (
+                <li key={program.id}>
+                  <Link
+                    href={programHref(program.id)}
+                    scroll={false}
+                    replace
+                    aria-current={current ? "true" : undefined}
                     className={cn(
-                      "flex size-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
-                      current ? "bg-primary text-white" : "bg-muted",
+                      "group flex h-full items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
+                      current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
                     )}
                   >
-                    {index + 1}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-bold leading-snug">{program.title}</span>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                      <span className="font-mono">{javaFileName(program.code, program.title)}</span>
-                      {drafts && !program.is_published ? (
-                        <Badge variant="highlight">Draft</Badge>
-                      ) : null}
+                    <span
+                      className={cn(
+                        "flex size-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
+                        current ? "bg-primary text-white" : "bg-muted",
+                      )}
+                    >
+                      {index + 1}
                     </span>
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold leading-snug">{program.title}</span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-mono">
+                          {javaFileName(program.code, program.title)}
+                        </span>
+                        {drafts && !program.is_published ? (
+                          <Badge variant="highlight">Draft</Badge>
+                        ) : null}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      ) : null}
 
+      {/* Video first, then the module's Code PDF, then the program's own code. */}
       <section aria-label={selected.title} className="space-y-6">
         <h2 className="text-2xl break-words">{selected.title}</h2>
         {hasVideos ? (
@@ -795,19 +800,16 @@ async function CodeTab({
             autoplay={autoplay}
           />
         ) : null}
+        {pdf}
         {hasCode ? (
           <CodeBlock
             code={selected.code}
             fileName={javaFileName(selected.code, selected.title)}
             language={selected.language}
           />
-        ) : hasVideos ? null : (
-          // Only when there's nothing at all; a video on its own needs no placeholder.
-          <ComingSoon>
-            {pdf
-              ? "The video and code for this program are on their way. Until then, the PDF above has it."
-              : "The video and code for this program are on their way."}
-          </ComingSoon>
+        ) : hasVideos || pdf ? null : (
+          // Only when the program has nothing to show at all.
+          <ComingSoon>The video for this program is on its way.</ComingSoon>
         )}
       </section>
     </div>
