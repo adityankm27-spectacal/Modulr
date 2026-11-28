@@ -19,6 +19,7 @@ import {
   formulaCardSchema,
   idSchema,
   moduleSchema,
+  codeProgramSchema,
   practicalBulkSchema,
   practicalSchema,
   PUBLISHABLE,
@@ -325,6 +326,68 @@ export async function addPracticals(_: ActionState, form: FormData) {
 }
 
 /** Deletes a practical together with its videos (the files are removed from the provider too). */
+/** Adds or edits a worked program on a module's Code tab. New ones start as drafts. */
+export async function saveCodeProgram(_: ActionState, form: FormData) {
+  return runAdminAction(form, codeProgramSchema, async ({ id, ...values }, supabase) => {
+    if (id) {
+      const { data, error } = await supabase
+        .from("code_programs")
+        .update(values)
+        .eq("id", id)
+        .select("id");
+      check(error);
+      mustAffect(data, "program");
+      return "Program saved";
+    }
+    const { count } = await supabase
+      .from("code_programs")
+      .select("id", { count: "exact", head: true })
+      .eq("module_id", values.module_id);
+    const { data, error } = await supabase
+      .from("code_programs")
+      .insert({ ...values, sort_order: (count ?? 0) + 1 })
+      .select("id")
+      .single();
+    check(error);
+    if (!data) throw new AdminError("Couldn't add the program. Please try again.");
+    return {
+      message: "Program added. Paste its code and add its video.",
+      redirectTo: `/admin/code-programs/${data.id}`,
+    };
+  });
+}
+
+/** Deletes a program together with its videos (the files are removed from the provider too). */
+export async function deleteCodeProgram(_: ActionState, form: FormData) {
+  return runAdminAction(form, idSchema, async ({ id }, supabase) => {
+    const { data: program } = await supabase
+      .from("code_programs")
+      .select("module_id")
+      .eq("id", id)
+      .maybeSingle();
+    const { data: videos } = await supabase
+      .from("videos")
+      .select("provider, provider_video_id")
+      .eq("code_program_id", id);
+    for (const video of videos ?? []) {
+      if (!video.provider_video_id) continue;
+      try {
+        await getVideoProvider(video.provider).deleteVideo(video.provider_video_id);
+      } catch (error) {
+        // Don't block the delete; a leftover provider copy can be cleaned up by hand.
+        console.error(error);
+      }
+    }
+    const { data, error } = await supabase.from("code_programs").delete().eq("id", id).select("id");
+    check(error);
+    mustAffect(data, "program");
+    return {
+      message: "Program deleted",
+      redirectTo: program ? `/admin/modules/${program.module_id}?tab=code` : "/admin/catalog",
+    };
+  });
+}
+
 export async function deletePractical(_: ActionState, form: FormData) {
   return runAdminAction(form, idSchema, async ({ id }, supabase) => {
     const { data: practical } = await supabase
@@ -421,10 +484,12 @@ export async function saveVideo(_: ActionState, form: FormData) {
       }
       return "Video saved";
     }
-    // New videos go at the end of their module's or practical's list.
+    // New videos go at the end of their module's, practical's or program's list.
     const parent = values.module_id
       ? ({ column: "module_id", id: values.module_id } as const)
-      : ({ column: "practical_id", id: values.practical_id ?? "" } as const);
+      : values.practical_id
+        ? ({ column: "practical_id", id: values.practical_id } as const)
+        : ({ column: "code_program_id", id: values.code_program_id ?? "" } as const);
     const { count } = await supabase
       .from("videos")
       .select("id", { count: "exact", head: true })

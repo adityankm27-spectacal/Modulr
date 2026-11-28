@@ -12,12 +12,15 @@ import {
 import { IntentLink as Link } from "@/components/intent-link";
 import type { ReactNode } from "react";
 import { FormulaCard } from "@/components/content/formula-card";
+import { CodeBlock } from "@/components/content/code-block";
 import { ContentGuard } from "@/components/content/content-guard";
 import { PdfViewer } from "@/components/content/pdf-viewer";
 import { QuestionCard } from "@/components/content/question-card";
 import { Markdown } from "@/components/markdown/markdown";
 import { Badge } from "@/components/ui/badge";
 import {
+  getCodeProgramVideos,
+  getCodePrograms,
   getCrossModuleQuestions,
   getDocument,
   getFormulaCards,
@@ -61,16 +64,18 @@ interface Props {
   drafts?: boolean;
   /** Signed-in viewer, for the watermark and watch progress. */
   viewer: { userId: string; name: string; email: string } | null;
-  /** `?v=` on the videos tab. */
+  /** `?v=` on the videos tab (and the selected program's video on the Code tab). */
   selectedVideoId?: string;
+  /** `?p=` on the Code tab. */
+  selectedProgramId?: string;
   autoplay?: boolean;
 }
 
 /** Content of one module tab for a viewer who has access (RLS has already filtered rows). */
 export async function ModuleContent(props: Props) {
-  // The video tab is excluded: focus moves into the player's iframe when it is clicked.
-  // Admin previews are excluded too, so drafts can still be screenshotted while editing.
-  if (props.tab === "videos") return <TabContent {...props} />;
+  // The video and code tabs are excluded: focus moves into the player's iframe when it is
+  // clicked. Admin previews are excluded too, so drafts can still be screenshotted.
+  if (props.tab === "videos" || props.tab === "code") return <TabContent {...props} />;
   return (
     <ContentGuard enabled={!props.drafts}>
       <TabContent {...props} />
@@ -87,9 +92,22 @@ async function TabContent({
   drafts = false,
   viewer,
   selectedVideoId,
+  selectedProgramId,
   autoplay = false,
 }: Props) {
   switch (tab) {
+    case "code":
+      return (
+        <CodeTab
+          moduleId={moduleId}
+          drafts={drafts}
+          viewer={viewer}
+          basePath={basePath}
+          selectedProgramId={selectedProgramId}
+          selectedVideoId={selectedVideoId}
+          autoplay={autoplay}
+        />
+      );
     case "videos":
       return (
         <VideosTab
@@ -136,6 +154,7 @@ async function TabContent({
 export async function VideosTab({
   moduleId,
   practicalId,
+  codeProgramId,
   practicalNumber,
   hrefFor,
   drafts,
@@ -144,9 +163,10 @@ export async function VideosTab({
   selectedVideoId,
   autoplay,
 }: {
-  /** A module's videos, or (instead) a practical's. */
+  /** A module's videos, or (instead) a practical's or a code program's. */
   moduleId?: string;
   practicalId?: string;
+  codeProgramId?: string;
   /** The practical's own number, used to label its videos (2, or 2.1 and 2.2 when there are several). */
   practicalNumber?: number;
   /** Link to a video within the page; modules use ?tab=videos&v=, practicals just ?v=. */
@@ -157,10 +177,12 @@ export async function VideosTab({
   selectedVideoId?: string;
   autoplay: boolean;
 }) {
-  const noun = practicalId ? "practical" : "module";
+  const noun = practicalId ? "practical" : codeProgramId ? "program" : "module";
   const videos = practicalId
     ? await getPracticalVideos(practicalId, { drafts })
-    : await getVideos(moduleId ?? "", { drafts });
+    : codeProgramId
+      ? await getCodeProgramVideos(codeProgramId, { drafts })
+      : await getVideos(moduleId ?? "", { drafts });
   if (videos.length === 0) return <ComingSoon>Videos for this {noun} are on their way.</ComingSoon>;
 
   const progress = viewer
@@ -656,6 +678,114 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
     >
       {children}
     </Link>
+  );
+}
+
+/** File name shown above a program: its public class, else the title in PascalCase. */
+function javaFileName(code: string, title: string) {
+  const declared =
+    /\bpublic\s+(?:final\s+|abstract\s+)*(?:class|interface|enum|record)\s+([A-Za-z_$][\w$]*)/.exec(
+      code,
+    )?.[1];
+  const fromTitle = title
+    .replace(/[^A-Za-z0-9 ]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("");
+  return `${declared ?? (fromTitle || "Main")}.java`;
+}
+
+/**
+ * Worked programs: pick one from the list to see its explanation video and its code.
+ * `?p=` selects the program; its videos use `?v=` like the Videos tab.
+ */
+async function CodeTab({
+  moduleId,
+  drafts,
+  viewer,
+  basePath,
+  selectedProgramId,
+  selectedVideoId,
+  autoplay,
+}: {
+  moduleId: string;
+  drafts: boolean;
+  viewer: Props["viewer"];
+  basePath: string;
+  selectedProgramId?: string;
+  selectedVideoId?: string;
+  autoplay: boolean;
+}) {
+  const programs = await getCodePrograms(moduleId, { drafts });
+  const selected = programs.find((p) => p.id === selectedProgramId) ?? programs[0];
+  if (!selected) return <ComingSoon>Code for this module is on its way.</ComingSoon>;
+  const programHref = (id: string) => `${basePath}?tab=code&p=${id}`;
+
+  return (
+    <div className="space-y-6">
+      <nav aria-label="Programs in this module">
+        <ol className="grid gap-2 sm:grid-cols-2">
+          {programs.map((program, index) => {
+            const current = program.id === selected.id;
+            return (
+              <li key={program.id}>
+                <Link
+                  href={programHref(program.id)}
+                  scroll={false}
+                  replace
+                  aria-current={current ? "true" : undefined}
+                  className={cn(
+                    "group flex h-full items-center gap-3 rounded-2xl border-[3px] bg-card p-3 transition-[translate,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-line hover:shadow-[0_4px_0_0_var(--line)] active:translate-y-0.5 active:shadow-none",
+                    current && "border-line shadow-[0_4px_0_0_var(--color-primary)]",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold transition-[scale,rotate] duration-300 group-hover:scale-110 group-hover:-rotate-6",
+                      current ? "bg-primary text-white" : "bg-muted",
+                    )}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold leading-snug">{program.title}</span>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span className="font-mono">{javaFileName(program.code, program.title)}</span>
+                      {drafts && !program.is_published ? (
+                        <Badge variant="highlight">Draft</Badge>
+                      ) : null}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
+      <section aria-label={selected.title} className="space-y-6">
+        <h2 className="text-2xl break-words">{selected.title}</h2>
+        <VideosTab
+          codeProgramId={selected.id}
+          hrefFor={(videoId) => `${programHref(selected.id)}&v=${videoId}`}
+          drafts={drafts}
+          viewer={viewer}
+          basePath={basePath}
+          selectedVideoId={selectedVideoId}
+          autoplay={autoplay}
+        />
+        {selected.code.trim() ? (
+          <CodeBlock
+            code={selected.code}
+            fileName={javaFileName(selected.code, selected.title)}
+            language={selected.language}
+          />
+        ) : (
+          <ComingSoon>The code for this program is on its way.</ComingSoon>
+        )}
+      </section>
+    </div>
   );
 }
 

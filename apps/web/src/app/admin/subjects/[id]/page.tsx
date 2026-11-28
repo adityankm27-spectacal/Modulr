@@ -315,6 +315,11 @@ export default async function SubjectAdminPage({ params }: { params: Promise<{ i
             defaultValue={subject.description ?? ""}
           />
           <CheckboxField
+            name="has_code_tab"
+            label="Code tab in modules (worked programs with code and a video)"
+            defaultChecked={subject.has_code_tab}
+          />
+          <CheckboxField
             name="is_published"
             label="Published"
             defaultChecked={subject.is_published}

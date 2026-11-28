@@ -1,4 +1,7 @@
+"use client";
+
 import {
+  CodeXml,
   FileText,
   History,
   MessageCircleQuestion,
@@ -7,14 +10,16 @@ import {
   Sigma,
   Star,
 } from "lucide-react";
-import { IntentLink as Link } from "@/components/intent-link";
-import { MODULE_TABS, tabCount, type ModuleCounts, type ModuleTabId } from "@/lib/module-tabs";
+import NextLink from "next/link";
+import { IntentLink } from "@/components/intent-link";
+import { moduleTabs, tabCount, type ModuleCounts, type ModuleTabId } from "@/lib/module-tabs";
 import { cn } from "@/lib/utils";
 import { TabPending } from "./tab-pending";
 import { TabStrip } from "./tab-strip";
 
 const ICONS: Record<ModuleTabId, typeof PlayCircle> = {
   videos: PlayCircle,
+  code: CodeXml,
   notes: FileText,
   slides: Presentation,
   formulas: Sigma,
@@ -27,15 +32,26 @@ export function ModuleTabsNav({
   basePath,
   active,
   counts,
+  hasCodeTab = false,
+  onSelect,
 }: {
   basePath: string;
   active: ModuleTabId;
   counts: ModuleCounts | undefined;
+  /** Show the Code tab (subjects that turned it on, e.g. Data Structures). */
+  hasCodeTab?: boolean;
+  /**
+   * Switch tabs in the browser instead of loading a new page (the module page sends
+   * every tab's content up front). Ctrl/Cmd-click still opens the tab's own URL.
+   */
+  onSelect?: (tab: ModuleTabId) => void;
 }) {
+  // Instant tabs never ask the server, so they don't load anything ahead on hover.
+  const Link = onSelect ? NextLink : IntentLink;
   return (
     <TabStrip label="Module sections">
       <ul className="flex min-w-max gap-2 border-b pt-1 pb-4">
-        {MODULE_TABS.map((tab) => {
+        {moduleTabs({ hasCodeTab }).map((tab) => {
           const Icon = ICONS[tab.id];
           const isActive = tab.id === active;
           const count = tabCount(tab.id, counts);
@@ -44,6 +60,14 @@ export function ModuleTabsNav({
               <Link
                 href={tab.id === "videos" ? basePath : `${basePath}?tab=${tab.id}`}
                 scroll={false}
+                prefetch={false}
+                data-instant-tab={onSelect ? "" : undefined}
+                onClick={(event) => {
+                  if (!onSelect || event.button !== 0) return;
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault();
+                  onSelect(tab.id);
+                }}
                 // Switching tabs replaces the history entry, so Back leaves the module.
                 replace
                 aria-current={isActive ? "page" : undefined}

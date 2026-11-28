@@ -147,7 +147,7 @@ export const getSubject = cache(
         await supabase
           .from("subjects")
           .select(
-            "id, code, name, description, semester, syllabus_version_id, syllabus_versions!inner(label, branches!inner(name, code))",
+            "id, code, name, description, semester, has_code_tab, syllabus_version_id, syllabus_versions!inner(label, branches!inner(name, code))",
           )
           .eq("id", subjectId)
           .eq("is_published", true)
@@ -246,6 +246,36 @@ export async function getPracticalVideos(
     .order("sort_order");
   if (!drafts) query = query.eq("is_published", true);
   return rows(await query, "practical videos");
+}
+
+/**
+ * A module's worked programs for the Code tab, in order. RLS only returns them to viewers
+ * with access to the module (code_program_access), like the module's other content.
+ */
+export async function getCodePrograms(moduleId: string, { drafts = false }: ContentOptions = {}) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("code_programs")
+    .select("id, title, language, code, is_published")
+    .eq("module_id", moduleId)
+    .order("sort_order");
+  if (!drafts) query = query.eq("is_published", true);
+  return rows(await query, "code programs");
+}
+
+/** A code program's explanation videos. */
+export async function getCodeProgramVideos(
+  programId: string,
+  { drafts = false }: ContentOptions = {},
+) {
+  const supabase = await createClient();
+  let query = supabase
+    .from("videos")
+    .select("id, title, duration_sec, chapters, is_published, processing_status, thumbnail_url")
+    .eq("code_program_id", programId)
+    .order("sort_order");
+  if (!drafts) query = query.eq("is_published", true);
+  return rows(await query, "program videos");
 }
 
 /** The published practicals of a subject. Titles are public; the videos are not. */

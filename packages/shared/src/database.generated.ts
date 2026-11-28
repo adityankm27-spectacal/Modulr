@@ -268,6 +268,51 @@ export type Database = {
           },
         ];
       };
+      code_programs: {
+        Row: {
+          code: string;
+          created_at: string;
+          id: string;
+          is_published: boolean;
+          language: string;
+          module_id: string;
+          sort_order: number;
+          title: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          code?: string;
+          created_at?: string;
+          id?: string;
+          is_published?: boolean;
+          language?: string;
+          module_id: string;
+          sort_order?: number;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          id?: string;
+          is_published?: boolean;
+          language?: string;
+          module_id?: string;
+          sort_order?: number;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "code_programs_module_id_fkey";
+            columns: ["module_id"];
+            isOneToOne: false;
+            referencedRelation: "modules";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       colleges: {
         Row: {
           created_at: string;
@@ -1026,6 +1071,7 @@ export type Database = {
           code: string;
           created_at: string;
           description: string | null;
+          has_code_tab: boolean;
           id: string;
           is_published: boolean;
           name: string;
@@ -1039,6 +1085,7 @@ export type Database = {
           code: string;
           created_at?: string;
           description?: string | null;
+          has_code_tab?: boolean;
           id?: string;
           is_published?: boolean;
           name: string;
@@ -1051,6 +1098,7 @@ export type Database = {
           code?: string;
           created_at?: string;
           description?: string | null;
+          has_code_tab?: boolean;
           id?: string;
           is_published?: boolean;
           name?: string;
@@ -1278,6 +1326,7 @@ export type Database = {
           mirror_of: string | null;
           captions_url: string | null;
           chapters: NonNullable<Json>;
+          code_program_id: string | null;
           created_at: string;
           duration_sec: number | null;
           id: string;
@@ -1299,6 +1348,7 @@ export type Database = {
           mirror_of?: string | null;
           captions_url?: string | null;
           chapters?: NonNullable<Json>;
+          code_program_id?: string | null;
           created_at?: string;
           duration_sec?: number | null;
           id?: string;
@@ -1319,6 +1369,7 @@ export type Database = {
           mirror_of?: string | null;
           captions_url?: string | null;
           chapters?: NonNullable<Json>;
+          code_program_id?: string | null;
           created_at?: string;
           duration_sec?: number | null;
           id?: string;
@@ -1336,6 +1387,13 @@ export type Database = {
           version?: number;
         };
         Relationships: [
+          {
+            foreignKeyName: "videos_code_program_id_fkey";
+            columns: ["code_program_id"];
+            isOneToOne: false;
+            referencedRelation: "code_programs";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "videos_module_id_fkey";
             columns: ["module_id"];
@@ -1434,6 +1492,7 @@ export type Database = {
     };
     Functions: {
       can_inspect_user: { Args: { p_user: string }; Returns: boolean };
+      code_program_access: { Args: { p_program: string; p_user: string }; Returns: boolean };
       has_access: { Args: { p_module: string; p_user: string }; Returns: boolean };
       has_practical_access: { Args: { p_practical: string; p_user: string }; Returns: boolean };
       practical_visible: { Args: { p_practical: string }; Returns: boolean };
@@ -1448,6 +1507,7 @@ export type Database = {
           has_pyq_sheet: boolean;
           has_short_notes: boolean;
           has_viva_sheet: boolean;
+          code_programs: number;
           important_questions: number;
           module_id: string;
           pyqs: number;

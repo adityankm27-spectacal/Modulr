@@ -33,15 +33,15 @@ export interface AdminVideo extends VideoDefaults {
 }
 
 /**
- * The admin's video list with upload, chapters, publish and delete, for a module or a
- * practical. `parent` says which one new videos are added to.
+ * The admin's video list with upload, chapters, publish and delete, for a module, a
+ * practical or a code program. `parent` says which one new videos are added to.
  */
 export function AdminVideoList({
   videos,
   parent,
 }: {
   videos: AdminVideo[];
-  parent: { field: "module_id" | "practical_id"; id: string };
+  parent: { field: "module_id" | "practical_id" | "code_program_id"; id: string };
 }) {
   return (
     <AdminSection

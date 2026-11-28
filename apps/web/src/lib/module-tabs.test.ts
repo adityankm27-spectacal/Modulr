@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { countsSummary, parseModuleTab, tabCount, type ModuleCounts } from "./module-tabs";
+import {
+  countsSummary,
+  moduleTabs,
+  parseModuleTab,
+  tabCount,
+  type ModuleCounts,
+} from "./module-tabs";
 
 const counts: ModuleCounts = {
   videos: 2,
@@ -13,6 +19,7 @@ const counts: ModuleCounts = {
   has_important_sheet: false,
   has_viva_sheet: false,
   slides: 0,
+  code_programs: 0,
 };
 
 const empty: ModuleCounts = {
@@ -27,6 +34,7 @@ const empty: ModuleCounts = {
   has_important_sheet: false,
   has_viva_sheet: false,
   slides: 0,
+  code_programs: 0,
 };
 
 describe("parseModuleTab", () => {
@@ -35,6 +43,18 @@ describe("parseModuleTab", () => {
     expect(parseModuleTab(["viva", "notes"])).toBe("viva");
     expect(parseModuleTab("nope")).toBe("videos");
     expect(parseModuleTab(undefined)).toBe("videos");
+  });
+
+  it("only opens the Code tab in subjects that have it", () => {
+    expect(parseModuleTab("code")).toBe("videos");
+    expect(parseModuleTab("code", { hasCodeTab: true })).toBe("code");
+  });
+});
+
+describe("moduleTabs", () => {
+  it("hides the Code tab unless the subject turns it on", () => {
+    expect(moduleTabs().map((t) => t.id)).not.toContain("code");
+    expect(moduleTabs({ hasCodeTab: true }).map((t) => t.id)).toContain("code");
   });
 });
 
@@ -47,6 +67,7 @@ describe("tabCount", () => {
     expect(tabCount("viva", counts)).toBe(1);
     expect(tabCount("pyqs", undefined)).toBe(0);
     expect(tabCount("slides", { ...counts, slides: 3 })).toBe(3);
+    expect(tabCount("code", { ...counts, code_programs: 4 })).toBe(4);
   });
 
   it("counts a PDF question sheet as content on its tab", () => {

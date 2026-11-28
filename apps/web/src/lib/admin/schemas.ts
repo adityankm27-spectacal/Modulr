@@ -76,6 +76,8 @@ export const subjectSchema = z.object({
   code: text("Code", 30),
   name: text("Name", 160),
   description: optionalText(2000),
+  /** Shows the Code tab (worked programs) in this subject's modules. */
+  has_code_tab: checkbox,
   is_published: checkbox,
 });
 
@@ -119,19 +121,34 @@ export const practicalBulkSchema = z.object({
   is_published: checkbox,
 });
 
+/** A worked program on a module's Code tab: a title and its source code. */
+export const codeProgramSchema = z.object({
+  id: optionalId,
+  module_id: id,
+  title: text("Title", 200),
+  // Code keeps its own indentation and blank lines, so it is not trimmed.
+  code: z
+    .string()
+    .max(200_000, "That code is too long.")
+    .default("")
+    .transform((v) => v.replace(/\r\n?/g, "\n")),
+  is_published: checkbox,
+});
+
 export const videoSchema = z
   .object({
     id: optionalId,
-    // A video belongs to a module or to a practical (exactly one).
+    // A video belongs to exactly one of: a module, a practical or a code program.
     module_id: optionalId,
     practical_id: optionalId,
+    code_program_id: optionalId,
     title: text("Title", 200),
     duration: z.string().trim().optional(),
     chapters: z.string().max(10000).optional(),
     is_published: checkbox,
   })
-  .refine((v) => Boolean(v.module_id) !== Boolean(v.practical_id), {
-    message: "A video belongs to a module or a practical.",
+  .refine((v) => [v.module_id, v.practical_id, v.code_program_id].filter(Boolean).length === 1, {
+    message: "A video belongs to a module, a practical or a code program.",
     path: ["module_id"],
   })
   .transform((v, ctx) => {
@@ -227,6 +244,7 @@ export const PUBLISHABLE = [
   "practicals",
   "videos",
   "documents",
+  "code_programs",
   "formula_cards",
   "questions",
 ] as const;
@@ -239,6 +257,7 @@ export const REORDERABLE = [
   "videos",
   "formula_cards",
   "questions",
+  "code_programs",
 ] as const;
 export type ReorderableTable = (typeof REORDERABLE)[number];
 

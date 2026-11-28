@@ -19,14 +19,21 @@ export default async function ModulePreviewPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; marks?: string; session?: string; v?: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    marks?: string;
+    session?: string;
+    v?: string;
+    p?: string;
+  }>;
 }) {
   const { id } = await params;
   const viewer = await getViewer();
   const mod = isUuid(id) ? await getModuleAdmin(id) : null;
   if (!mod) notFound();
   const query = await searchParams;
-  const tab = parseModuleTab(query.tab);
+  const hasCodeTab = mod.subjects.has_code_tab;
+  const tab = parseModuleTab(query.tab, { hasCodeTab });
   const basePath = `/admin/modules/${mod.id}/preview`;
 
   return (
@@ -56,7 +63,7 @@ export default async function ModulePreviewPage({
         <h1 className="mt-2 text-2xl sm:text-4xl">{mod.title}</h1>
       </div>
 
-      <ModuleTabsNav basePath={basePath} active={tab} counts={undefined} />
+      <ModuleTabsNav basePath={basePath} active={tab} counts={undefined} hasCodeTab={hasCodeTab} />
       <ModuleContent
         moduleId={mod.id}
         subjectId={mod.subject_id}
@@ -74,6 +81,7 @@ export default async function ModulePreviewPage({
             : null
         }
         selectedVideoId={query.v}
+        selectedProgramId={query.p}
       />
     </div>
   );

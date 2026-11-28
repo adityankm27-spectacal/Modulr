@@ -1,6 +1,8 @@
 /** The sections every module pack has (spec §4, plus uploaded slides), in display order. */
 export const MODULE_TABS = [
   { id: "videos", label: "Videos" },
+  // Only in subjects with the Code tab turned on (Data Structures); hidden elsewhere.
+  { id: "code", label: "Code" },
   { id: "notes", label: "Short notes" },
   { id: "formulas", label: "Formulas" },
   { id: "important", label: "Important Qs" },
@@ -11,9 +13,18 @@ export const MODULE_TABS = [
 
 export type ModuleTabId = (typeof MODULE_TABS)[number]["id"];
 
-export function parseModuleTab(value: string | string[] | undefined): ModuleTabId {
+export function parseModuleTab(
+  value: string | string[] | undefined,
+  { hasCodeTab = false }: { hasCodeTab?: boolean } = {},
+): ModuleTabId {
   const raw = Array.isArray(value) ? value[0] : value;
-  return MODULE_TABS.find((tab) => tab.id === raw)?.id ?? "videos";
+  const tab = MODULE_TABS.find((t) => t.id === raw)?.id ?? "videos";
+  return tab === "code" && !hasCodeTab ? "videos" : tab;
+}
+
+/** The tabs a module shows: the Code tab only where the subject has it turned on. */
+export function moduleTabs({ hasCodeTab = false }: { hasCodeTab?: boolean } = {}) {
+  return MODULE_TABS.filter((tab) => tab.id !== "code" || hasCodeTab);
 }
 
 export interface ModuleCounts {
@@ -30,6 +41,8 @@ export interface ModuleCounts {
   has_viva_sheet: boolean;
   /** Published files on the Slides tab. */
   slides: number;
+  /** Published programs on the Code tab. */
+  code_programs: number;
 }
 
 export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): number {
@@ -41,6 +54,8 @@ export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): nu
       return counts.has_short_notes ? 1 : 0;
     case "slides":
       return counts.slides;
+    case "code":
+      return counts.code_programs;
     case "formulas":
       return (
         counts.formula_cards + (counts.has_formula_sheet && counts.formula_cards === 0 ? 1 : 0)
@@ -60,6 +75,7 @@ export function countsSummary(counts: ModuleCounts | undefined): string {
   const parts: string[] = [];
   if (counts.videos) parts.push(`${counts.videos} ${counts.videos === 1 ? "video" : "videos"}`);
   if (counts.has_short_notes) parts.push("Notes");
+  if (counts.code_programs) parts.push("Code");
   if (counts.slides) parts.push("Slides");
   if (counts.formula_cards || counts.has_formula_sheet) parts.push("Formulas");
   if (counts.pyqs) parts.push(`${counts.pyqs} ${counts.pyqs === 1 ? "PYQ" : "PYQs"}`);

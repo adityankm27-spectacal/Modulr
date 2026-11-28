@@ -74,7 +74,7 @@ export async function getSubjectAdmin(id: string) {
     supabase
       .from("subjects")
       .select(
-        "id, code, name, description, semester, is_published, syllabus_version_id, syllabus_versions!inner(id, label, branches!inner(name))",
+        "id, code, name, description, semester, is_published, has_code_tab, syllabus_version_id, syllabus_versions!inner(id, label, branches!inner(name))",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -115,7 +115,7 @@ export async function getModuleAdmin(id: string) {
   const { data: mod, error } = await supabase
     .from("modules")
     .select(
-      "id, number, title, is_free_preview, is_published, subject_id, subjects!inner(id, code, name, syllabus_version_id, syllabus_versions!inner(id, label))",
+      "id, number, title, is_free_preview, is_published, subject_id, subjects!inner(id, code, name, has_code_tab, syllabus_version_id, syllabus_versions!inner(id, label))",
     )
     .eq("id", id)
     .maybeSingle();
@@ -125,7 +125,7 @@ export async function getModuleAdmin(id: string) {
 
 export async function getModuleContentAdmin(moduleId: string) {
   const supabase = await createClient();
-  const [videos, documents, cards, questions, slides] = await Promise.all([
+  const [videos, documents, cards, questions, slides, programs] = await Promise.all([
     supabase
       .from("videos")
       .select(
@@ -154,6 +154,11 @@ export async function getModuleContentAdmin(moduleId: string) {
       .eq("module_id", moduleId)
       .eq("kind", "slides")
       .order("created_at"),
+    supabase
+      .from("code_programs")
+      .select("id, title, is_published, code, videos(count)")
+      .eq("module_id", moduleId)
+      .order("sort_order"),
   ]);
   return {
     videos: must(videos, "videos"),
@@ -161,6 +166,7 @@ export async function getModuleContentAdmin(moduleId: string) {
     cards: must(cards, "formula cards"),
     questions: must(questions, "questions"),
     slides: must(slides, "slides"),
+    programs: must(programs, "code programs"),
   };
 }
 
@@ -213,4 +219,27 @@ export async function getPracticalAdmin(id: string) {
   if (practical.error) throw new Error(practical.error.message);
   if (!practical.data) return null;
   return { practical: practical.data, videos: must(videos, "videos") };
+}
+
+export async function getCodeProgramAdmin(id: string) {
+  const supabase = await createClient();
+  const [program, videos] = await Promise.all([
+    supabase
+      .from("code_programs")
+      .select(
+        "id, title, code, language, is_published, module_id, modules!inner(id, number, title, subject_id, subjects!inner(id, name, syllabus_versions!inner(id, label)))",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("videos")
+      .select(
+        "id, title, provider, provider_video_id, duration_sec, chapters, processing_status, is_published",
+      )
+      .eq("code_program_id", id)
+      .order("sort_order"),
+  ]);
+  if (program.error) throw new Error(program.error.message);
+  if (!program.data) return null;
+  return { program: program.data, videos: must(videos, "videos") };
 }

@@ -20,6 +20,7 @@ import {
   deleteModule,
   removeSlide,
   renameSlide,
+  saveCodeProgram,
   saveDocument,
   saveFormulaCard,
   saveModule,
@@ -40,6 +41,7 @@ const TABS = [
   { id: "questions", label: "Questions" },
   { id: "videos", label: "Videos" },
   { id: "slides", label: "Slides" },
+  { id: "code", label: "Code" },
   { id: "details", label: "Details" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
@@ -61,7 +63,9 @@ export default async function ModuleEditorPage({
   const mod = isUuid(id) ? await getModuleAdmin(id) : null;
   if (!mod) notFound();
   const requested = (await searchParams).tab;
-  const tab: Tab = TABS.find((t) => t.id === requested)?.id ?? "notes";
+  // The Code tab only exists in subjects that turned it on (Data Structures).
+  const tabs = TABS.filter((t) => t.id !== "code" || mod.subjects.has_code_tab);
+  const tab: Tab = tabs.find((t) => t.id === requested)?.id ?? "notes";
   const content = await getModuleContentAdmin(mod.id);
   const notes = content.documents.find((d) => d.kind === "short_notes");
   const sheet = content.documents.find((d) => d.kind === "formula_sheet");
@@ -118,7 +122,7 @@ export default async function ModuleEditorPage({
         </div>
         <nav aria-label="Module editor sections" className="-mx-4 overflow-x-auto px-4">
           <ul className="flex min-w-max gap-2 border-b pb-3">
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <li key={t.id}>
                 <Link
                   href={`/admin/modules/${mod.id}?tab=${t.id}`}
@@ -402,6 +406,55 @@ export default async function ModuleEditorPage({
                 );
               })}
             </ul>
+          )}
+        </AdminSection>
+      ) : null}
+
+      {tab === "code" ? (
+        <AdminSection
+          title="Code programs"
+          description="Worked programs in Java for this module. Each has its code and its own explanation video; students pick one from the list on the Code tab."
+        >
+          <ActionForm action={saveCodeProgram} submitLabel="Add program" resetOnSuccess>
+            <input type="hidden" name="module_id" value={mod.id} />
+            <TextField name="title" label="Program title" placeholder="e.g. Stack using array" />
+          </ActionForm>
+          {content.programs.length === 0 ? (
+            <EmptyState>
+              No programs yet. Add one, then paste its code and upload its video.
+            </EmptyState>
+          ) : (
+            <SortableList
+              table="code_programs"
+              items={content.programs.map((p) => {
+                const lines = p.code ? p.code.split("\n").length : 0;
+                const videos = p.videos[0]?.count ?? 0;
+                return {
+                  id: p.id,
+                  label: p.title,
+                  content: (
+                    <div className="flex flex-wrap items-center justify-between gap-2 pr-2">
+                      <Link
+                        href={`/admin/code-programs/${p.id}`}
+                        className="font-bold underline-offset-4 hover:underline"
+                      >
+                        {p.title}
+                      </Link>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <Badge>{lines ? pluralize(lines, "line") : "No code yet"}</Badge>
+                        <Badge>{videos ? pluralize(videos, "video") : "No video yet"}</Badge>
+                        <FlagToggle
+                          table="code_programs"
+                          id={p.id}
+                          value={p.is_published}
+                          label={p.title}
+                        />
+                      </span>
+                    </div>
+                  ),
+                };
+              })}
+            />
           )}
         </AdminSection>
       ) : null}

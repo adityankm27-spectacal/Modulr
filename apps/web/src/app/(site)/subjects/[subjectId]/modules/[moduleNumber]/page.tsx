@@ -18,7 +18,8 @@ import {
   getSubjectStyle,
   hasSubjectAccess,
 } from "@/lib/catalog";
-import { parseModuleTab } from "@/lib/module-tabs";
+import { InstantModuleTabs } from "@/components/catalog/instant-module-tabs";
+import { moduleTabs, parseModuleTab } from "@/lib/module-tabs";
 import { parseQuestionFilters } from "@/lib/questions";
 import { isUuid } from "@/lib/validation";
 
@@ -58,6 +59,7 @@ export default async function ModulePage({
     session?: string | string[];
     v?: string | string[];
     autoplay?: string | string[];
+    p?: string | string[];
   }>;
 }) {
   const [data, viewer] = await Promise.all([load(params), getViewer()]);
@@ -65,7 +67,8 @@ export default async function ModulePage({
   const { subject, modules, current, index } = data;
 
   const query = await searchParams;
-  const tab = parseModuleTab(query.tab);
+  const hasCodeTab = subject.has_code_tab;
+  const tab = parseModuleTab(query.tab, { hasCodeTab });
   const filters = parseQuestionFilters(query);
   const basePath = `/subjects/${subject.id}/modules/${current.number}`;
   const returnTo = tab === "videos" ? basePath : `${basePath}?tab=${tab}`;
@@ -95,6 +98,9 @@ export default async function ModulePage({
   const tone = SUBJECT_TONE[style.tone];
   const previous = modules[index - 1];
   const next = modules[index + 1];
+  const contentViewer = viewer
+    ? { userId: viewer.userId, name: viewer.profile?.full_name ?? "", email: viewer.email ?? "" }
+    : null;
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:py-12">
@@ -128,50 +134,60 @@ export default async function ModulePage({
         </div>
       </header>
 
-      <div className="mt-6">
-        <ModuleTabsNav basePath={basePath} active={tab} counts={counts.get(current.id)} />
-      </div>
-
-      <div className="mt-6">
-        {lock.kind === "open" ? (
-          // The tab's content streams in after the header and tabs, so a page switch shows
-          // the new page at once instead of waiting for videos, notes or a PDF link.
-          <Suspense
-            key={`${tab}:${query.marks ?? ""}:${query.session ?? ""}`}
-            fallback={<TabSkeleton />}
-          >
-            <ModuleContent
-              moduleId={current.id}
-              subjectId={subject.id}
-              tab={tab}
+      {lock.kind === "open" ? (
+        // Every tab's content is sent with the page, each streaming in on its own, so
+        // switching tabs happens in the browser with no wait. A new key per server render
+        // (a filter, a chosen video or program) resets the open tab to the URL's.
+        <InstantModuleTabs
+          key={[tab, query.v, query.p, query.marks, query.session].join(":")}
+          basePath={basePath}
+          initialTab={tab}
+          counts={counts.get(current.id)}
+          hasCodeTab={hasCodeTab}
+          panels={Object.fromEntries(
+            moduleTabs({ hasCodeTab }).map(({ id }) => [
+              id,
+              <Suspense key={id} fallback={<TabSkeleton />}>
+                <ModuleContent
+                  moduleId={current.id}
+                  subjectId={subject.id}
+                  tab={id}
+                  basePath={basePath}
+                  filters={filters}
+                  viewer={contentViewer}
+                  // A chosen video or program belongs to the tab it was picked on.
+                  selectedVideoId={id === tab && typeof query.v === "string" ? query.v : undefined}
+                  selectedProgramId={typeof query.p === "string" ? query.p : undefined}
+                  autoplay={id === tab && query.autoplay === "1"}
+                />
+              </Suspense>,
+            ]),
+          )}
+        />
+      ) : (
+        <>
+          <div className="mt-6">
+            <ModuleTabsNav
               basePath={basePath}
-              filters={filters}
-              viewer={
-                viewer
-                  ? {
-                      userId: viewer.userId,
-                      name: viewer.profile?.full_name ?? "",
-                      email: viewer.email ?? "",
-                    }
+              active={tab}
+              counts={counts.get(current.id)}
+              hasCodeTab={hasCodeTab}
+            />
+          </div>
+          <div className="mt-6">
+            <LockPanel
+              lock={lock}
+              returnTo={returnTo}
+              monthlyPricePaise={monthly?.price_paise ?? null}
+              freeModuleHref={
+                lock.kind === "paywall" && freeModule
+                  ? `/subjects/${subject.id}/modules/${freeModule.number}`
                   : null
               }
-              selectedVideoId={typeof query.v === "string" ? query.v : undefined}
-              autoplay={query.autoplay === "1"}
             />
-          </Suspense>
-        ) : (
-          <LockPanel
-            lock={lock}
-            returnTo={returnTo}
-            monthlyPricePaise={monthly?.price_paise ?? null}
-            freeModuleHref={
-              lock.kind === "paywall" && freeModule
-                ? `/subjects/${subject.id}/modules/${freeModule.number}`
-                : null
-            }
-          />
-        )}
-      </div>
+          </div>
+        </>
+      )}
 
       <nav aria-label="Other modules" className="mt-12 grid grid-cols-2 gap-3 border-t pt-6">
         {previous ? (
