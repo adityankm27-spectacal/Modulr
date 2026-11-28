@@ -4,6 +4,7 @@ import { formatTimestamp, type VideoChapter } from "@modulr/shared";
 import { Loader2, Maximize, Minimize, Play, RotateCcw, SkipForward } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { preconnect } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { parsePlayerJsMessage, playerJsCommand, readTimeUpdate } from "@/lib/video/playerjs";
@@ -84,6 +85,8 @@ export function VideoPlayer({
   const playing = useRef(false);
 
   // ---- Playback URL ---------------------------------------------------------
+  // Open the connection to Bunny's player while the signed URL is still being fetched.
+  preconnect("https://iframe.mediadelivery.net");
   useEffect(() => {
     let cancelled = false;
     void fetchPlayback(video.id).then((result) => !cancelled && setLoad(result));
@@ -441,7 +444,6 @@ export function VideoPlayer({
             className="h-full w-full border-0"
             // No fullscreen or picture-in-picture: both would escape the watermark.
             allow="accelerometer; gyroscope; autoplay; encrypted-media"
-            loading="lazy"
           />
         ) : null}
 
