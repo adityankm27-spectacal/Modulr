@@ -13,6 +13,7 @@ export const DOCUMENT_KINDS = [
   "important_sheet",
   "viva_sheet",
   "slides",
+  "code_sheet",
 ] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 

@@ -3,7 +3,7 @@ import type { QuestionKind } from "@modulr/shared";
 /**
  * Every module tab that can show an uploaded PDF, stored as one `documents` row per
  * module and kind (documents_one_per_kind). Short notes and formula sheets also have
- * Markdown; the question sheets are PDF-only and sit above that tab's question list.
+ * Markdown; the question sheets and the Code PDF are PDF-only and sit above that tab's list.
  */
 export const PDF_DOCUMENT_KINDS = [
   "short_notes",
@@ -11,6 +11,7 @@ export const PDF_DOCUMENT_KINDS = [
   "pyq_sheet",
   "important_sheet",
   "viva_sheet",
+  "code_sheet",
 ] as const;
 export type PdfDocumentKind = (typeof PDF_DOCUMENT_KINDS)[number];
 
@@ -28,4 +29,5 @@ export const PDF_LABELS: Record<PdfDocumentKind, string> = {
   pyq_sheet: "PYQ paper",
   important_sheet: "Important questions",
   viva_sheet: "Viva questions",
+  code_sheet: "Code PDF",
 };

@@ -415,6 +415,14 @@ export default async function ModuleEditorPage({
           title="Code programs"
           description="Worked programs in Java for this module. Each has its code and its own explanation video; students pick one from the list on the Code tab."
         >
+          <PdfSlot
+            moduleId={mod.id}
+            moduleTitle={mod.title}
+            kind="code_sheet"
+            doc={content.documents.find((d) => d.kind === "code_sheet")}
+            hint="Upload a PDF with this module's code, e.g. a lab manual or program sheet. Students see it at the top of the Code tab, above the programs."
+            showPublish
+          />
           <ActionForm action={saveCodeProgram} submitLabel="Add program" resetOnSuccess>
             <input type="hidden" name="module_id" value={mod.id} />
             <TextField name="title" label="Program title" placeholder="e.g. Stack using array" />

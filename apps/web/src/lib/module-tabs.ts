@@ -43,6 +43,8 @@ export interface ModuleCounts {
   slides: number;
   /** Published programs on the Code tab. */
   code_programs: number;
+  /** A published PDF on the Code tab (counts as one item). */
+  has_code_sheet: boolean;
 }
 
 export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): number {
@@ -55,7 +57,7 @@ export function tabCount(tab: ModuleTabId, counts: ModuleCounts | undefined): nu
     case "slides":
       return counts.slides;
     case "code":
-      return counts.code_programs;
+      return counts.code_programs + (counts.has_code_sheet ? 1 : 0);
     case "formulas":
       return (
         counts.formula_cards + (counts.has_formula_sheet && counts.formula_cards === 0 ? 1 : 0)
@@ -75,7 +77,7 @@ export function countsSummary(counts: ModuleCounts | undefined): string {
   const parts: string[] = [];
   if (counts.videos) parts.push(`${counts.videos} ${counts.videos === 1 ? "video" : "videos"}`);
   if (counts.has_short_notes) parts.push("Notes");
-  if (counts.code_programs) parts.push("Code");
+  if (counts.code_programs || counts.has_code_sheet) parts.push("Code");
   if (counts.slides) parts.push("Slides");
   if (counts.formula_cards || counts.has_formula_sheet) parts.push("Formulas");
   if (counts.pyqs) parts.push(`${counts.pyqs} ${counts.pyqs === 1 ? "PYQ" : "PYQs"}`);

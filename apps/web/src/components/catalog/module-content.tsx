@@ -721,13 +721,18 @@ async function CodeTab({
   selectedVideoId?: string;
   autoplay: boolean;
 }) {
-  const programs = await getCodePrograms(moduleId, { drafts });
+  const [programs, sheet] = await Promise.all([
+    getCodePrograms(moduleId, { drafts }),
+    getDocument(moduleId, "code_sheet", { drafts }),
+  ]);
+  const pdf = sheet?.pdf_path ? <DocumentPdf doc={sheet} viewer={viewer} /> : null;
   const selected = programs.find((p) => p.id === selectedProgramId) ?? programs[0];
-  if (!selected) return <ComingSoon>Code for this module is on its way.</ComingSoon>;
+  if (!selected) return pdf ?? <ComingSoon>Code for this module is on its way.</ComingSoon>;
   const programHref = (id: string) => `${basePath}?tab=code&p=${id}`;
 
   return (
     <div className="space-y-6">
+      {pdf}
       <nav aria-label="Programs in this module">
         <ol className="grid gap-2 sm:grid-cols-2">
           {programs.map((program, index) => {

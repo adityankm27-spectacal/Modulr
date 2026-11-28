@@ -1508,6 +1508,7 @@ export type Database = {
           has_short_notes: boolean;
           has_viva_sheet: boolean;
           code_programs: number;
+          has_code_sheet: boolean;
           important_questions: number;
           module_id: string;
           pyqs: number;
@@ -1533,7 +1534,8 @@ export type Database = {
         | "pyq_sheet"
         | "important_sheet"
         | "viva_sheet"
-        | "slides";
+        | "slides"
+        | "code_sheet";
       payment_status: "created" | "authorized" | "captured" | "failed" | "refunded";
       plan_interval: "month" | "one_time";
       plan_scope: "all" | "subject" | "semester";
@@ -1669,6 +1671,7 @@ export const Constants = {
         "important_sheet",
         "viva_sheet",
         "slides",
+        "code_sheet",
       ],
       payment_status: ["created", "authorized", "captured", "failed", "refunded"],
       plan_interval: ["month", "one_time"],
