@@ -729,6 +729,8 @@ async function CodeTab({
   const selected = programs.find((p) => p.id === selectedProgramId) ?? programs[0];
   if (!selected) return pdf ?? <ComingSoon>Code for this module is on its way.</ComingSoon>;
   const programHref = (id: string) => `${basePath}?tab=code&p=${id}`;
+  const hasCode = Boolean(selected.code.trim());
+  const hasVideos = (await getCodeProgramVideos(selected.id, { drafts })).length > 0;
 
   return (
     <div className="space-y-6">
@@ -775,23 +777,32 @@ async function CodeTab({
 
       <section aria-label={selected.title} className="space-y-6">
         <h2 className="text-2xl break-words">{selected.title}</h2>
-        <VideosTab
-          codeProgramId={selected.id}
-          hrefFor={(videoId) => `${programHref(selected.id)}&v=${videoId}`}
-          drafts={drafts}
-          viewer={viewer}
-          basePath={basePath}
-          selectedVideoId={selectedVideoId}
-          autoplay={autoplay}
-        />
-        {selected.code.trim() ? (
+        {hasVideos ? (
+          <VideosTab
+            codeProgramId={selected.id}
+            hrefFor={(videoId) => `${programHref(selected.id)}&v=${videoId}`}
+            drafts={drafts}
+            viewer={viewer}
+            basePath={basePath}
+            selectedVideoId={selectedVideoId}
+            autoplay={autoplay}
+          />
+        ) : null}
+        {hasCode ? (
           <CodeBlock
             code={selected.code}
             fileName={javaFileName(selected.code, selected.title)}
             language={selected.language}
           />
         ) : (
-          <ComingSoon>The code for this program is on its way.</ComingSoon>
+          // One message for whatever is missing, not a box each for the video and the code.
+          <ComingSoon>
+            {hasVideos
+              ? "The code for this program is on its way."
+              : pdf
+                ? "The video and code for this program are on their way. Until then, the PDF above has it."
+                : "The video and code for this program are on their way."}
+          </ComingSoon>
         )}
       </section>
     </div>

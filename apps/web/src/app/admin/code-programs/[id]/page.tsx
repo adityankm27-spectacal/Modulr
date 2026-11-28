@@ -11,6 +11,7 @@ import { AdminSection, Breadcrumbs } from "@/components/admin/admin-ui";
 import { AdminVideoList } from "@/components/admin/admin-video-list";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
+import { PdfSlot } from "@/components/admin/pdf-slot";
 import { buttonVariants } from "@/components/ui/button";
 import { deleteCodeProgram, saveCodeProgram } from "@/lib/admin/actions";
 import { adminMetadata } from "@/lib/admin/metadata";
@@ -27,7 +28,7 @@ export default async function CodeProgramEditorPage({
   const { id } = await params;
   const data = isUuid(id) ? await getCodeProgramAdmin(id) : null;
   if (!data) notFound();
-  const { program, videos } = data;
+  const { program, videos, codeSheet } = data;
   const mod = program.modules;
   const subject = mod.subjects;
 
@@ -97,6 +98,20 @@ export default async function CodeProgramEditorPage({
             defaultChecked={program.is_published}
           />
         </ActionForm>
+      </AdminSection>
+
+      <AdminSection
+        title="Code PDF"
+        description={`One PDF for all of Module ${mod.number}'s code, e.g. a lab manual. Students see it at the top of the module's Code tab, above the programs. It's the same PDF as on the module's Code tab, so uploading it here or there is the same.`}
+      >
+        <PdfSlot
+          moduleId={mod.id}
+          moduleTitle={mod.title}
+          kind="code_sheet"
+          doc={codeSheet}
+          hint="PDF only, up to 20 MB. Switch it to Published so students can see it."
+          showPublish
+        />
       </AdminSection>
 
       <AdminVideoList videos={videos} parent={{ field: "code_program_id", id: program.id }} />
